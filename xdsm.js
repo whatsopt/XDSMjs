@@ -1,3 +1,8 @@
+/*
+ * XDSMjs
+ * Author: Rémi Lafage
+ */
+
 function Node(id, name, type) {
     if (typeof(name)==='undefined') type = id;
     if (typeof(type)==='undefined') type = 'analysis';
