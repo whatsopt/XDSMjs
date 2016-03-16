@@ -1,0 +1,23 @@
+{
+    "nodes" : [{"id": "Opt", "name":"Optimization", "type":"optimization"},
+               {"id": "MDA", "name":"MDA", "type":"metamodel"}, 
+               {"id": "DA1", "name":"Analysis 1"}, 
+               {"id": "DA2", "name":"Analysis 2"}, 
+               {"id": "DA3", "name":"Analysis 3"},
+               {"id": "Func", "name":"Functions"}
+               ],
+    "edges" : [{"from":"Opt" ,"to":"DA1", "name":"2:x_0,x_1"},
+               {"from":"DA1" ,"to":"DA3", "name":"3:4"},
+               {"from":"DA3" ,"to":"DA1", "name":"_3:4_"},
+               {"from":"MDA" ,"to":"DA1", "name":"2:x_2"},
+               {"from":"Func","to":"Opt", "name":"7:f,c"}
+               ],
+               
+    "inputs":  [{"id": "Input1", "to":"Opt", "name":"x_0"}],
+    "outputs": [{"id": "Input1", "from":"DA3", "name":"y_*" }],
+    
+    "chains" : [["Opt", "DA1", "DA3", "Func", "Opt"],
+                ["DA3", "DA1"],
+                ["DA2", "DA3", "DA2"]]
+
+}
