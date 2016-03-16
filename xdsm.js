@@ -11,12 +11,13 @@ function Node(id, name, type) {
     this.type = type;
 }
 
-function Edge(id, name, row, col) {
-    this.id = id;
+function Edge(from, to, name, row, col) {
+    this.id = from+"-"+to;
     this.name = name;
     this.row = row;
     this.col = col;
     this.iotype = row<col?"in":"out";
+    this.io = {from_u: (from=="__U__"), to_u: (to=="__U__")};
 }
 
 function Cell(x, y, width, height) {
@@ -39,8 +40,8 @@ function Graph(mdo) {
         var ids=_.map(this.nodes, function(elt) {return elt.id;});
         var idA = _.indexOf(ids, item.from);
         var idB = _.indexOf(ids, item.to);
-        console.log("Edge "+item.from+"-"+item.to, item.name, idA, idB);
-        this.edges.push(new Edge(item.from+"-"+item.to, item.name, idA, idB));
+        //console.log("Edge "+item.from+"-"+item.to, item.name, idA, idB);
+        this.edges.push(new Edge(item.from, item.to, item.name, idA, idB));
     }, this);  
     
     _.each(mdo.chains, function(chain, i) {
@@ -60,18 +61,18 @@ function Graph(mdo) {
     }, this);
 }
 
-d3.json("xdsm.json", function(error, mdo) {
+d3.json("mdf.json", function(error, mdo) {
     if (error) throw error;
     var graph = new Graph(mdo);
-    console.log(graph);
+    //console.log(graph);
     xdsm(graph);
 });
 
 function xdsm(graph) {
     var WIDTH = 1000;
     var HEIGHT = 500;
-    var X_ORIG = 0;
-    var Y_ORIG = 0;
+    var X_ORIG = 50;
+    var Y_ORIG = 20;
     var PADDING = 20;
     var CELL_W = 150;
     var CELL_H = 75;
@@ -93,7 +94,7 @@ function xdsm(graph) {
                             var that = d3.select(this);
                             if (d.name[0]==='_' && d.name[d.name.length-1]==='_') {
                                 that.append("text")
-                                   .text(function(d) { return d.name.substr(1, d.name.length-1); });
+                                   .text(function(d) { return d.name.substr(1, d.name.length-2); });
                             } else {
                                 that.append("foreignObject")
                                    .text(function(d) { return "$"+d.name+"$"; });
@@ -232,24 +233,32 @@ function xdsm(graph) {
                     var i1 = (d.iotype === "in")?d.col:d.row;
                     var i2 = (d.iotype === "in")?d.row:d.col;                    
                     var w = CELL_W*(i1-i2);
-                    var h = CELL_H*(i1-i2);                      
+                    var h = CELL_H*(i1-i2);
+                    points = [];                      
                     if (d.iotype === "in") {
-                        var p1 = (-w)+",0";     
-                        var p3 = "0,"+h;     
+                        if (!d.io.from_u) {
+                            points.push((-w)+",0"); 
+                        }    
+                        points.push("0,0");
+                        if (!d.io.to_u) {
+                            points.push("0,"+h);
+                        }
                     } else {
-                        var p3 = w+",0";     
-                        var p1 = "0,"+(-h);     
+                        if (!d.io.from_u) {
+                            points.push(w+",0");
+                        }
+                        points.push("0,0"); 
+                        if (!d.io.to_u) {
+                            points.push("0,"+(-h));
+                        }     
                     }
-                    var p2 = "0,0";
-                    return [p1, p2, p3].join(" ");
+                    return points.join(" ");
                 })
                 .attr("transform", function() { 
                                 var m = (d.col===undefined)?i:d.col;
                                 var n = (d.row===undefined)?i:d.row;
-                                console.log(d, m, n);
                                 var w = CELL_W*m+X_ORIG;
                                 var h = CELL_H*n+Y_ORIG; 
-                                console.log(w, h);
                                 return "translate("+ (X_ORIG+w) +"," + (Y_ORIG+h) + ")";
                            });
            });

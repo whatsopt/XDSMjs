@@ -1,0 +1,34 @@
+{
+    "nodes" : [{"id": "Opt", "name":"Optimization", "type":"optimization"},
+               {"id": "MDA", "name":"MDA", "type":"mda"}, 
+               {"id": "DA1", "name":"Analysis 1"}, 
+               {"id": "DA2", "name":"Analysis 2"}, 
+               {"id": "DA3", "name":"Analysis 3"},
+               {"id": "Func", "name":"Functions", "type": "function"}
+               ],
+    "edges" : [{"from":"__U__", "to":"Opt", "name":"x^{(0)}"},
+               {"from":"__U__", "to":"MDA", "name":"y^{t,(0)}"},
+               {"from":"Opt", "to":"__U__", "name":"x^{*}"},
+               {"from":"Opt" ,"to":"DA1", "name":"2:x_0,x_1"},
+               {"from":"Opt" ,"to":"DA2", "name":"3:x_0,x_2"},
+               {"from":"Opt" ,"to":"DA3", "name":"3:x_0,x_3"},
+               {"from":"Opt" ,"to":"Func", "name":"6:x"},
+               {"from":"MDA" ,"to":"DA1", "name":"2:y_2^t,y_3^t"},
+               {"from":"MDA" ,"to":"DA2", "name":"3:y_3^t"},               
+               {"from":"DA1" ,"to":"DA2", "name":"3:y_1"},
+               {"from":"DA1" ,"to":"DA3", "name":"4:y_1"},
+               {"from":"DA1" ,"to":"Func", "name":"6:y_1"},
+               {"from":"DA2" ,"to":"DA3", "name":"4:y_2"},
+               {"from":"DA2" ,"to":"Func", "name":"6:y_2"},
+               {"from":"DA3" ,"to":"Func", "name":"6:y_3"},
+               
+               {"from":"DA1" ,"to":"MDA", "name":"5:y_1"},
+               {"from":"DA1", "to":"__U__", "name":"y_1^{*}"},
+               {"from":"DA2" ,"to":"MDA", "name":"5:y_2"},
+               {"from":"DA2", "to":"__U__", "name":"y_2^{*}"},
+               {"from":"DA3" ,"to":"MDA", "name":"5:y_3"},
+               {"from":"DA3", "to":"__U__", "name":"y_3^{*}"},
+               {"from":"Func","to":"Opt", "name":"7:f,c"}
+               ],    
+    "chains" : []
+}
