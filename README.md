@@ -15,8 +15,12 @@ It is based on [D3](https://d3js.org/) and [Mathjax](https://www.mathjax.org/).
 Compared to the original latex generator it uses a json format as input (see example xdsm.json).
 
 ## Usage
-* Edit xdsm.json
-* Open xdsm.html in a browser (tested with Chrome)
+* Serve the files from xdsm-js directory with your favourite http server. Example with python:
+```
+> cd <install-dir>/xdsm-js
+> python -m SimpleHTTPserver 8020
+```
+* Open http://localhost:8020/xdsm.html in a browser (tested with Chrome)
 
 ## TODO
 * Add multi-component representation
