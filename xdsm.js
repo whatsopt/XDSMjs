@@ -1,6 +1,7 @@
 /*
  * XDSMjs
  * Author: Rémi Lafage
+ * Copyright 2016
  */
 
 function Node(id, name, type) {
@@ -17,7 +18,7 @@ function Edge(from, to, name, row, col) {
     this.row = row;
     this.col = col;
     this.iotype = row<col?"in":"out";
-    this.io = {from_u: (from=="__U__"), to_u: (to=="__U__")};
+    this.io = {from_u: (from=="_U_"), to_u: (to=="_U_")};
 }
 
 function Cell(x, y, width, height) {
@@ -28,7 +29,7 @@ function Cell(x, y, width, height) {
 }
 
 function Graph(mdo) {
-    this.nodes = [new Node("__U__", "__U__", "user")];
+    this.nodes = [new Node("_U_", "_U_", "user")];
     this.edges = [];
     this.chains = [];
     
@@ -61,7 +62,7 @@ function Graph(mdo) {
     }, this);
 }
 
-d3.json("mdf.json", function(error, mdo) {
+d3.json("xdsm.json", function(error, mdo) {
     if (error) throw error;
     var graph = new Graph(mdo);
     //console.log(graph);
@@ -119,16 +120,18 @@ function xdsm(graph) {
                 var i1 = d[0]<d[1]?d[1]:d[0];
                 var i2 = d[0]<d[1]?d[0]:d[1];                   
                 var w = CELL_W*(i1-i2);
-                var h = CELL_H*(i1-i2);                      
+                var h = CELL_H*(i1-i2);        
+                var points = [];              
                 if (d[0]<d[1]) {
-                    var p1 = (-w)+",0";     
-                    var p3 = "0,"+h;     
+                    if (d[0]!=0) { points.push((-w)+",0"); }
+                    points.push("0,0");  
+                    if (d[1]!=0) { points.push("0,"+h); }     
                 } else {
-                    var p3 = w+",0";     
-                    var p1 = "0,"+(-h);     
+                    if (d[0]!=0) { points.push(w+",0"); }     
+                    points.push("0,0");  
+                    if (d[1]!=0) { points.push("0,"+(-h)); }     
                 }
-                var p2 = "0,0";
-                return [p1, p2, p3].join(" ");
+                return points.join(" ");
         })   
         .attr("transform", function(d) { 
                      var i1 = d[0]<d[1]?d[1]:d[0];
@@ -229,28 +232,20 @@ function xdsm(graph) {
         edges.each(function (d, i) {
             dataflow.insert("polyline", ":first-child")
                 .attr("points", function () {
-                    console.log(d);
+                    //console.log(d);
                     var i1 = (d.iotype === "in")?d.col:d.row;
                     var i2 = (d.iotype === "in")?d.row:d.col;                    
                     var w = CELL_W*(i1-i2);
                     var h = CELL_H*(i1-i2);
                     points = [];                      
                     if (d.iotype === "in") {
-                        if (!d.io.from_u) {
-                            points.push((-w)+",0"); 
-                        }    
+                        if (!d.io.from_u) { points.push((-w)+",0"); }    
                         points.push("0,0");
-                        if (!d.io.to_u) {
-                            points.push("0,"+h);
-                        }
+                        if (!d.io.to_u) { points.push("0,"+h); }
                     } else {
-                        if (!d.io.from_u) {
-                            points.push(w+",0");
-                        }
+                        if (!d.io.from_u) { points.push(w+",0"); }
                         points.push("0,0"); 
-                        if (!d.io.to_u) {
-                            points.push("0,"+(-h));
-                        }     
+                        if (!d.io.to_u) { points.push("0,"+(-h)); }     
                     }
                     return points.join(" ");
                 })
