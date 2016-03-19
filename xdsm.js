@@ -1,7 +1,6 @@
 /*
  * XDSMjs
- * Author: Rémi Lafage
- * Copyright 2016
+ * Copyright 2016 Rémi Lafage
  */
 
 function Node(id, name, type) {
@@ -33,28 +32,28 @@ function Graph(mdo) {
     this.edges = [];
     this.chains = [];
     
-    _.each(mdo.nodes, function(item) {
+    mdo.nodes.forEach(function(item) {
         this.nodes.push(new Node(item.id, item.name, item.type));
     }, this);
 
-    _.each(mdo.edges, function(item){
-        var ids=_.map(this.nodes, function(elt) {return elt.id;});
-        var idA = _.indexOf(ids, item.from);
-        var idB = _.indexOf(ids, item.to);
+    mdo.edges.forEach(function(item){
+        var ids = this.nodes.map(function(elt) {return elt.id;});
+        var idA = ids.indexOf(item.from);
+        var idB = ids.indexOf(item.to);
         //console.log("Edge "+item.from+"-"+item.to, item.name, idA, idB);
         this.edges.push(new Edge(item.from, item.to, item.name, idA, idB));
     }, this);  
     
-    _.each(mdo.chains, function(chain, i) {
+    mdo.chains.forEach(function(chain, i) {
         if (chain.length < 2) {
             console.log("Bad process chain ("+chain.length+"elt)");
         } else {  
             this.chains.push([]);
-            _.each(chain, function(item, j) {
+            chain.forEach(function(item, j) {
                 if (j!==0) {
-                    var ids=_.map(this.nodes, function(elt) {return elt.id;});
-                    var idA = _.indexOf(ids, chain[j-1]);
-                    var idB = _.indexOf(ids, chain[j]);
+                    var ids = this.nodes.map(function(elt) {return elt.id;});
+                    var idA = ids.indexOf(chain[j-1]);
+                    var idB = ids.indexOf(chain[j]);
                     this.chains[i].push([idA, idB]);
                 }
             }, this);
