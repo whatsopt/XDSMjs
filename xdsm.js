@@ -3,6 +3,8 @@
  * Copyright 2016 Rémi Lafage
  */
 
+const UID = "_U_";
+
 function Node(id, name, type) {
     if (typeof(name)==='undefined') type = id;
     if (typeof(type)==='undefined') type = 'analysis';
@@ -17,8 +19,9 @@ function Edge(from, to, name, row, col) {
     this.row = row;
     this.col = col;
     this.iotype = row<col?"in":"out";
-    this.io = {from_u: (from=="_U_"), to_u: (to=="_U_")};
+    this.io = {from_u: (from==UID), to_u: (to==UID)};
 }
+Edge.prototype.isIO = function() {return this.io.from_u || this.io.to_u;};
 
 function Cell(x, y, width, height) {
     this.x = x;
@@ -28,7 +31,7 @@ function Cell(x, y, width, height) {
 }
 
 function Graph(mdo) {
-    this.nodes = [new Node("_U_", "_U_", "user")];
+    this.nodes = [new Node(UID, UID, "user")];
     this.edges = [];
     this.chains = [];
     
@@ -89,12 +92,14 @@ function xdsm(graph) {
                       .enter().append("g")
                         .attr("class", function (d, i) { 
                             var klass = kind==="node"?d.type:"dataInter";
+                            if (klass==="dataInter" && d.isIO()) { klass = "dataIO";}
                             return kind+" "+klass; })
                         .each(function(d, i) {
                             var that = d3.select(this);
                             if (d.name[0]==='_' && d.name[d.name.length-1]==='_') {
                                 that.append("text")
-                                   .text(function(d) { return d.name.substr(1, d.name.length-2); });
+                                   .text(function(d) { return d.name.substr(1, d.name.length-2); })
+                                   .attr("class", "plaintext");
                             } else {
                                 that.append("foreignObject")
                                    .text(function(d) { return "$"+d.name+"$"; });
@@ -168,12 +173,13 @@ function xdsm(graph) {
                                .attr("height", function () { return grid[m][n].height; });
                     });
                     
-                item.select("text")
+                item.select(".plaintext")
                     .each(function(d, j)  {
                         var that = d3.select(this);
                         var data = item.data()[0];
                         var m = (data.row===undefined)?i:data.row;
                         var n = (data.col===undefined)?i:data.col;
+                        console.log(that);
                         grid[m][n] = new Cell(-that[0][j].getBBox().width/2, that[0][j].getBBox().height/3, 
                                                that[0][j].getBBox().width, that[0][j].getBBox().height);
                         that.attr("x", function () { return grid[m][n].x; })
@@ -181,7 +187,7 @@ function xdsm(graph) {
                             .attr("width", function () { return grid[m][n].width; })
                             .attr("height", function () { return grid[m][n].height; });
                     });
-            }); 
+           }); 
             
             items.attr("transform", function(d, i) { 
                                 var m = (d.col===undefined)?i:d.col;
@@ -220,8 +226,8 @@ function xdsm(graph) {
                var botright = (w/2+pad)+", "+(pad+h/2);
                var botleft = (-2*pad-w/2)+", "+(pad+h/2);
                var tpz = [topleft, topright, botright, botleft].join(" ");
-               return tpz;
-            });
+               return tpz; })
+            .classed("");
                             
         
         // Dataflow

@@ -5,10 +5,7 @@
 
 /* Component types */
 .xdsm .user {
-    fill: #CCCCFF;
-    stroke: black;
-    stroke-width: 2px;
-    display: none;
+    visibility: hidden;
 }
 
 .xdsm .optimization {
