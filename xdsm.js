@@ -4,22 +4,26 @@
  */
 
 const UID = "_U_";
+const PLAINTEXT_SEP = "_";
+const MULTI_TYPE = "_multi";
 
 function Node(id, name, type) {
     if (typeof(name)==='undefined') type = id;
     if (typeof(type)==='undefined') type = 'analysis';
     this.id   = id;
     this.name = name; 
-    this.type = type;
+    this.isMulti = (type.search(/_multi$/)>=0);
+    this.type = this.isMulti?type.substr(0,type.length-MULTI_TYPE.length):type;
 }
 
-function Edge(from, to, name, row, col) {
+function Edge(from, to, name, row, col, isMulti) {
     this.id = from+"-"+to;
     this.name = name;
     this.row = row;
     this.col = col;
     this.iotype = row<col?"in":"out";
     this.io = {from_u: (from==UID), to_u: (to==UID)};
+    this.isMulti = isMulti;
 }
 Edge.prototype.isIO = function() {return this.io.from_u || this.io.to_u;};
 
@@ -44,7 +48,9 @@ function Graph(mdo) {
         var idA = ids.indexOf(item.from);
         var idB = ids.indexOf(item.to);
         //console.log("Edge "+item.from+"-"+item.to, item.name, idA, idB);
-        this.edges.push(new Edge(item.from, item.to, item.name, idA, idB));
+        //console.log(item.from, item.to, this.nodes[idB]);
+        var isMulti = this.nodes[idA].isMulti || this.nodes[idB].isMulti; 
+        this.edges.push(new Edge(item.from, item.to, item.name, idA, idB, isMulti));
     }, this);  
     
     mdo.chains.forEach(function(chain, i) {
@@ -64,7 +70,7 @@ function Graph(mdo) {
     }, this);
 }
 
-d3.json("xdsm.json", function(error, mdo) {
+d3.json("co.json", function(error, mdo) {
     if (error) throw error;
     var graph = new Graph(mdo);
     //console.log(graph);
@@ -72,13 +78,13 @@ d3.json("xdsm.json", function(error, mdo) {
 });
 
 function xdsm(graph) {
-    var WIDTH = 1000;
-    var HEIGHT = 500;
-    var X_ORIG = 50;
-    var Y_ORIG = 20;
-    var PADDING = 20;
-    var CELL_W = 150;
-    var CELL_H = 75;
+    const WIDTH = 1000;
+    const HEIGHT = 500;
+    const X_ORIG = 50;
+    const Y_ORIG = 20;
+    const PADDING = 20;
+    const CELL_W = 150;
+    const CELL_H = 75;
     var svg = d3.select(".xdsm").append("svg")
                 .attr("width", WIDTH)
                 .attr("height", HEIGHT)
@@ -96,7 +102,7 @@ function xdsm(graph) {
                             return kind+" "+klass; })
                         .each(function(d, i) {
                             var that = d3.select(this);
-                            if (d.name[0]==='_' && d.name[d.name.length-1]==='_') {
+                            if (d.name[0] === PLAINTEXT_SEP && d.name[d.name.length-1] === PLAINTEXT_SEP) {
                                 that.append("text")
                                    .text(function(d) { return d.name.substr(1, d.name.length-2); })
                                    .attr("class", "plaintext");
@@ -170,7 +176,7 @@ function xdsm(graph) {
                         foreign.attr("x", function () { return grid[m][n].x; })
                                .attr("y", function () { return grid[m][n].y; })
                                .attr("width", function () { return grid[m][n].width; })
-                               .attr("height", function () { return grid[m][n].height; });
+                               .attr("height", function () { return grid[m][n].height+5; });  // +5 adjustment for Firefox
                     });
                     
                 item.select(".plaintext")
@@ -179,7 +185,7 @@ function xdsm(graph) {
                         var data = item.data()[0];
                         var m = (data.row===undefined)?i:data.row;
                         var n = (data.col===undefined)?i:data.col;
-                        console.log(that);
+                        //console.log(that);
                         grid[m][n] = new Cell(-that[0][j].getBBox().width/2, that[0][j].getBBox().height/3, 
                                                that[0][j].getBBox().width, that[0][j].getBBox().height);
                         that.attr("x", function () { return grid[m][n].x; })
@@ -203,32 +209,49 @@ function xdsm(graph) {
         layoutText(edges);
                 
         // rectangles for nodes
-        var rects = nodes.insert("rect", ":first-child")
-            .attr("x", function (d, i) {return grid[i][i].x - PADDING;})
-            .attr("y", function (d, i) {return -Math.abs(grid[i][i].y) - PADDING;})
-            .attr("width", function (d, i) {return grid[i][i].width + (PADDING*2);})
-            .attr("height", function (d, i) {return grid[i][i].height + (PADDING*2);})
-            .attr("rx", function (d, i) { 
+        function customRect(node, d, i, offset){
+            node.insert("rect", ":first-child").attr("x", function () {return grid[i][i].x+offset - PADDING;})
+            .attr("y", function () {return -Math.abs(grid[i][i].y) - PADDING - offset;})
+            .attr("width", function () {return grid[i][i].width + (PADDING*2);})
+            .attr("height", function () {return grid[i][i].height + (PADDING*2);})
+            .attr("rx", function () { 
                 var rounded = d.type==='optimization' || d.type==='mda' || d.type==='doe';
                 return rounded?(grid[i][i].height + (PADDING*2))/2:0;})
-            .attr("ry", function (d, i) { 
+            .attr("ry", function () { 
                 var rounded = d.type==='optimization' || d.type==='mda' || d.type==='doe';                
                 return rounded?(grid[i][i].height + (PADDING*2))/2:0;});
-        
+        }
+        nodes.each(function (d, i) {
+            that = d3.select(this);
+            that.call(customRect, d, i, 0);
+            if (d.isMulti) {
+                that.call(customRect, d, i, 2);
+                that.call(customRect, d, i, 4);
+            }
+        });
+            
         // trapezium for edges
-        var trapz = edges.insert("polygon", ":first-child")
+        function customTrapz(edge, d, i, offset) {
+            edge.insert("polygon", ":first-child")
             .attr("points", function (d, i) {
                var pad = 10;
                var w = grid[d.row][d.col].width;
                var h = grid[d.row][d.col].height;
-               var topleft = (-2*pad+5-w/2)+", "+(-h);
-               var topright = (5+w/2+pad)+", "+(-h);
-               var botright = (w/2+pad)+", "+(pad+h/2);
-               var botleft = (-2*pad-w/2)+", "+(pad+h/2);
+               var topleft = (-2*pad+5-w/2+offset)+", "+(-h-offset);
+               var topright = (5+w/2+pad+offset)+", "+(-h-offset);
+               var botright = (w/2+pad+offset)+", "+(pad+h/2-offset);
+               var botleft = (-2*pad-w/2+offset)+", "+(pad+h/2-offset);
                var tpz = [topleft, topright, botright, botleft].join(" ");
-               return tpz; })
-            .classed("");
-                            
+               return tpz; });
+        }
+        edges.each(function (d, i) {
+            that = d3.select(this);
+            that.call(customTrapz, d, i, 0);
+            if (d.isMulti) {
+                that.call(customTrapz, d, i, 2);
+                that.call(customTrapz, d, i, 4);
+            }
+        });
         
         // Dataflow
         var dataflow = svg.insert("g", ":first-child")
