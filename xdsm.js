@@ -3,9 +3,17 @@
  * Copyright 2016 Rémi Lafage
  */
 
+const WIDTH = 1000;
+const HEIGHT = 500;
+const X_ORIG = 50;
+const Y_ORIG = 20;
+const PADDING = 20;
+const CELL_W = 200;
+const CELL_H = 75;
 const UID = "_U_";
 const PLAINTEXT_SEP = "_";
 const MULTI_TYPE = "_multi";
+const MULTI_OFFSET = 3;
 
 function Node(id, name, type) {
     if (typeof(name)==='undefined') type = id;
@@ -78,13 +86,6 @@ d3.json("co.json", function(error, mdo) {
 });
 
 function xdsm(graph) {
-    const WIDTH = 1000;
-    const HEIGHT = 500;
-    const X_ORIG = 50;
-    const Y_ORIG = 20;
-    const PADDING = 20;
-    const CELL_W = 150;
-    const CELL_H = 75;
     var svg = d3.select(".xdsm").append("svg")
                 .attr("width", WIDTH)
                 .attr("height", HEIGHT)
@@ -225,8 +226,8 @@ function xdsm(graph) {
             that = d3.select(this);
             that.call(customRect, d, i, 0);
             if (d.isMulti) {
-                that.call(customRect, d, i, 2);
-                that.call(customRect, d, i, 4);
+                that.call(customRect, d, i, 1*MULTI_OFFSET);
+                that.call(customRect, d, i, 2*MULTI_OFFSET);
             }
         });
             
@@ -248,8 +249,8 @@ function xdsm(graph) {
             that = d3.select(this);
             that.call(customTrapz, d, i, 0);
             if (d.isMulti) {
-                that.call(customTrapz, d, i, 2);
-                that.call(customTrapz, d, i, 4);
+                that.call(customTrapz, d, i, 1*MULTI_OFFSET);
+                that.call(customTrapz, d, i, 2*MULTI_OFFSET);
             }
         });
         
