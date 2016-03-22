@@ -5,7 +5,6 @@
                {"id": "DA2", "name":"3: Analysis 2"}, 
                {"id": "DA3", "name":"4: Analysis 3"},
                {"id": "Func", "name":"6: Functions", "type": "function"}
-               {"id": "Func1", "name":"6: Functions", "type": "function"}
                ],
     "edges" : [{"from":"_U_", "to":"Opt", "name":"x^{(0)}"},
                {"from":"_U_", "to":"MDA", "name":"y^{t,(0)}"},

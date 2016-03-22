@@ -78,7 +78,7 @@ function Graph(mdo) {
     }, this);
 }
 
-d3.json("co.json", function(error, mdo) {
+d3.json("xdsm.json", function(error, mdo) {
     if (error) throw error;
     var graph = new Graph(mdo);
     //console.log(graph);

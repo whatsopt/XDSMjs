@@ -1,0 +1,27 @@
+{
+    "nodes" : [{"id": "SysOpt", "name":"0,2\\rightarrow1: Sys. Optim", "type":"optimization"},
+               {"id": "SysFunc", "name":"1: Sys. Functions", "type": "function"},
+               {"id": "Opti", "name":"1.0, 1.3\\rightarrow1.1: Optim\\ i", "type":"optimization_multi"},
+               {"id": "Ani", "name":"1.1:Analysis\\ i", "type":"analysis_multi"}, 
+               {"id": "DiF", "name":"1.2:Discipline\\ i\\ Func", "type":"function_multi"} 
+              ],
+    "edges" : [{"from":"_U_", "to":"SysOpt", "name":"x_0^{(0)},\\hat{x}_{1 \\cdots N}^{(0)},y^{t,(0)}"},
+               {"from":"_U_", "to":"Opti", "name":"\\hat{x}_{0i}^{(0)},x_i^{(0)}"},
+               {"from":"SysOpt", "to":"SysFunc", "name":"1:x_0,\\hat{x}_{1 \\cdots N},y^t"},
+               {"from":"SysOpt", "to":"Ani", "name":"1.1:y_{j \\neq i}^t"},
+               {"from":"SysOpt", "to":"DiF", "name":"1.2:x_0,\\hat{x}_i,y^t"},
+               {"from":"Opti", "to":"Ani", "name":"1.1:\\hat{x}_{0i},x_i"},
+               {"from":"Opti", "to":"DiF", "name":"1.2:\\hat{x}_{0i},x_i"},
+               {"from":"Ani", "to":"DiF", "name":"1.2:y_i"},
+
+               {"from":"SysOpt", "to":"_U_", "name":"x_0^{*}"},
+               {"from":"Opti", "to":"_U_", "name":"x_i^{*}"},
+               {"from":"Ani", "to":"_U_", "name":"y_i^{*}"},
+               {"from":"SysFunc", "to":"SysOpt", "name":"2:f_0,c_0"},
+               {"from":"DiF", "to":"Opti", "name":"1.3:f_i,c_i,J_i"},
+               {"from":"DiF", "to":"SysOpt", "name":"2:J_i^*"}
+               ],    
+    "chains" : [["_U_", "SysOpt", "SysFunc", "SysOpt", "_U_"],
+                ["SysOpt", "Opti", "Ani", "DiF", "Opti", "SysOpt"]
+               ]
+}
