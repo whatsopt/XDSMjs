@@ -18,7 +18,7 @@ Compared to the original latex generator it uses a json format as input (see exa
 * Serve the files from XDSMjs directory with your favourite http server. Example with python:
 ```
 > cd <install-dir>/XDSMjs
-> python -m SimpleHTTPserver 8020
+> python -m SimpleHTTPServer 8020
 ```
 * Open `http://localhost:8020/xdsm.html` in a browser (tested with Chrome)
 * To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page. 
