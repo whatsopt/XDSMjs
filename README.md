@@ -15,15 +15,16 @@ It is based on [D3](https://d3js.org/) and [Mathjax](https://www.mathjax.org/).
 Compared to the original latex generator it uses a json format as input (see example xdsm.json).
 
 ## Usage
-* Serve the files from xdsm-js directory with your favourite http server. Example with python:
+* Serve the files from XDSMjs directory with your favourite http server. Example with python:
 ```
-> cd <install-dir>/xdsm-js
-> python -m SimpleHTTPserver 8020
+> cd <install-dir>/XDSMjs
+> python -m SimpleHTTPServer 8020
 ```
-* Open http://localhost:8020/xdsm.html in a browser (tested with Chrome)
+* Open `http://localhost:8020/xdsm.html` in a browser (tested with Chrome)
+* To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page. 
 
 ## TODO
-* Add multi-component representation
+* ~~Add multi-component representation~~
 * Add multi-line display within component boxes 
 * Add XDSM json formal description (json schema)
 * Add process chaining vizualisation using D3 animation capability

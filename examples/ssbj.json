@@ -1,0 +1,25 @@
+{
+    "nodes" : [{"id": "Struct", "name":"Structure \\ x_{str}=\\left\\lbrace \\lambda,x\\right\\rbrace", "type":"analysis"},
+               {"id": "Aero", "name":"Aerodynamics \\ x_{aer}=C_f", "type":"analysis"},
+               {"id": "Prop", "name":"Propulsion \\ x_{pro}=Th", "type":"analysis"},
+               {"id": "Perf", "name":"Performance", "type":"analysis"}
+               ],
+    "edges" : [{"from":"_U_", "to":"Struct", "name":"t/c, AR, \\Lambda, S_{ref}"},
+               {"from":"_U_", "to":"Aero", "name":"t/c, h, M, AR, \\Lambda, S_{ref}"},
+               {"from":"_U_", "to":"Prop", "name":"h, M"},
+               {"from":"_U_", "to":"Perf", "name":"h, M"},
+               {"from":"Struct", "to":"Aero", "name":"W_T, \\theta"},
+               {"from":"Struct", "to":"Perf", "name":"W_T, W_F"},
+               {"from":"Aero", "to":"Prop", "name":"D"},
+               {"from":"Aero", "to":"Perf", "name":"L/D"},
+               {"from":"Prop", "to":"Perf", "name":"SFC"},
+               {"from":"Prop", "to":"Aero", "name":"ESF"},
+               {"from":"Prop", "to":"Struct", "name":"W_E"},
+               {"from":"Aero", "to":"Struct", "name":"L"},
+               {"from":"Struct", "to":"_U_", "name":"\\sigma_{1\\rightarrow5}, \\theta"},
+               {"from":"Aero", "to":"_U_", "name":"\\frac{dp}{dx}"},
+               {"from":"Prop", "to":"_U_", "name":"T_E"},
+               {"from":"Perf", "to":"_U_", "name":"R"}
+               ],    
+    "chains" : []
+}
