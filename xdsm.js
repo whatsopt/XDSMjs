@@ -82,10 +82,12 @@ d3.json("xdsm.json", function(error, mdo) {
     if (error) throw error;
     var graph = new Graph(mdo);
     //console.log(graph);
-    xdsm(graph);
+    //var nolatex = false;
+    var nolatex = true;
+    xdsm(graph, nolatex);
 });
 
-function xdsm(graph) {
+function xdsm(graph, nolatex) {
     var svg = d3.select(".xdsm").append("svg")
                 .attr("width", WIDTH)
                 .attr("height", HEIGHT)
@@ -103,7 +105,11 @@ function xdsm(graph) {
                             return kind+" "+klass; })
                         .each(function(d, i) {
                             var that = d3.select(this);
-                            if (d.name[0] === PLAINTEXT_SEP && d.name[d.name.length-1] === PLAINTEXT_SEP) {
+                            if (nolatex) {
+                                that.append("text")
+                                   .text(function(d) { return d.name; })
+                                   .attr("class", "plaintext");                                
+                            } else if (d.name[0] === PLAINTEXT_SEP && d.name[d.name.length-1] === PLAINTEXT_SEP) {
                                 that.append("text")
                                    .text(function(d) { return d.name.substr(1, d.name.length-2); })
                                    .attr("class", "plaintext");
@@ -288,10 +294,72 @@ function xdsm(graph) {
            });
     
         // set svg size
-        var w = CELL_W*(graph.nodes.length+1)+X_ORIG; 
-        var h = CELL_H*(graph.nodes.length+1)+Y_ORIG; 
+        var w = CELL_W*(graph.nodes.length)+PADDING; 
+        var h = CELL_H*(graph.nodes.length)+PADDING; 
         svg.attr("width", w).attr("height", h);
     
-            
+        d3.select("button").on("click", function () {
+            computedStyleToInlineStyle(svg[0][0], true);
+
+            var html = d3.select("svg")
+                            .attr("title", "xdsm")
+                            .attr("version", 1.1)
+                            .attr("xmlns", "http://www.w3.org/2000/svg")
+                            .node().parentNode.innerHTML;
+        
+            var imgsrc = "data:image/svg+xml;base64,"+ btoa(unescape(encodeURIComponent(html)));
+            //var img = '<img src="'+imgsrc+'">'; 
+            //d3.select("#svgdataurl").html(img);
+   
+            var canvas = d3.select("canvas")
+                            .attr("width", w)
+                            .attr("height", h);
+            var context = canvas[0][0].getContext("2d");
+
+            var image = new Image;
+            image.src = imgsrc;
+            image.onload = function() {
+                context.drawImage(image, 0, 0);
+                var canvasdata = canvas[0][0].toDataURL("image/png");
+                var pngimg = '<img src="'+canvasdata+'">'; 
+                d3.select("#pngdataurl").html(pngimg);
+                var a = document.createElement("a");
+                a.download = "xdsm.png";
+                a.href = canvasdata;
+                document.body.appendChild(a);
+                a.click();
+            };
+        });
+
     });  // Startup Hook
 }
+
+
+function computedStyleToInlineStyle(element, recursive) {
+    if (!element) {
+      throw new Error("No element specified.");
+    }
+
+    if (!(element instanceof Element)) {
+      throw new Error("Specified element is not an instance of Element.");
+    }
+
+    if (recursive) {
+      Array.prototype.forEach.call(element.children, function(child) {
+        computedStyleToInlineStyle(child, recursive);
+      });
+    }
+
+    var computedStyle = getComputedStyle(element, null);
+    for (var i = 0; i < computedStyle.length; i++) {
+      var property = computedStyle.item(i);
+      if (property==="fill" 
+          || property==="stroke" 
+          || property==="stroke-width" 
+          || property==="visibility") {
+        var value = computedStyle.getPropertyValue(property);
+        element.style[property] = value;
+      }
+    }
+};
+
