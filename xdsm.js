@@ -82,8 +82,8 @@ d3.json("xdsm.json", function(error, mdo) {
     if (error) throw error;
     var graph = new Graph(mdo);
     //console.log(graph);
-    //var nolatex = false;
-    var nolatex = true;
+    var nolatex = false;
+    //var nolatex = true;
     xdsm(graph, nolatex);
 });
 
