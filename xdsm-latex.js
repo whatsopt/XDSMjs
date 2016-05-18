@@ -6,7 +6,7 @@
 /* jshint node: true */
 "use strict";
 
-var d3 = require('d3');
+//var d3 = require('d3');
 
 const WIDTH = 1000;
 const HEIGHT = 500;
@@ -229,7 +229,7 @@ function xdsm(graph) {
                 return rounded?(grid[i][i].height + (PADDING*2))/2:0;});
         }
         nodes.each(function (d, i) {
-            that = d3.select(this);
+            var that = d3.select(this);
             that.call(customRect, d, i, 0);
             if (d.isMulti) {
                 that.call(customRect, d, i, 1*MULTI_OFFSET);
@@ -252,7 +252,7 @@ function xdsm(graph) {
                return tpz; });
         }
         edges.each(function (d, i) {
-            that = d3.select(this);
+            var that = d3.select(this);
             that.call(customTrapz, d, i, 0);
             if (d.isMulti) {
                 that.call(customTrapz, d, i, 1*MULTI_OFFSET);
@@ -272,7 +272,7 @@ function xdsm(graph) {
                     var i2 = (d.iotype === "in")?d.row:d.col;                    
                     var w = CELL_W*(i1-i2);
                     var h = CELL_H*(i1-i2);
-                    points = [];                      
+                    var points = [];                      
                     if (d.iotype === "in") {
                         if (!d.io.from_u) { points.push((-w)+",0"); }    
                         points.push("0,0");
@@ -298,68 +298,6 @@ function xdsm(graph) {
         var h = CELL_H*(graph.nodes.length)+PADDING; 
         svg.attr("width", w).attr("height", h);
     
-        d3.select("button").on("click", function () {
-            computedStyleToInlineStyle(svg[0][0], true);
-
-            var html = d3.select("svg")
-                            .attr("title", "xdsm")
-                            .attr("version", 1.1)
-                            .attr("xmlns", "http://www.w3.org/2000/svg")
-                            .node().parentNode.innerHTML;
-        
-            var imgsrc = "data:image/svg+xml;base64,"+ btoa(unescape(encodeURIComponent(html)));
-            //var img = '<img src="'+imgsrc+'">'; 
-            //d3.select("#svgdataurl").html(img);
-   
-            var canvas = d3.select("canvas")
-                            .attr("width", w)
-                            .attr("height", h);
-            var context = canvas[0][0].getContext("2d");
-
-            var image = new Image();
-            image.src = imgsrc;
-            image.onload = function() {
-                context.drawImage(image, 0, 0);
-                var canvasdata = canvas[0][0].toDataURL("image/png");
-                var pngimg = '<img src="'+canvasdata+'">'; 
-                d3.select("#pngdataurl").html(pngimg);
-                var a = document.createElement("a");
-                a.download = "xdsm.png";
-                a.href = canvasdata;
-                document.body.appendChild(a);
-                a.click();
-            };
-        });
-
     });  // Startup Hook
-}
-
-// this function adds inline style attribute to elements from css styles
-// It si required to generate proper image from d3 svg element.
-function computedStyleToInlineStyle(element, recursive) {
-    if (!element) {
-      throw new Error("No element specified.");
-    }
-
-    if (!(element instanceof Element)) {
-      throw new Error("Specified element is not an instance of Element.");
-    }
-
-    if (recursive) {
-      Array.prototype.forEach.call(element.children, function(child) {
-        computedStyleToInlineStyle(child, recursive);
-      });
-    }
-
-    var computedStyle = getComputedStyle(element, null);
-    for (var i = 0; i < computedStyle.length; i++) {
-      var property = computedStyle.item(i);
-      // process only the properties used in the css
-      if (property==="fill" || property==="stroke" ||
-          property==="stroke-width" || property==="visibility") {
-        var value = computedStyle.getPropertyValue(property);
-        element.style[property] = value;
-      }
-    }
 }
 
