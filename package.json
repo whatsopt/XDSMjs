@@ -1,0 +1,33 @@
+{
+  "name": "xdsmjs",
+  "version": "0.1.0",
+  "description": "XDSM diagram generator ",
+  "main": "xdsm.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "lint": "jshint xdsm.js",
+    "browserify": "browserify . -o ./xdsm-bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OneraHub/XDSMjs.git"
+  },
+  "keywords": [
+    "XDSM",
+    "MDO"
+  ],
+  "author": "Remi Lafage",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/OneraHub/XDSMjs/issues"
+  },
+  "homepage": "https://github.com/OneraHub/XDSMjs#readme",
+  "devDependencies": {
+    "jshint": "^2.9.2"
+  },
+  "dependencies": {
+    "d3": "^3.5.17"
+  }
+}
