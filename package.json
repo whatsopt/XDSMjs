@@ -8,7 +8,9 @@
   },
   "scripts": {
     "lint": "eslint xdsm.js ./src/* || true",
-    "build": "browserify . -o ./build/xdsm.js"
+    "build": "browserify . -o ./build/xdsm.js",
+    "test": "node tests/xdsm-test.js | faucet || true",
+    "testfront": "node tests/xdsm-testfront.js | testling -x firefox"
   },
   "repository": {
     "type": "git",
@@ -23,6 +25,7 @@
   "homepage": "https://github.com/OneraHub/XDSMjs#readme",
   "devDependencies": {
     "tape": "^4.5.1",
+    "testling": "^1.7.1",
     "eslint": "^2.10.2",
     "browserify": "^13.0.1",
     "eslint-config-google": "^0.5.0"
@@ -37,8 +40,8 @@
       "node": true
     },
     "rules": {
-        "linebreak-style": "off",        
-        "require-jsdoc": "off"
+      "linebreak-style": "off",
+      "require-jsdoc": "off"
     }
-  } 
+  }
 }

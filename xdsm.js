@@ -54,7 +54,7 @@ function xdsm(graph) {
             var that = d3.select(this);
             that.append("text").text(function(d) {
               return d.name;
-            }).attr("class", "plaintext");
+            });
           });
   }
 
