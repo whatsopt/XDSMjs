@@ -30,7 +30,5 @@
                {"from":"DA3", "to":"_U_", "name":"y_3^{*}"},
                {"from":"Func","to":"Opt", "name":"7:f,c"}
                ],    
-    "chains" : [["_U_", "Opt", "MDA","Func", "Opt", "_U_"],
-                ["MDA", "DA1", "DA2", "DA3", "MDA"]
-                ]
+    "chains" : [["_U_", "Opt", ["MDA", "DA1", "DA2", "DA3"],"Func", "Opt", "_U_"]]
 }
