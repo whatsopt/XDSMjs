@@ -79,6 +79,11 @@ test("Graph.expand(['Opt', ['MDA', 'DA1', 'DA2', 'DA3'],'Func']) returns ['Opt',
                            ['Opt', 'MDA', 'DA1', 'DA2', 'DA3', 'MDA','Func', 'Opt']);
   t.end();
 });
+test("Graph.expand([['Opt', 'DA1'], ['Opt', 'DA2'], ['Opt', 'DA3']]) returns ['Opt', 'DA1', 'Opt', 'DA2',  'Opt', 'DA3', 'Opt']", function(t) {
+	t.deepEqual(Graph.expand([['Opt', 'DA1'], ['Opt', 'DA2'], ['Opt', 'DA3']]),
+  	                       ['Opt', 'DA1', 'Opt', 'Opt', 'DA2',  'Opt', 'Opt', 'DA3', 'Opt', 'Opt']);
+  t.end();
+});
 
 test("Graph.chains should expand as list of index couples", function(t) {
   g = new Graph({nodes:[{id:'Opt',name:'Opt'},

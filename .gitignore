@@ -1,0 +1,5 @@
+# Eclipse
+/.project
+
+# npm
+/node_modules
