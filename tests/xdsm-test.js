@@ -1,22 +1,21 @@
 var test = require('tape');
-var strParse = require('../src/string_processor');
+var Labelizer = require('../src/labelizer');
 var Graph = require('../src/graph');
 
 test("strParse('x') returns {'base':'x', 'sub':undefined, 'sup':undefined}", function(t) {
-  t.deepEqual(strParse("x"), {'base':'x', 'sub':undefined, 'sup':undefined});
+  t.deepEqual(Labelizer.strParse("x"), {'base':'x', 'sub':undefined, 'sup':undefined});
   t.end();
 });
 
 test("strParse('x_12') returns {'base':'x', 'sub': '12', 'sup':undefined}", function(t) {
-  t.deepEqual(strParse("x_12"), {'base':'x', 'sub': '12', 'sup':undefined});
+  t.deepEqual(Labelizer.strParse("x_12"), {'base':'x', 'sub': '12', 'sup':undefined});
   t.end();
 });
 
 test("strParse('x_13^0') returns {'base':'x', 'sub': '13', 'sup': '0'}", function(t) {
-  t.deepEqual(strParse("x_13^0"), {'base':'x', 'sub': '13', 'sup': '0'});
+  t.deepEqual(Labelizer.strParse("x_13^0"), {'base':'x', 'sub': '13', 'sup': '0'});
   t.end();
 });
-
 
 test("Graph.flatten(['b2']) returns ['b2']", function(t) {
   t.deepEqual(Graph.flatten(['b2']), ['b2']);
