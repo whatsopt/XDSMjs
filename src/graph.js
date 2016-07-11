@@ -72,7 +72,9 @@ function Graph(mdo) {
             throw new Error("Process chain element (" +
                             chain[j] + ") not found");
           }
-          this.chains[i].push([idA, idB]);
+          if (idA !== idB) {
+            this.chains[i].push([idA, idB]);
+          }
         }
       }, this);
     }
