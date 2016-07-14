@@ -1,0 +1,6 @@
+# Eclipse
+/.project
+
+# npm
+/node_modules
+/build/xdsm-test-bundle.js

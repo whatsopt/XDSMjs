@@ -10,13 +10,17 @@
     "lint": "eslint xdsm.js ./src/* || true",
     "build": "browserify . -o ./build/xdsm.js",
     "test": "node tests/xdsm-test.js | faucet || true",
-    "testfront": "node tests/xdsm-testfront.js | testling -x firefox"
+    "testfront": "node tests/xdsm-testfront.js | testling -x firefox",
+    "testbrowser": "browserify tests/xdsm-test.js -o ./build/xdsm-test-bundle.js | firefox ./tests/index.html"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/OneraHub/XDSMjs.git"
   },
-  "keywords": ["XDSM", "MDO"],
+  "keywords": [
+    "XDSM",
+    "MDO"
+  ],
   "author": "Remi Lafage",
   "license": "Apache-2.0",
   "bugs": {
@@ -24,11 +28,12 @@
   },
   "homepage": "https://github.com/OneraHub/XDSMjs#readme",
   "devDependencies": {
-    "tape": "^4.5.1",
-    "testling": "^1.7.1",
-    "eslint": "^2.10.2",
     "browserify": "^13.0.1",
-    "eslint-config-google": "^0.5.0"
+    "eslint": "^2.10.2",
+    "eslint-config-google": "^0.5.0",
+    "faucet": "0.0.1",
+    "tape": "^4.5.1",
+    "testling": "^1.7.1"
   },
   "dependencies": {
     "d3": "^3.5.17"

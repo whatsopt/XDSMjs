@@ -6,6 +6,7 @@
 
 var d3 = require('d3');
 var Graph = require('./src/graph.js');
+var Labelizer = require('./src/labelizer.js');
 
 var WIDTH = 1000;
 var HEIGHT = 500;
@@ -51,10 +52,8 @@ function xdsm(graph) {
             return kind + " " + klass;
           })
           .each(function() {
-            var that = d3.select(this);
-            that.append("text").text(function(d) {
-              return d.name;
-            });
+            var labelize = Labelizer.labelize();
+            d3.select(this).call(labelize);
           });
   }
 

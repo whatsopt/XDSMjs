@@ -63,62 +63,72 @@ function Graph(mdo) {
             return elt.id;
           });
           var idA = ids.indexOf(chain[j - 1]);
-          if (idA<0) {throw new Error("Process chain element ("+chain[j - 1]+") not found");}
+          if (idA < 0) {
+            throw new Error("Process chain element (" +
+                            chain[j - 1] + ") not found");
+          }
           var idB = ids.indexOf(chain[j]);
-          if (idB<0) {throw new Error("Process chain element ("+chain[j]+") not found");}
-          this.chains[i].push([idA, idB]);
+          if (idB < 0) {
+            throw new Error("Process chain element (" +
+                            chain[j] + ") not found");
+          }
+          if (idA !== idB) {
+            this.chains[i].push([idA, idB]);
+          }
         }
       }, this);
     }
   }, this);
 }
 
-flatten = Graph.flatten = function _flatten(a, r) {
-    if (!r) { r = []; }
-    if (a instanceof Array) {
-      for(var i=0; i<a.length; i++){
-        if(a[i] instanceof Array){
-            _flatten(a[i], r);
-        } else {
-            r.push(a[i]);
-        }
+var flatten = Graph.flatten = function _flatten(a, r) {
+  if (!r) {
+    r = [];
+  }
+  if (a instanceof Array) {
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] instanceof Array) {
+        _flatten(a[i], r);
+      } else {
+        r.push(a[i]);
       }
-    } else {
-      return a;
     }
-    return r;
+  } else {
+    return a;
+  }
+  return r;
 };
 
 Graph.expand = function _expand(item, level) {
-  if (level===undefined) {level=0;}
-  //console.log(level, item);
+  if (level === undefined) {
+    level = 0;
+  }
+  // console.log(level, item);
   if (item instanceof Array) {
     if (item.length === 0) {
-      if (level>0) {
-        // throw 
+      if (level > 0) {
+        // throw
       }
       return [];
     } else if (item.length === 1) {
-      //var my = level===0?[_expand(item[0], level)]:_expand(item[0], level);
+      // var my = level===0?[_expand(item[0], level)]:_expand(item[0], level);
       var my = flatten([_expand(item[0])]);
-      //console.log("return my = "+my);
+      // console.log("return my = "+my);
       return my;
-    } else {
-      var car = item.shift();
-      var cdr = _expand(item, level+1);
-      var ecar = _expand([car], level+1);
-      var ret;
-      if (level===0) {
-        ret = [].concat(ecar, cdr, ecar[0]);
-      } else {
-        ret = [].concat(ecar, cdr);
-      }
-      //console.log("return "+ret);
-      return flatten(ret);
     }
-  } else {
-    return item;
+    var car = item.shift();
+    var cdr = _expand(item, level + 1);
+    var ecar = _expand([car], level + 1);
+    var ret;
+    if (level === 0) {
+      ret = [].concat(ecar, cdr, ecar[0]);
+    } else {
+      ret = [].concat(ecar, cdr);
+    }
+    // console.log("return "+ret);
+    return flatten(ret);
   }
+  return item;
 };
 
 module.exports = Graph;
