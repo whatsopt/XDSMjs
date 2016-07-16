@@ -121,10 +121,11 @@ function xdsm(graph) {
         var data = item.data()[0];
         var m = (data.row === undefined) ? i : data.row;
         var n = (data.col === undefined) ? i : data.col;
-        grid[m][n] = new Cell(-that[0][j].getBBox().width / 2,
-                              that[0][j].getBBox().height / 3,
-                              that[0][j].getBBox().width,
-                              that[0][j].getBBox().height);
+        var bbox = that[0][j].getBBox();
+        grid[m][n] = new Cell(-bbox.width / 2,
+                              0,
+                              bbox.width,
+                              bbox.height);
         that.attr("x", function() {
           return grid[m][n].x;
         }).attr("y", function() {
@@ -156,7 +157,7 @@ function xdsm(graph) {
       return grid[i][i].x + offset - PADDING;
     })
     .attr("y", function() {
-      return -Math.abs(grid[i][i].y) - PADDING - offset;
+      return -grid[i][i].height * 2 / 3 - PADDING - offset;
     })
     .attr("width", function() {
       return grid[i][i].width + (PADDING * 2);
@@ -188,13 +189,16 @@ function xdsm(graph) {
   // trapezium for edges
   function customTrapz(edge, d, i, offset) {
     edge.insert("polygon", ":first-child").attr("points", function(d) {
-      var pad = 10;
+      var pad = 5;
       var w = grid[d.row][d.col].width;
       var h = grid[d.row][d.col].height;
-      var topleft = (-2 * pad + 5 - w / 2 + offset) + ", " + (-h - offset);
-      var topright = (5 + w / 2 + pad + offset) + ", " + (-h - offset);
-      var botright = (w / 2 + pad + offset) + ", " + (pad + h / 2 - offset);
-      var botleft = (-2 * pad - w / 2 + offset) + ", " + (pad + h / 2 - offset);
+      var topleft = (-pad - w / 2 + offset) + ", " +
+                    (-pad - h * 2 / 3 - offset);
+      var topright = (w / 2 + pad + offset + 5) + ", " +
+                     (-pad - h * 2 / 3 - offset);
+      var botright = (w / 2 + pad + offset - 5 + 5) + ", " +
+                     (pad + h / 3 - offset);
+      var botleft = (-pad - w / 2 + offset - 5) + ", " + (pad + h / 3 - offset);
       var tpz = [topleft, topright, botright, botleft].join(" ");
       return tpz;
     });

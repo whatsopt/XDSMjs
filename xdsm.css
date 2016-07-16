@@ -52,8 +52,15 @@
 
 /* Text */
 .xdsm text {
-    fill: black;
-    stroke: none;
+  fill: black;
+  stroke: none;
+  font-size: large;
+}
+.xdsm tspan.sub {
+  font-size: small;
+}
+.xdsm tspan.sup {
+  font-size: small;
 }
 
 /* Data */
