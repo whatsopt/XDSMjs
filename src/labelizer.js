@@ -26,40 +26,59 @@ Labelizer.strParse = function(str) {
   return res;
 };
 
+
 Labelizer.labelize = function() {
+  var ellipsis = 0;
+  
   function createLabel(selection) {
     selection.each(function(d) {
       var tokens = Labelizer.strParse(d.name);
       var text = selection.append("text");
-      tokens.forEach(function(token, i, ary) {
-        text.append("tspan").text(token.base);
-        var offsetSub = 0;
-        var offsetSup = 0;
-        if (token.sub) {
-          offsetSub = 10;
+      tokens.every(function(token, i, ary) {
+        console.log(i+":"+token);
+        if (ellipsis < 1 || i < 5) {
+          text.append("tspan").text(token.base);
+          var offsetSub = 0;
+          var offsetSup = 0;
+          var newElts = [];
+          if (token.sub) {
+            offsetSub = 10;
+            text.append("tspan")
+              .attr("class", "sub")
+              .attr("dy", offsetSub)
+              .text(token.sub);
+          }
+          if (token.sup) {
+            offsetSup = -10;
+            text.append("tspan")
+              .attr("class", "sup")
+              .attr("dx", -5)
+              .attr("dy", -offsetSub + offsetSup)
+              .text(token.sup);
+            offsetSub = 0;
+          }
+        } else {
           text.append("tspan")
-            .attr("class", "sub")
-            .attr("dy", offsetSub)
-            .text(token.sub);
-        }
-        if (token.sup) {
-          offsetSup = -10;
-          text.append("tspan")
-            .attr("class", "sup")
-            .attr("dx", -5)
-            .attr("dy", -offsetSub + offsetSup)
-            .text(token.sup);
-          offsetSub = 0;
+            .attr("dy", -offsetSub - offsetSup)
+            .text("...");
+          return false;
         }
         if (i < ary.length - 1) {
           text.append("tspan")
             .attr("dy", -offsetSub - offsetSup)
             .text(", ");
         }
+        return true;
       }, this);
     });
   }
-
+  
+  createLabel.ellipsis = function(value) {
+    if (!arguments.length) return ellipsis;
+    ellipsis = value;
+    return createLabel;
+  }
+  
   return createLabel;
 };
 

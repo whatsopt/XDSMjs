@@ -52,7 +52,7 @@ function xdsm(graph) {
             return kind + " " + klass;
           })
           .each(function() {
-            var labelize = Labelizer.labelize();
+            var labelize = Labelizer.labelize().ellipsis(5);
             d3.select(this).call(labelize);
           });
   }
