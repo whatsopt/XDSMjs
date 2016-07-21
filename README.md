@@ -25,14 +25,6 @@ Compared to the original latex generator it uses a json format as input (see exa
 * Open `http://localhost:8020/xdsm.html` in a browser (tested with Chrome)
 * To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page. 
 
-## TODO
-* ~~Add multi-component representation~~
-* Add multi-line display within component boxes 
-* Add XDSM json formal description (json schema)
-* Add process chaining vizualisation using D3 animation capability
-* Automate components padding 
-* ...
-
 ## Licence
  Copyright 2016 Rémi Lafage
 
