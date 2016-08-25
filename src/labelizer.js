@@ -1,6 +1,8 @@
 function Labelizer() {}
 
 Labelizer.strParse = function(str) {
+  if (str === "") { return [{base: '', sub: undefined, sup: undefined}];}
+  
   var lstr = str.split(',');
   var rg = /([A-Za-z0-9]+)(_[A-Za-z0-9]+)?(\^.+)?/;
 
@@ -19,6 +21,7 @@ Labelizer.strParse = function(str) {
       }
     } else {
       console.log("Warning : can not parse " + s);
+      throw "LabelizeError";
     }
     return {base: base, sub: sub, sup: sup};
   }, this);
@@ -35,7 +38,6 @@ Labelizer.labelize = function() {
       var tokens = Labelizer.strParse(d.name);
       var text = selection.append("text");
       tokens.every(function(token, i, ary) {
-        console.log(i+":"+token);
         if (ellipsis < 1 || i < 5) {
           text.append("tspan").text(token.base);
           var offsetSub = 0;

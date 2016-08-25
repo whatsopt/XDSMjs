@@ -2,6 +2,14 @@ var test = require('tape');
 var Labelizer = require('../src/labelizer');
 var Graph = require('../src/graph');
 
+test("Labelizer.strParse('') returns [{'base':'', 'sub':undefined, 'sup':undefined}]", function(t) {
+  t.deepEqual(Labelizer.strParse(""), [{'base':'', 'sub':undefined, 'sup':undefined}]);
+  t.end();
+});
+test("Labelizer.strParse('+A') throws LabelizeError", function(t) {
+  t.throws(function() {Labelizer.strParse("+");}, "should throw LabelizeError");
+  t.end();
+});
 test("Labelizer.strParse('x') returns [{'base':'x', 'sub':undefined, 'sup':undefined}]", function(t) {
   t.deepEqual(Labelizer.strParse("x"), [{'base':'x', 'sub':undefined, 'sup':undefined}]);
   t.end();
