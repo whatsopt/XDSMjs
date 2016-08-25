@@ -1,8 +1,10 @@
 function Labelizer() {}
 
 Labelizer.strParse = function(str) {
-  if (str === "") { return [{base: '', sub: undefined, sup: undefined}];}
-  
+  if (str === "") {
+    return [{base: '', sub: undefined, sup: undefined}];
+  }
+
   var lstr = str.split(',');
   var rg = /([A-Za-z0-9]+)(_[A-Za-z0-9]+)?(\^.+)?/;
 
@@ -20,8 +22,7 @@ Labelizer.strParse = function(str) {
         sup = m[3].substring(1);
       }
     } else {
-      console.log("Warning : can not parse " + s);
-      throw "LabelizeError";
+      throw new Error("Labelizer.strParse: Can not parse '" + s + "'");
     }
     return {base: base, sub: sub, sup: sup};
   }, this);
@@ -29,20 +30,18 @@ Labelizer.strParse = function(str) {
   return res;
 };
 
-
 Labelizer.labelize = function() {
   var ellipsis = 0;
-  
+
   function createLabel(selection) {
     selection.each(function(d) {
       var tokens = Labelizer.strParse(d.name);
       var text = selection.append("text");
       tokens.every(function(token, i, ary) {
+        var offsetSub = 0;
+        var offsetSup = 0;
         if (ellipsis < 1 || i < 5) {
           text.append("tspan").text(token.base);
-          var offsetSub = 0;
-          var offsetSup = 0;
-          var newElts = [];
           if (token.sub) {
             offsetSub = 10;
             text.append("tspan")
@@ -74,13 +73,15 @@ Labelizer.labelize = function() {
       }, this);
     });
   }
-  
+
   createLabel.ellipsis = function(value) {
-    if (!arguments.length) return ellipsis;
+    if (!arguments.length) {
+      return ellipsis;
+    }
     ellipsis = value;
     return createLabel;
-  }
-  
+  };
+
   return createLabel;
 };
 

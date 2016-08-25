@@ -6,8 +6,8 @@ test("Labelizer.strParse('') returns [{'base':'', 'sub':undefined, 'sup':undefin
   t.deepEqual(Labelizer.strParse(""), [{'base':'', 'sub':undefined, 'sup':undefined}]);
   t.end();
 });
-test("Labelizer.strParse('+A') throws LabelizeError", function(t) {
-  t.throws(function() {Labelizer.strParse("+");}, "should throw LabelizeError");
+test("Labelizer.strParse('+A') throws an error", function(t) {
+  t.throws(function() {Labelizer.strParse("+");}, "should throw an error");
   t.end();
 });
 test("Labelizer.strParse('x') returns [{'base':'x', 'sub':undefined, 'sup':undefined}]", function(t) {
