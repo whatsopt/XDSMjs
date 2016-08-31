@@ -62,6 +62,7 @@ Labelizer.labelize = function() {
           text.append("tspan")
             .attr("dy", -offsetSub - offsetSup)
             .text("...");
+          selection.classed("ellipsized", true);
           return false;
         }
         if (i < ary.length - 1) {
@@ -83,6 +84,36 @@ Labelizer.labelize = function() {
   };
 
   return createLabel;
+};
+
+Labelizer.tooltipize = function() {
+  var text = "";
+
+  function createTooltip(selection) {
+    var tokens = Labelizer.strParse(text);
+    var html = [];
+    tokens.forEach(function(token) {
+      var item = token.base;
+      if (token.sub) {
+        item += "<sub>" + token.sub + "</sub>";
+      }
+      if (token.sup) {
+        item += "<sup>" + token.sup + "</sup>";
+      }
+      html.push(item);
+    }, this);
+    selection.html(html.join(", "));
+  }
+
+  createTooltip.text = function(value) {
+    if (!arguments.length) {
+      return text;
+    }
+    text = value;
+    return createTooltip;
+  };
+
+  return createTooltip;
 };
 
 module.exports = Labelizer;

@@ -33,6 +33,10 @@ d3.json("xdsm.json", function(error, mdo) {
 });
 
 function xdsm(graph) {
+  var div = d3.select("body").append("div")
+              .attr("class", "tooltip")
+              .style("opacity", 0);
+
   var svg = d3.select(".xdsm").append("svg")
               .attr("width", WIDTH)
               .attr("height", HEIGHT)
@@ -41,7 +45,7 @@ function xdsm(graph) {
 
   // kind: node || edge
   function createTextGroup(kind) {
-    return svg.selectAll("." + kind)
+    var textGroups = svg.selectAll("." + kind)
             .data(graph[kind + "s"])
           .enter().append("g")
           .attr("class", function(d) {
@@ -55,6 +59,24 @@ function xdsm(graph) {
             var labelize = Labelizer.labelize().ellipsis(5);
             d3.select(this).call(labelize);
           });
+
+    d3.selectAll(".ellipsized").on("mouseover", function(d) {
+      div.transition()
+        .duration(200)
+        .style("opacity", 0.9);
+      var tooltipize = Labelizer.tooltipize().text(d.name);
+      div.call(tooltipize)
+        .style("width", "200px")
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 28) + "px");
+    })
+    .on("mouseout", function() {
+      div.transition()
+        .duration(500)
+        .style("opacity", 0);
+    });
+
+    return textGroups;
   }
 
   var nodes = createTextGroup("node");

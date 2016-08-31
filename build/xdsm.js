@@ -9693,6 +9693,10 @@ module.exports = Graph;
 function Labelizer() {}
 
 Labelizer.strParse = function(str) {
+  if (str === "") {
+    return [{base: '', sub: undefined, sup: undefined}];
+  }
+
   var lstr = str.split(',');
   var rg = /([A-Za-z0-9]+)(_[A-Za-z0-9]+)?(\^.+)?/;
 
@@ -9710,7 +9714,7 @@ Labelizer.strParse = function(str) {
         sup = m[3].substring(1);
       }
     } else {
-      console.log("Warning : can not parse " + s);
+      throw new Error("Labelizer.strParse: Can not parse '" + s + "'");
     }
     return {base: base, sub: sub, sup: sup};
   }, this);
@@ -9718,21 +9722,18 @@ Labelizer.strParse = function(str) {
   return res;
 };
 
-
 Labelizer.labelize = function() {
   var ellipsis = 0;
-  
+
   function createLabel(selection) {
     selection.each(function(d) {
       var tokens = Labelizer.strParse(d.name);
       var text = selection.append("text");
       tokens.every(function(token, i, ary) {
-        console.log(i+":"+token);
+        var offsetSub = 0;
+        var offsetSup = 0;
         if (ellipsis < 1 || i < 5) {
           text.append("tspan").text(token.base);
-          var offsetSub = 0;
-          var offsetSup = 0;
-          var newElts = [];
           if (token.sub) {
             offsetSub = 10;
             text.append("tspan")
@@ -9753,6 +9754,7 @@ Labelizer.labelize = function() {
           text.append("tspan")
             .attr("dy", -offsetSub - offsetSup)
             .text("...");
+          selection.classed("ellipsized", true);
           return false;
         }
         if (i < ary.length - 1) {
@@ -9764,14 +9766,45 @@ Labelizer.labelize = function() {
       }, this);
     });
   }
-  
+
   createLabel.ellipsis = function(value) {
-    if (!arguments.length) return ellipsis;
+    if (!arguments.length) {
+      return ellipsis;
+    }
     ellipsis = value;
     return createLabel;
+  };
+
+  return createLabel;
+};
+
+
+Labelizer.tooltipize = function() {
+  var text = "";
+  
+  function createTooltip(selection) {
+    var tokens = Labelizer.strParse(text);
+    var html = [];
+    tokens.forEach(function(token, i, ary) {
+      var item = token.base;
+      if (token.sub) {
+        item += "<sub>"+token.sub+"</sub>";
+      }
+      if (token.sup) {
+        item += "<sup>"+token.sup+"</sup>";
+      }
+      html.push(item);
+    }, this);
+    selection.html(html.join(", "));
   }
   
-  return createLabel;
+  createTooltip.text = function(value) {
+    if (!arguments.length) return text;
+    text = value;
+    return createTooltip;
+  }
+
+  return createTooltip;
 };
 
 module.exports = Labelizer;
@@ -9812,6 +9845,10 @@ d3.json("xdsm.json", function(error, mdo) {
 });
 
 function xdsm(graph) {
+  var div = d3.select("body").append("div") 
+              .attr("class", "tooltip")       
+              .style("opacity", 0);
+  
   var svg = d3.select(".xdsm").append("svg")
               .attr("width", WIDTH)
               .attr("height", HEIGHT)
@@ -9820,7 +9857,7 @@ function xdsm(graph) {
 
   // kind: node || edge
   function createTextGroup(kind) {
-    return svg.selectAll("." + kind)
+    var textGroups = svg.selectAll("." + kind)
             .data(graph[kind + "s"])
           .enter().append("g")
           .attr("class", function(d) {
@@ -9834,6 +9871,24 @@ function xdsm(graph) {
             var labelize = Labelizer.labelize().ellipsis(5);
             d3.select(this).call(labelize);
           });
+     
+   d3.selectAll(".ellipsized").on("mouseover", function(d) {    
+            div.transition()    
+                .duration(200)    
+                .style("opacity", .9);    
+            var tooltipize = Labelizer.tooltipize().text(d.name);
+            div.call(tooltipize)  
+               .style("width", "200px")
+               .style("left", (d3.event.pageX) + "px")   
+               .style("top", (d3.event.pageY - 28) + "px");  
+            })          
+          .on("mouseout", function(d) {   
+            div.transition()    
+                .duration(500)    
+                .style("opacity", 0); 
+          });
+   
+    return textGroups; 
   }
 
   var nodes = createTextGroup("node");
