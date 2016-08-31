@@ -10,8 +10,8 @@
     "lint": "eslint xdsm.js ./src/* || true",
     "build": "browserify . -o ./build/xdsm.js",
     "test": "node tests/xdsm-test.js | faucet || true",
-    "testfront": "node tests/xdsm-testfront.js | testling -x firefox",
-    "testbrowser": "browserify tests/xdsm-test.js -o ./build/xdsm-test-bundle.js | firefox ./tests/index.html"
+    "testbrowser": "browserify tests/xdsm-test.js -o ./build/xdsm-test-bundle.js | firefox ./tests/index.html || true",
+    "testfront": "browserify tests/xdsm-test.js | testling -x firefox || true"
   },
   "repository": {
     "type": "git",
