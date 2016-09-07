@@ -9698,7 +9698,7 @@ Labelizer.strParse = function(str) {
   }
 
   var lstr = str.split(',');
-  var rg = /([A-Za-z0-9]+)(_[A-Za-z0-9]+)?(\^.+)?/;
+  var rg = /([0-9\-]+:)?([A-Za-z0-9]+)(_[A-Za-z0-9]+)?(\^.+)?/;
 
   var res = lstr.map(function(s) {
     var base;
@@ -9706,12 +9706,12 @@ Labelizer.strParse = function(str) {
     var sup;
     var m = s.match(rg);
     if (m) {
-      base = m[1];
-      if (m[2]) {
-        sub = m[2].substring(1);
-      }
+      base = (m[1]?m[1]:"") + m[2];
       if (m[3]) {
-        sup = m[3].substring(1);
+        sub = m[3].substring(1);
+      }
+      if (m[4]) {
+        sup = m[4].substring(1);
       }
     } else {
       throw new Error("Labelizer.strParse: Can not parse '" + s + "'");
@@ -9778,31 +9778,32 @@ Labelizer.labelize = function() {
   return createLabel;
 };
 
-
 Labelizer.tooltipize = function() {
   var text = "";
-  
+
   function createTooltip(selection) {
     var tokens = Labelizer.strParse(text);
     var html = [];
-    tokens.forEach(function(token, i, ary) {
+    tokens.forEach(function(token) {
       var item = token.base;
       if (token.sub) {
-        item += "<sub>"+token.sub+"</sub>";
+        item += "<sub>" + token.sub + "</sub>";
       }
       if (token.sup) {
-        item += "<sup>"+token.sup+"</sup>";
+        item += "<sup>" + token.sup + "</sup>";
       }
       html.push(item);
     }, this);
     selection.html(html.join(", "));
   }
-  
+
   createTooltip.text = function(value) {
-    if (!arguments.length) return text;
+    if (!arguments.length) {
+      return text;
+    }
     text = value;
     return createTooltip;
-  }
+  };
 
   return createTooltip;
 };
@@ -9845,10 +9846,10 @@ d3.json("xdsm.json", function(error, mdo) {
 });
 
 function xdsm(graph) {
-  var div = d3.select("body").append("div") 
-              .attr("class", "tooltip")       
+  var div = d3.select("body").append("div")
+              .attr("class", "tooltip")
               .style("opacity", 0);
-  
+
   var svg = d3.select(".xdsm").append("svg")
               .attr("width", WIDTH)
               .attr("height", HEIGHT)
@@ -9871,24 +9872,24 @@ function xdsm(graph) {
             var labelize = Labelizer.labelize().ellipsis(5);
             d3.select(this).call(labelize);
           });
-     
-   d3.selectAll(".ellipsized").on("mouseover", function(d) {    
-            div.transition()    
-                .duration(200)    
-                .style("opacity", .9);    
-            var tooltipize = Labelizer.tooltipize().text(d.name);
-            div.call(tooltipize)  
-               .style("width", "200px")
-               .style("left", (d3.event.pageX) + "px")   
-               .style("top", (d3.event.pageY - 28) + "px");  
-            })          
-          .on("mouseout", function(d) {   
-            div.transition()    
-                .duration(500)    
-                .style("opacity", 0); 
-          });
-   
-    return textGroups; 
+
+    d3.selectAll(".ellipsized").on("mouseover", function(d) {
+      div.transition()
+        .duration(200)
+        .style("opacity", 0.9);
+      var tooltipize = Labelizer.tooltipize().text(d.name);
+      div.call(tooltipize)
+        .style("width", "200px")
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 28) + "px");
+    })
+    .on("mouseout", function() {
+      div.transition()
+        .duration(500)
+        .style("opacity", 0);
+    });
+
+    return textGroups;
   }
 
   var nodes = createTextGroup("node");

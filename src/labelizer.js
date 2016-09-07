@@ -6,7 +6,7 @@ Labelizer.strParse = function(str) {
   }
 
   var lstr = str.split(',');
-  var rg = /([A-Za-z0-9]+)(_[A-Za-z0-9]+)?(\^.+)?/;
+  var rg = /([0-9\-]+:)?([A-Za-z0-9]+)(_[A-Za-z0-9]+)?(\^.+)?/;
 
   var res = lstr.map(function(s) {
     var base;
@@ -14,12 +14,12 @@ Labelizer.strParse = function(str) {
     var sup;
     var m = s.match(rg);
     if (m) {
-      base = m[1];
-      if (m[2]) {
-        sub = m[2].substring(1);
-      }
+      base = (m[1] ? m[1] : "") + m[2];
       if (m[3]) {
-        sup = m[3].substring(1);
+        sub = m[3].substring(1);
+      }
+      if (m[4]) {
+        sup = m[4].substring(1);
       }
     } else {
       throw new Error("Labelizer.strParse: Can not parse '" + s + "'");

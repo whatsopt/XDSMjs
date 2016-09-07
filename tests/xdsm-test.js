@@ -34,6 +34,11 @@ test("Labelizer.strParse('x_13^0, y_1^{*}') returns [{'base':'x', 'sub': '13', '
                                                           {'base':'y', 'sub': '1', 'sup': '{*}'}]);
   t.end();
 });
+test("Labelizer.strParse('1:Opt') returns [{'base':'1:Opt', 'sub':undefined, 'sup':undefined}]", function(t) {
+  t.deepEqual(Labelizer.strParse("1:Opt"), [{'base':'1:Opt', 'sub':undefined, 'sup':undefined}]);
+  t.end();
+});
+
 
 test("Graph.flatten(['b2']) returns ['b2']", function(t) {
   t.deepEqual(Graph.flatten(['b2']), ['b2']);
