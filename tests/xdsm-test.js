@@ -56,54 +56,54 @@ test("Graph.expand([['a']]) returns ['a']", function(t) {
   t.deepEqual(Graph.expand([['a']]), ['a']);
   t.end();
 });
-test("Graph.expand(['a', 'b']) returns ['a', 'b', 'a']", function(t) {
-  t.deepEqual(Graph.expand(['a', 'b']), ['a', 'b', 'a']);
+test("Graph.expand(['a', 'b']) returns ['a', 'b']", function(t) {
+  t.deepEqual(Graph.expand(['a', 'b']), ['a', 'b']);
   t.end();
 });
-test("Graph.expand([['a', 'b']]) returns ['a', 'b', 'a']", function(t) {
-  t.deepEqual(Graph.expand([['a', 'b']]), ['a', 'b', 'a']);
+test("Graph.expand([['a', 'b']]) returns ['a', 'b']", function(t) {
+  t.deepEqual(Graph.expand([['a', 'b']]), ['a', 'b']);
   t.end();
 });
 test("Graph.expand(['a', ['b']]) returns ['a', 'b', 'a']", function(t) {
   t.deepEqual(Graph.expand(['a', ['b']]), ['a', 'b', 'a']);
   t.end();
 });
-test("Graph.expand([['a'], 'b']) returns ['a', 'b', 'a']", function(t) {
-  t.deepEqual(Graph.expand([['a'], 'b']), ['a', 'b', 'a']);
+test("Graph.expand([['a'], 'b']) returns ['a', 'b']", function(t) {
+  t.deepEqual(Graph.expand([['a'], 'b']), ['a', 'b']);
   t.end();
 });
-test("Graph.expand([['a'], 'b', 'c']) returns ['a', 'b', 'c', 'a']", function(t) {
-  t.deepEqual(Graph.expand([['a'], 'b', 'c']), ['a', 'b', 'c', 'a']);
+test("Graph.expand([['a'], 'b', 'c']) returns ['a', 'b', 'c']", function(t) {
+  t.deepEqual(Graph.expand([['a'], 'b', 'c']), ['a', 'b', 'c']);
   t.end();
 });
-test("Graph.expand(['a', ['b'], 'c']) returns ['a', 'b', 'c', 'a']", function(t) {
-  t.deepEqual(Graph.expand(['a', ['b'], 'c']), ['a', 'b', 'c', 'a']);
+test("Graph.expand(['a', ['b'], 'c']) returns ['a', 'b', 'a', 'c']", function(t) {
+  t.deepEqual(Graph.expand(['a', ['b'], 'c']), ['a', 'b', 'a', 'c']);
   t.end();
 });
-test("Graph.expand(['a', [['b']], 'c']) returns ['a', 'b', 'c', 'a']", function(t) {
-  t.deepEqual(Graph.expand(['a', [['b']], 'c']), ['a', 'b', 'c', 'a']);
+test("Graph.expand(['a', [['b']], 'c']) returns ['a', 'b', 'a', 'c']", function(t) {
+  t.deepEqual(Graph.expand(['a', [['b']], 'c']), ['a', 'b', 'a', 'c']);
   t.end();
 });
-test("Graph.expand(['a', [['b', [d]]], 'c']) returns ['a', 'b', 'd', 'b', 'c', 'a']", function(t) {
-  t.deepEqual(Graph.expand(['a', [['b', ['d']]], 'c']), ['a', 'b', 'd', 'b', 'c', 'a']);
+test("Graph.expand(['a', [['b', [d]]], 'c']) returns ['a', 'b', 'd', 'b', 'a', 'c']", function(t) {
+  t.deepEqual(Graph.expand(['a', [['b', ['d']]], 'c']), ['a', 'b', 'd', 'b', 'a', 'c']);
   t.end();
 });
-test("Graph.expand(['a', ['b1', 'b2'], 'c']) returns ['a', 'b1', 'b2', 'b1', 'c', 'a']", function(t) {
-  t.deepEqual(Graph.expand(['a', ['b1', 'b2'], 'c']), ['a', 'b1', 'b2', 'b1', 'c', 'a']);
+test("Graph.expand(['a', ['b1', 'b2'], 'c']) returns ['a', 'b1', 'b2', 'a', 'c']", function(t) {
+  t.deepEqual(Graph.expand(['a', ['b1', 'b2'], 'c']), ['a', 'b1', 'b2', 'a', 'c']);
   t.end();
 });
-test("Graph.expand(['a0', ['b1', 'b2', 'b3'], 'c3']) returns ['a0', 'b1', 'b2', 'b3', 'b1', 'c3', 'a0']", function(t) {
-  t.deepEqual(Graph.expand(['a0', ['b1', 'b2', 'b3'], 'c3']), ['a0', 'b1', 'b2', 'b3', 'b1', 'c3', 'a0']);
+test("Graph.expand(['a0', ['b1', 'b2', 'b3'], 'c3']) returns ['a0', 'b1', 'b2', 'b3', 'a0', 'c3']", function(t) {
+  t.deepEqual(Graph.expand(['a0', ['b1', 'b2', 'b3'], 'c3']), ['a0', 'b1', 'b2', 'b3', 'a0', 'c3']);
   t.end();
 });
-test("Graph.expand(['Opt', ['MDA', 'DA1', 'DA2', 'DA3'],'Func']) returns ['Opt', 'MDA', 'DA1', 'DA2', 'DA3', 'MDA','Func', 'Opt']", function(t) {
-  t.deepEqual(Graph.expand(['Opt', ['MDA', 'DA1', 'DA2', 'DA3'],'Func']), 
+test("Graph.expand(['Opt', ['MDA', ['DA1', 'DA2', 'DA3'],'Func']]) returns ['Opt', 'MDA', 'DA1', 'DA2', 'DA3', 'MDA','Func', 'Opt']", function(t) {
+  t.deepEqual(Graph.expand(['Opt', ['MDA', ['DA1', 'DA2', 'DA3'],'Func']]), 
                            ['Opt', 'MDA', 'DA1', 'DA2', 'DA3', 'MDA','Func', 'Opt']);
   t.end();
 });
-test("Graph.expand([['Opt', 'DA1'], ['Opt', 'DA2'], ['Opt', 'DA3']]) returns ['Opt', 'DA1', 'Opt', 'DA2',  'Opt', 'DA3', 'Opt']", function(t) {
+test("Graph.expand([['Opt', 'DA1'], ['Opt', 'DA2'], ['Opt', 'DA3']]) returns ['Opt', 'DA1', 'Opt', 'DA2',  'Opt', 'DA3']", function(t) {
 	t.deepEqual(Graph.expand([['Opt', 'DA1'], ['Opt', 'DA2'], ['Opt', 'DA3']]),
-  	                       ['Opt', 'DA1', 'Opt', 'Opt', 'DA2',  'Opt', 'Opt', 'DA3', 'Opt', 'Opt']);
+  	                       ['Opt', 'DA1', 'Opt', 'DA2',  'Opt', 'Opt', 'DA3']);
   t.end();
 });
 test("Graph.chains should expand as list of index couples", function(t) {
@@ -113,7 +113,7 @@ test("Graph.chains should expand as list of index couples", function(t) {
                         {id:'DA2',name:'DA2'},
                         {id:'DA3',name:'DA3'},
                         {id:'Func',name:'Func'}], 
-                 edges:[], chains:[['Opt', ['MDA', 'DA1', 'DA2', 'DA3'],'Func']]});
+                 edges:[], chains:[['Opt', ['MDA', ['DA1', 'DA2', 'DA3'],'Func']]]});
   t.deepEqual(g.chains, [[[1,2], [2,3], [3,4], [4,5], [5,2], [2,6], [6,1]]]);
   t.end();
 });
@@ -123,7 +123,7 @@ test("Graph.chains should expand as list of index couples", function(t) {
                         {id:'DA2',name:'DA2'},
                         {id:'DA3',name:'DA3'},
                         {id:'Func',name:'Func'}],
-                        edges:[], chains:[[['Opt', 'DA1'], ['Opt', 'DA2'], ['Opt', 'DA3'], 'Func']]});
-  t.deepEqual(g.chains, [[[1,2], [2,1], [1,3], [3,1], [1,4], [4,1], [1,5], [5,1]]]);
+                        edges:[], chains:[['Opt', ['DA1'], 'Opt', ['DA2'], 'Opt', ['DA3'], 'Func']]});
+  t.deepEqual(g.chains, [[[1,2], [2,1], [1,3], [3,1], [1,4], [4,1], [1,5]]]);
   t.end();
 });

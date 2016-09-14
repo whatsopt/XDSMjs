@@ -99,36 +99,41 @@ var flatten = Graph.flatten = function _flatten(a, r) {
   return r;
 };
 
-Graph.expand = function _expand(item, level) {
+function _expand(item, level) {
   if (level === undefined) {
     level = 0;
   }
-  // console.log(level, item);
+  //console.log("expand("+item+", "+level+")");
   if (item instanceof Array) {
     if (item.length === 0) {
-      if (level > 0) {
-        // throw
-      }
       return [];
     } else if (item.length === 1) {
-      // var my = level===0?[_expand(item[0], level)]:_expand(item[0], level);
-      var my = flatten([_expand(item[0])]);
-      // console.log("return my = "+my);
+      var my = [flatten(_expand(item[0], level+1))];
+      //console.log("return my = "+my);
       return my;
     }
     var car = item.shift();
+    var ecar = flatten([_expand(car, level + 1)]);
+    var cadr = item.shift();
+    var ecadr = flatten([_expand(cadr, level + 1)]);
     var cdr = _expand(item, level + 1);
-    var ecar = _expand([car], level + 1);
     var ret;
-    if (level === 0) {
-      ret = [].concat(ecar, cdr, ecar[0]);
+    if (cadr instanceof Array) {
+      //console.log("return ecar="+ecar+", ecadr="+ecadr+", ecar[0]="+ecar[0]+", cdr="+cdr );
+      ret = [].concat(ecar, ecadr, ecar[0], cdr);
     } else {
-      ret = [].concat(ecar, cdr);
+      ret = [].concat(ecar, ecadr, cdr);
     }
-    // console.log("return "+ret);
-    return flatten(ret);
+    //console.log("return "+ret);
+    return ret;
   }
+  
+  console.log("not array return "+item);
   return item;
+};
+
+Graph.expand = function(item, level) {
+  return flatten(_expand(item, level));
 };
 
 module.exports = Graph;
