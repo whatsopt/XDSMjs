@@ -6,7 +6,7 @@ Labelizer.strParse = function(str) {
   }
 
   var lstr = str.split(',');
-  var rg = /([0-9\-]+:)?([A-Za-z0-9]+)(_[A-Za-z0-9]+)?(\^.+)?/;
+  var rg = /([0-9\-]+:)?([A-Za-z0-9\-]+)(_[A-Za-z0-9\-]+)?(\^.+)?/;
 
   var res = lstr.map(function(s) {
     var base;

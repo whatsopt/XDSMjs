@@ -38,6 +38,10 @@ test("Labelizer.strParse('1:Opt') returns [{'base':'1:Opt', 'sub':undefined, 'su
   t.deepEqual(Labelizer.strParse("1:Opt"), [{'base':'1:Opt', 'sub':undefined, 'sup':undefined}]);
   t.end();
 });
+test("Labelizer.strParse('1:L-BFGS-B') returns [{'base':'1:L-BFGS-B', 'sub':undefined, 'sup':undefined}]", function(t) {
+  t.deepEqual(Labelizer.strParse("1:L-BFGS-B"), [{'base':'1:L-BFGS-B', 'sub':undefined, 'sup':undefined}]);
+  t.end();
+});
 
 
 test("Graph.flatten(['b2']) returns ['b2']", function(t) {
