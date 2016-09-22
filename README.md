@@ -17,13 +17,16 @@ It is based on [D3](https://d3js.org/) and [Mathjax](https://www.mathjax.org/).
 Compared to the original latex generator it uses a json format as input (see example xdsm.json).
 
 ## Usage
-* Serve the files from XDSMjs directory with your favourite http server. Example with python:
+* Open xdsm.html in your browser (tested with Firefox) 
+* To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page. 
+
+## Troubleshooting
+* If you don't see a diagram, may be you need to serve the files with your favourite HTTP server (same origin policy of your browser). An example with python:
 ```
 > cd <install-dir>/XDSMjs
 > python -m SimpleHTTPServer 8020
 ```
-* Open `http://localhost:8020/xdsm.html` in a browser (tested with Chrome)
-* To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page. 
+then open `http://localhost:8020/xdsm.html` in a browser.
 
 ## Licence
  Copyright 2016 Rémi Lafage
