@@ -9613,11 +9613,11 @@ function Graph(mdo) {
       throw new Error("Bad process chain (" + chain.length + "elt)");
     } else {
       this.chains.push([]);
+      var ids = this.nodes.map(function(elt) {
+        return elt.id;
+      });
       chain.forEach(function(item, j) {
         if (j !== 0) {
-          var ids = this.nodes.map(function(elt) {
-            return elt.id;
-          });
           var idA = ids.indexOf(chain[j - 1]);
           if (idA < 0) {
             throw new Error("Process chain element (" +
@@ -9703,7 +9703,7 @@ Labelizer.strParse = function(str) {
   }
 
   var lstr = str.split(',');
-  var rg = /([0-9\-]+:)?([A-Za-z0-9\-]+)(_[A-Za-z0-9]+)?(\^.+)?/;
+  var rg = /([0-9\-]+:)?([A-Za-z0-9\-]+)(_[A-Za-z0-9\-]+)?(\^.+)?/;
 
   var res = lstr.map(function(s) {
     var base;

@@ -52,32 +52,34 @@ function Graph(mdo) {
   }, this);
 
   mdo.chains.forEach(function(chain, i) {
-    chain = Graph.expand(chain);
-    if (chain.length < 2) {
-      throw new Error("Bad process chain (" + chain.length + "elt)");
-    } else {
-      this.chains.push([]);
-      chain.forEach(function(item, j) {
-        if (j !== 0) {
-          var ids = this.nodes.map(function(elt) {
-            return elt.id;
-          });
-          var idA = ids.indexOf(chain[j - 1]);
-          if (idA < 0) {
-            throw new Error("Process chain element (" +
-                            chain[j - 1] + ") not found");
+    var echain = Graph.expand(chain);
+    echain.forEach(function(leaf_chain, k) {
+      if (leaf_chain.length < 2) {
+        throw new Error("Bad process chain (" + leaf_chain.length + "elt)");
+      } else {
+        this.chains.push([]);
+        var ids = this.nodes.map(function(elt) {
+          return elt.id;
+        });
+        leaf_chain.forEach(function(item, j) {
+          if (j !== 0) {
+            var idA = ids.indexOf(leaf_chain[j - 1]);
+            if (idA < 0) {
+              throw new Error("Process chain element (" +
+                              leaf_chain[j - 1] + ") not found");
+            }
+            var idB = ids.indexOf(leaf_chain[j]);
+            if (idB < 0) {
+              throw new Error("Process chain element (" +
+                              leaf_chain[j] + ") not found");
+            }
+            if (idA !== idB) {
+              this.chains[this.chains.length-1].push([idA, idB]);
+            }
           }
-          var idB = ids.indexOf(chain[j]);
-          if (idB < 0) {
-            throw new Error("Process chain element (" +
-                            chain[j] + ") not found");
-          }
-          if (idA !== idB) {
-            this.chains[i].push([idA, idB]);
-          }
-        }
-      }, this);
-    }
+        }, this);
+      }
+    }, this);
   }, this);
 }
 
@@ -99,41 +101,70 @@ var flatten = Graph.flatten = function _flatten(a, r) {
   return r;
 };
 
-function _expand(item, level) {
+function _expand(item, level, head) {
   if (level === undefined) {
     level = 0;
   }
-  //console.log("expand("+item+", "+level+")");
+  console.log("expand("+JSON.stringify(item)+", "+level+", "+JSON.stringify(head)+")");
   if (item instanceof Array) {
+    var ret = [];
     if (item.length === 0) {
-      return [];
+      return ret;
     } else if (item.length === 1) {
-      var my = [flatten(_expand(item[0], level+1))];
-      //console.log("return my = "+my);
-      return my;
+      if (item[0].hasOwnProperty('parallel')) {
+        ret = item[0].parallel.map(function(elt) { return [_expand(elt, level+1, head)]; });
+        if (head !== undefined) {
+          ret = ret.map(function(elt) { return [head].concat(elt); });
+        }
+      } else if (item[0] instanceof Array) {
+        ret = _expand(item[0], level+1, head);
+        if (head !== undefined) {
+          if (ret instanceof Array && ret[0] instanceof Array) {
+            ret = ret.map(function(elt) { return [].concat(elt, head); });
+          } else {
+            if (head !== ret[ret.length-1]) {
+              ret = [].concat(ret, head);
+            }
+          }
+        } else {
+          ret = [].concat(ret);
+        }  
+      } else {
+        ret = _expand(item[0], level+1);
+      }
+      console.log("return ret = "+JSON.stringify(ret));
+      return ret;
     }
     var car = item.shift();
-    var ecar = flatten([_expand(car, level + 1)]);
+    var ecar = [_expand(car, level + 1, head)];
     var cadr = item.shift();
-    var ecadr = flatten([_expand(cadr, level + 1)]);
-    var cdr = _expand(item, level + 1);
-    var ret;
-    if (cadr instanceof Array) {
-      //console.log("return ecar="+ecar+", ecadr="+ecadr+", ecar[0]="+ecar[0]+", cdr="+cdr );
-      ret = [].concat(ecar, ecadr, ecar[0], cdr);
-    } else {
-      ret = [].concat(ecar, ecadr, cdr);
+    var cdr  = item;
+    if (cadr instanceof Array) {   
+      var ecadr = _expand([cadr], level + 1, ecar[ecar.length-1]);
+      ecdr = _expand(cdr, level + 1, ecar[ecar.length-1]);
+      if (cadr[0] instanceof Object && cadr[0].hasOwnProperty('parallel')) {
+        return [].concat(ecar.slice(0, ecar.length-1), ecadr, ecdr);
+      } else {
+        return [].concat(ecar, ecadr, ecdr);
+      } 
+    } 
+    if (cadr.hasOwnProperty('parallel')) {
+      console.log("coucou "+ JSON.stringify(cadr));
+      return [].concat(ecar.slice(0, ecar.length-1), _expand([].concat(cadr, cdr), level + 1, ecar[0]));
     }
-    //console.log("return "+ret);
-    return ret;
+    return [].concat(ecar, _expand([].concat(cadr, cdr), level + 1));
   }
   
-  console.log("not array return "+item);
+  //console.log("not array return "+item);
   return item;
 };
 
 Graph.expand = function(item, level) {
-  return flatten(_expand(item, level));
+  var expanded = _expand(item, level);
+  if (expanded[0] instanceof Array) {
+    return expanded;
+  } 
+  return [expanded];
 };
 
 module.exports = Graph;
