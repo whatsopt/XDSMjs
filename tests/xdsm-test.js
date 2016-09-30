@@ -43,18 +43,8 @@ test("Labelizer.strParse('1:L-BFGS-B') returns [{'base':'1:L-BFGS-B', 'sub':unde
   t.end();
 });
 
-
-test("Graph.flatten(['b2']) returns ['b2']", function(t) {
-  t.deepEqual(Graph.flatten(['b2']), ['b2']);
-  t.end();
-});
-test("Graph.flatten('b2') returns 'b2'", function(t) {
-  t.deepEqual(Graph.flatten('b2'), 'b2');
-  t.end();
-});
-
 test("Graph.expand(['a']) returns [['a']]", function(t) {
-  t.deepEqual(Graph.expand([['a']]), [['a']]);
+  t.deepEqual(Graph.expand(['a']), [['a']]);
   t.end();
 });
 test("Graph.expand([['a']]) returns [['a']]", function(t) {
@@ -106,8 +96,6 @@ test("Graph.expand(['opt', ['mda', ['d1', 'd2', 'd3'],'func']]) returns [['opt',
                            [['opt', 'mda', 'd1', 'd2', 'd3', 'mda','func', 'opt']]);
   t.end();
 });
-
-
 test("Graph.expand([{parallel: ['d1', 'd2']}]) returns [[d1], [d2]]", function(t) {
   t.deepEqual(Graph.expand([{parallel: ['d1', 'd2']}]),
                            [['d1'], ['d2']]);
@@ -139,8 +127,13 @@ test("Graph.expand(['opt', 'mda', {parallel: ['d1', 'd2', 'd3']}, 'd4']]) return
   t.end();
 });
 test("Graph.expand(['opt', ['mda', {parallel: ['d1', 'd2', 'd3']}, 'd4']]) returns [['opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4'], ['d4', 'opt']]", function(t) {
-  t.deepEqual(Graph.expand(['opt', ['mda', {parallel: ['d1', 'd2', 'd3']}, 'd4']],
-              [['opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4'], ['d4', 'opt']]));
+  t.deepEqual(Graph.expand(['opt', ['mda', {parallel: ['d1', 'd2', 'd3']}, 'd4']]),
+              [['opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4'], ['d4', 'opt']]);
+  t.end();
+});
+test("Graph.expand((['_U_', ['opt', ['mda', {parallel: ['d1', 'd2', 'd3']}, 'd4']]]) returns [['_U_', 'opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4'], ['d4', 'opt', '_U_']]", function(t) {
+  t.deepEqual(Graph.expand(['_U_', ['opt', ['mda', {parallel: ['d1', 'd2', 'd3']}, 'd4']]]),
+                           [['_U_', 'opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4'], ['d4', 'opt', '_U_']]);
   t.end();
 });
 

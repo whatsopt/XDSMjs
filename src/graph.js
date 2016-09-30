@@ -83,84 +83,55 @@ function Graph(mdo) {
   }, this);
 }
 
-var flatten = Graph.flatten = function _flatten(a, r) {
-  if (!r) {
-    r = [];
-  }
-  if (a instanceof Array) {
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] instanceof Array) {
-        _flatten(a[i], r);
-      } else {
-        r.push(a[i]);
-      }
-    }
-  } else {
-    return a;
-  }
-  return r;
-};
-
-function _expand(item, level, head) {
-  if (level === undefined) {
-    level = 0;
-  }
-  console.log("expand("+JSON.stringify(item)+", "+level+", "+JSON.stringify(head)+")");
-  if (item instanceof Array) {
-    var ret = [];
-    if (item.length === 0) {
-      return ret;
-    } else if (item.length === 1) {
+function _expand(chain) {
+  var ret = [];
+  var prev;
+  var flag_parallel = false;
+  console.log("_expand("+JSON.stringify(chain)+")")
+  chain.forEach(function(item) {
+    if (item instanceof Array) {
       if (item[0].hasOwnProperty('parallel')) {
-        ret = item[0].parallel.map(function(elt) { return [_expand(elt, level+1, head)]; });
-        if (head !== undefined) {
-          ret = ret.map(function(elt) { return [head].concat(elt); });
-        }
-      } else if (item[0] instanceof Array) {
-        ret = _expand(item[0], level+1, head);
-        if (head !== undefined) {
-          if (ret instanceof Array && ret[0] instanceof Array) {
-            ret = ret.map(function(elt) { return [].concat(elt, head); });
-          } else {
-            if (head !== ret[ret.length-1]) {
-              ret = [].concat(ret, head);
-            }
-          }
+        if (prev) {
+          ret = ret.slice(0, ret.length-1).concat(item[0].parallel.map(function(elt) { return [prev].concat(_expand([elt]), prev); }));
         } else {
-          ret = [].concat(ret);
-        }  
+          throw new Error("Bad chain structure : cannot parallel loop without previous starting point.");
+        }        
       } else {
-        ret = _expand(item[0], level+1);
+        if (prev) {
+          ret = ret.concat(_expand(item), prev)
+        } else {
+          ret = ret.concat(_expand(item));
+        }
       }
-      console.log("return ret = "+JSON.stringify(ret));
-      return ret;
-    }
-    var car = item.shift();
-    var ecar = [_expand(car, level + 1, head)];
-    var cadr = item.shift();
-    var cdr  = item;
-    if (cadr instanceof Array) {   
-      var ecadr = _expand([cadr], level + 1, ecar[ecar.length-1]);
-      ecdr = _expand(cdr, level + 1, ecar[ecar.length-1]);
-      if (cadr[0] instanceof Object && cadr[0].hasOwnProperty('parallel')) {
-        return [].concat(ecar.slice(0, ecar.length-1), ecadr, ecdr);
+      prev = ret[ret.length-1];
+    } else if (item.hasOwnProperty('parallel')) {
+      flag_parallel = true;
+      if (prev) {
+        ret = ret.slice(0, ret.length-1).concat(item.parallel.map(function(elt) { return [prev].concat(_expand([elt])); }));
       } else {
-        return [].concat(ecar, ecadr, ecdr);
-      } 
-    } 
-    if (cadr.hasOwnProperty('parallel')) {
-      console.log("coucou "+ JSON.stringify(cadr));
-      return [].concat(ecar.slice(0, ecar.length-1), _expand([].concat(cadr, cdr), level + 1, ecar[0]));
+        ret = ret.concat(item.parallel.map(function(elt) { return _expand([elt]); }));
+      }      
+      prev = undefined;
+    } else {
+      var i = ret.length-1;
+      var flag_parallel = false;
+      while (i>=0 && (ret[i] instanceof Array)) {
+        ret[i] = ret[i].concat(item);
+        i=i-1;
+        var flag_parallel = true;
+      }
+      if (!flag_parallel) {
+        ret.push(item);
+      }
+      prev = item;
     }
-    return [].concat(ecar, _expand([].concat(cadr, cdr), level + 1));
-  }
-  
-  //console.log("not array return "+item);
-  return item;
+    console.log("ret = "+JSON.stringify(ret)+", prev="+JSON.stringify(prev));
+  }, this);
+  return ret;
 };
 
-Graph.expand = function(item, level) {
-  var expanded = _expand(item, level);
+Graph.expand = function(item) {
+  var expanded = _expand(item);
   if (expanded[0] instanceof Array) {
     return expanded;
   } 
