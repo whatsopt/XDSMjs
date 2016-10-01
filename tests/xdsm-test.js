@@ -136,10 +136,7 @@ test("Graph.expand((['_U_', ['opt', ['mda', {parallel: ['d1', 'd2', 'd3']}, 'd4'
                            [['_U_', 'opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4'], ['d4', 'opt', '_U_']]);
   t.end();
 });
-
-
-
-/*test("Graph.chains should expand as list of index couples", function(t) {
+test("Graph.chains should expand as list of index couples", function(t) {
   g = new Graph({nodes:[{id:'Opt',name:'Opt'},
                         {id:'MDA',name:'MDA'},
                         {id:'DA1',name:'DA1'},
@@ -160,4 +157,3 @@ test("Graph.chains should expand as list of index couples", function(t) {
   t.deepEqual(g.chains, [[[1,2], [2,1], [1,3], [3,1], [1,4], [4,1], [1,5]]]);
   t.end();
 });
-*/

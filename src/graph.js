@@ -87,7 +87,6 @@ function _expand(chain) {
   var ret = [];
   var prev;
   var flag_parallel = false;
-  console.log("_expand("+JSON.stringify(chain)+")")
   chain.forEach(function(item) {
     if (item instanceof Array) {
       if (item[0].hasOwnProperty('parallel')) {
@@ -125,17 +124,35 @@ function _expand(chain) {
       }
       prev = item;
     }
-    console.log("ret = "+JSON.stringify(ret)+", prev="+JSON.stringify(prev));
   }, this);
   return ret;
 };
 
 Graph.expand = function(item) {
   var expanded = _expand(item);
-  if (expanded[0] instanceof Array) {
-    return expanded;
-  } 
-  return [expanded];
+  var result=[];
+  var current=[];
+  expanded.forEach(function(elt) {
+    if (elt instanceof Array) {
+      if (current.length > 0) {
+        current.push(elt[0]);
+        result.push(current);
+        current=[];
+      }
+      result.push(elt);
+    } else {
+      if (result.length > 0 && current.length === 0) {
+        var last_chain = result[result.length-1];
+        var last_elt = last_chain[last_chain.length-1];
+        current.push(last_elt);
+      }
+      current.push(elt);
+    }
+  }, this);
+  if (current.length > 0) {
+    result.push(current);
+  }
+  return result;
 };
 
 module.exports = Graph;
