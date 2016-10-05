@@ -136,6 +136,21 @@ test("Graph.expand((['_U_', ['opt', ['mda', {parallel: ['d1', 'd2', 'd3']}, 'd4'
                            [['_U_', 'opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4'], ['d4', 'opt', '_U_']]);
   t.end();
 });
+test("Graph.expand((['_U_', ['opt', ['mda', ['d1', 'd2']]]]) returns [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda', 'opt', '_U_']]", function(t) {
+  t.deepEqual(Graph.expand(['_U_', ['opt', ['mda', ['d1', 'd2']]]]),
+      [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda', 'opt', '_U_']]);
+t.end();
+});
+test("Graph.expand((['_U_', ['opt', ['mda', ['d1', 'd2'], 'mda', ['d1', 'd2']]]]) returns [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda', 'mda', 'd1', 'd2', 'mda', 'opt', '_U_']]", function(t) {
+  t.deepEqual(Graph.expand(['_U_', ['opt', ['mda', ['d1', 'd2'], 'mda', ['d1', 'd2']]]]),
+      [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda', 'mda', 'd1', 'd2', 'mda', 'opt', '_U_']]);
+t.end();
+});
+test("Graph.expand((['_U_', ['opt', ['mda', ['d1', 'd2'], {parallel: ['sc1', 'sc2']},'mda', ['d1', 'd2']]]]) returns [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda'], ['mda', 'sc1', 'mda'], ['mda', 'sc2', 'mda'], ['mda', 'd1', 'd2', 'mda', 'opt', '_U_']]", function(t) {
+  t.deepEqual(Graph.expand(['_U_', ['opt', ['mda', ['d1', 'd2'], {parallel: ['sc1', 'sc2']}, 'mda', ['d1', 'd2']]]]),
+      [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda'], ['mda', 'sc1', 'mda'], ['mda', 'sc2', 'mda'], ['mda', 'd1', 'd2', 'mda', 'opt', '_U_']]);
+t.end();
+});
 test("Graph.chains should expand as list of index couples", function(t) {
   g = new Graph({nodes:[{id:'Opt',name:'Opt'},
                         {id:'MDA',name:'MDA'},

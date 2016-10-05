@@ -9608,88 +9608,107 @@ function Graph(mdo) {
   }, this);
 
   mdo.chains.forEach(function(chain, i) {
-    chain = Graph.expand(chain);
-    if (chain.length < 2) {
-      throw new Error("Bad process chain (" + chain.length + "elt)");
-    } else {
-      this.chains.push([]);
-      var ids = this.nodes.map(function(elt) {
-        return elt.id;
-      });
-      chain.forEach(function(item, j) {
-        if (j !== 0) {
-          var idA = ids.indexOf(chain[j - 1]);
-          if (idA < 0) {
-            throw new Error("Process chain element (" +
-                            chain[j - 1] + ") not found");
+    var echain = Graph.expand(chain);
+    echain.forEach(function(leaf_chain, k) {
+      if (leaf_chain.length < 2) {
+        throw new Error("Bad process chain (" + leaf_chain.length + "elt)");
+      } else {
+        this.chains.push([]);
+        var ids = this.nodes.map(function(elt) {
+          return elt.id;
+        });
+        leaf_chain.forEach(function(item, j) {
+          if (j !== 0) {
+            var idA = ids.indexOf(leaf_chain[j - 1]);
+            if (idA < 0) {
+              throw new Error("Process chain element (" +
+                              leaf_chain[j - 1] + ") not found");
+            }
+            var idB = ids.indexOf(leaf_chain[j]);
+            if (idB < 0) {
+              throw new Error("Process chain element (" +
+                              leaf_chain[j] + ") not found");
+            }
+            if (idA !== idB) {
+              this.chains[this.chains.length-1].push([idA, idB]);
+            }
           }
-          var idB = ids.indexOf(chain[j]);
-          if (idB < 0) {
-            throw new Error("Process chain element (" +
-                            chain[j] + ") not found");
-          }
-          if (idA !== idB) {
-            this.chains[i].push([idA, idB]);
-          }
-        }
-      }, this);
-    }
+        }, this);
+      }
+    }, this);
   }, this);
 }
 
-var flatten = Graph.flatten = function _flatten(a, r) {
-  if (!r) {
-    r = [];
-  }
-  if (a instanceof Array) {
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] instanceof Array) {
-        _flatten(a[i], r);
+function _expand(chain) {
+  var ret = [];
+  var prev;
+  var flag_parallel = false;
+  chain.forEach(function(item) {
+    if (item instanceof Array) {
+      if (item[0].hasOwnProperty('parallel')) {
+        if (prev) {
+          ret = ret.slice(0, ret.length-1).concat(item[0].parallel.map(function(elt) { return [prev].concat(_expand([elt]), prev); }));
+        } else {
+          throw new Error("Bad chain structure : cannot parallel loop without previous starting point.");
+        }        
       } else {
-        r.push(a[i]);
+        if (prev) {
+          ret = ret.concat(_expand(item), prev)
+        } else {
+          ret = ret.concat(_expand(item));
+        }
       }
-    }
-  } else {
-    return a;
-  }
-  return r;
-};
-
-function _expand(item, level) {
-  if (level === undefined) {
-    level = 0;
-  }
-  //console.log("expand("+item+", "+level+")");
-  if (item instanceof Array) {
-    if (item.length === 0) {
-      return [];
-    } else if (item.length === 1) {
-      var my = [flatten(_expand(item[0], level+1))];
-      //console.log("return my = "+my);
-      return my;
-    }
-    var car = item.shift();
-    var ecar = flatten([_expand(car, level + 1)]);
-    var cadr = item.shift();
-    var ecadr = flatten([_expand(cadr, level + 1)]);
-    var cdr = _expand(item, level + 1);
-    var ret;
-    if (cadr instanceof Array) {
-      //console.log("return ecar="+ecar+", ecadr="+ecadr+", ecar[0]="+ecar[0]+", cdr="+cdr );
-      ret = [].concat(ecar, ecadr, ecar[0], cdr);
+      prev = ret[ret.length-1];
+    } else if (item.hasOwnProperty('parallel')) {
+      flag_parallel = true;
+      if (prev) {
+        ret = ret.slice(0, ret.length-1).concat(item.parallel.map(function(elt) { return [prev].concat(_expand([elt])); }));
+      } else {
+        ret = ret.concat(item.parallel.map(function(elt) { return _expand([elt]); }));
+      }      
+      prev = undefined;
     } else {
-      ret = [].concat(ecar, ecadr, cdr);
+      var i = ret.length-1;
+      var flag_parallel = false;
+      while (i>=0 && (ret[i] instanceof Array)) {
+        ret[i] = ret[i].concat(item);
+        i=i-1;
+        var flag_parallel = true;
+      }
+      if (!flag_parallel) {
+        ret.push(item);
+      }
+      prev = item;
     }
-    //console.log("return "+ret);
-    return ret;
-  }
-  
-  console.log("not array return "+item);
-  return item;
+  }, this);
+  return ret;
 };
 
-Graph.expand = function(item, level) {
-  return flatten(_expand(item, level));
+Graph.expand = function(item) {
+  var expanded = _expand(item);
+  var result=[];
+  var current=[];
+  expanded.forEach(function(elt) {
+    if (elt instanceof Array) {
+      if (current.length > 0) {
+        current.push(elt[0]);
+        result.push(current);
+        current=[];
+      }
+      result.push(elt);
+    } else {
+      if (result.length > 0 && current.length === 0) {
+        var last_chain = result[result.length-1];
+        var last_elt = last_chain[last_chain.length-1];
+        current.push(last_elt);
+      }
+      current.push(elt);
+    }
+  }, this);
+  if (current.length > 0) {
+    result.push(current);
+  }
+  return result;
 };
 
 module.exports = Graph;
