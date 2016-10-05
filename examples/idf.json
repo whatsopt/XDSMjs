@@ -89,19 +89,9 @@
       [
         [
           "Opt", 
-          "Dis1"
-        ], 
-        [
-          "Opt", 
-          "Dis2"
-        ], 
-        [
-          "Opt", 
-          "Dis3"
-        ], 
-        [
-          "Opt", 
-          "Dis4"
+          [{
+          	"parallel": ["Dis1", "Dis2", "Dis3", "Dis4"]
+          }]
         ]
       ]
     ]
