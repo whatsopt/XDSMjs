@@ -14,5 +14,5 @@
                {"from":"_U_", "to":"DA1", "name":"x_0"},
                {"from":"DA3", "to":"_U_", "name":"y_0"}
                ],    
-    "chains" : [["Opt", ["MDA", "DA1", "DA2", "DA3"], "Func"]]
+    "workflow" : ["Opt", ["MDA", "DA1", "DA2", "DA3"], "Func"]
 }
