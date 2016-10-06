@@ -161,4 +161,51 @@ Graph.expand = function(item) {
   return result;
 };
 
+
+Graph.number = function(wk_struct, num) {
+  num = typeof num !== 'undefined' ? num : 0;
+  to_num = {};
+  
+  function set_num(node_id, num) {
+    if (node_id in to_num) {
+      to_num[node_id] += "," + num;
+    } else {
+      to_num[node_id] = "" + num;
+    }
+  }
+  
+  function _number(wks, num) {
+    if (wks instanceof Array) {
+      if (wks.length === 0) {
+        return num;
+      } else if (wks.length === 1) {
+        return _number(wks[0], num);
+      } else {
+        var head = wks[0];
+        var tail = wks.slice(1);
+        var beg = _number(head, num);
+        var end;
+        if (tail[0] instanceof Array) {
+          end = _number(tail[0], beg);
+          set_num(head, end + "-" + beg);
+          beg = end + 1;
+          tail.shift();
+        } 
+        end = _number(tail, beg);
+        return end;
+      }
+    } else if ((wks instanceof Object) && 'parallel' in wks) {
+      var nums = wks.parallel.map(function (branch) { return _number(branch, num); });
+      end = Math.max.apply(null, nums);
+      return end;
+    } else {
+      set_num(wks, num);
+      return num + 1;
+    }
+  }
+
+  _number(wk_struct, num);
+  return to_num;
+};
+
 module.exports = Graph;

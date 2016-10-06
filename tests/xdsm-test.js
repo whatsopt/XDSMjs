@@ -172,3 +172,46 @@ test("Graph.chains should expand as list of index couples", function(t) {
   t.deepEqual(g.chains, [[[1,2], [2,1], [1,3], [3,1], [1,4], [4,1], [1,5]]]);
   t.end();
 });
+
+
+test("Graph.number(['d1']) returns {d1: ''})", function(t) {
+  t.deepEqual(Graph.number(['d1']), {d1: '0'});
+  t.end();
+}); 
+test("Graph.number(['d1', 'd1']) returns {d1: '0,1'})", function(t) {
+  t.deepEqual(Graph.number(['d1', 'd1']), {d1: '0,1'});
+  t.end();
+});
+test("Graph.number(['mda', 'd1']) returns {mda:'0', d1:'1'})", function(t) {
+  t.deepEqual(Graph.number(['mda', 'd1']), {mda:'0', d1:'1'});
+  t.end();
+});
+test("Graph.number(['mda', 'd1', 'd2', 'd3']) returns {mda: '0', d1: '1', d2: '2', d3: '3'})", function(t) {
+  t.deepEqual(Graph.number(['mda', 'd1', 'd2', 'd3']), {mda: '0', d1: '1', d2: '2', d3: '3'});
+  t.end();
+});
+test("Graph.number(['mda', ['d1', 'd2', 'd3']]) returns {mda: '0,4-1', d1: '1', d2: '2', d3: '3'} )", function(t) {
+  t.deepEqual(Graph.number(['mda', ['d1', 'd2', 'd3']]), {mda: '0,4-1', d1: '1', d2: '2', d3: '3'});
+  t.end();
+});
+test("Graph.number(['mda', {parallel:['d1', 'd2', 'd3']}]) returns {'mda': '0', 'd1': '1', 'd2': '1', 'd3': '1'})", function(t) {
+  t.deepEqual(Graph.number(['mda', {parallel:['d1', 'd2', 'd3']}]), {'mda': '0', 'd1': '1', 'd2': '1', 'd3': '1'});
+  t.end();
+});
+test("Graph.number(['mda', [{parallel:['d1', 'd2', 'd3']}]]) returns {'mda': '0,2-1', 'd1': '1', 'd2': '1', 'd3': '1'})", function(t) {
+  t.deepEqual(Graph.number(['mda', [{parallel:['d1', 'd2', 'd3']}]]), {'mda': '0,2-1', 'd1': '1', 'd2': '1', 'd3': '1'});
+  t.end();
+});
+test("Graph.number(['opt', 'mda', ['d1', 'd2', 'd3']]) returns {'opt': '0', 'mda': '1,5-2', 'd1': '2', 'd2': '3', 'd3': '4'})", function(t) {
+  t.deepEqual(Graph.number(['opt', 'mda', ['d1', 'd2', 'd3']]), {'opt': '0', 'mda': '1,5-2', 'd1': '2', 'd2': '3', 'd3': '4'});
+  t.end();
+});
+test("Graph.number([['opt', ['mda', ['d1', 'd2', 'd3']]], 'd4']) returns {'opt': '0,6-1', 'mda': '1,5-2', 'd1': '2', 'd2': '3', 'd3': '4', 'd4': '7'})", function(t) {
+  t.deepEqual(Graph.number([['opt', ['mda', ['d1', 'd2', 'd3']]], 'd4']), {'opt': '0,6-1', 'mda': '1,5-2', 'd1': '2', 'd2': '3', 'd3': '4', 'd4': '7'});
+  t.end();
+});
+test("Graph.number([['Opt', ['mda', ['d1'], 's1']]]) returns {'Opt': '0,5-1', 'mda': '1,3-2', 'd1': '2', 's1': '4'})", function(t) {
+  t.deepEqual(Graph.number([['Opt', ['mda', ['d1'], 's1']]]), {'Opt': '0,5-1', 'mda': '1,3-2', 'd1': '2', 's1': '4'});
+  t.end();
+});
+
