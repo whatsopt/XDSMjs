@@ -37,8 +37,13 @@ function Graph(mdo) {
   this.edges = [];
   this.chains = [];
 
+  var num_prefixes = {};
+  mdo.chains.forEach(function(chain) {
+    num_prefixes = Graph.number(chain);
+  });
+
   mdo.nodes.forEach(function(item) {
-    this.nodes.push(new Node(item.id, item.name, item.type));
+    this.nodes.push(new Node(item.id, num_prefixes[item.id]+":"+item.name, item.type));
   }, this);
 
   mdo.edges.forEach(function(item) {
