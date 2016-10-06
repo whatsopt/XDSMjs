@@ -158,7 +158,7 @@ test("Graph.chains should expand as list of index couples", function(t) {
                         {id:'DA2',name:'DA2'},
                         {id:'DA3',name:'DA3'},
                         {id:'Func',name:'Func'}], 
-                 edges:[], chains:[['Opt', ['MDA', ['DA1', 'DA2', 'DA3'],'Func']]]});
+                 edges:[], workflow:['Opt', ['MDA', ['DA1', 'DA2', 'DA3'],'Func']]});
   t.deepEqual(g.chains, [[[1,2], [2,3], [3,4], [4,5], [5,2], [2,6], [6,1]]]);
   t.end();
 });
@@ -168,7 +168,7 @@ test("Graph.chains should expand as list of index couples", function(t) {
                         {id:'DA2',name:'DA2'},
                         {id:'DA3',name:'DA3'},
                         {id:'Func',name:'Func'}],
-                        edges:[], chains:[['Opt', ['DA1'], 'Opt', ['DA2'], 'Opt', ['DA3'], 'Func']]});
+                        edges:[], workflow:[['Opt', ['DA1'], 'Opt', ['DA2'], 'Opt', ['DA3'], 'Func']]});
   t.deepEqual(g.chains, [[[1,2], [2,1], [1,3], [3,1], [1,4], [4,1], [1,5]]]);
   t.end();
 });

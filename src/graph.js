@@ -37,13 +37,12 @@ function Graph(mdo) {
   this.edges = [];
   this.chains = [];
 
-  var num_prefixes = {};
-  mdo.chains.forEach(function(chain) {
-    num_prefixes = Graph.number(chain);
-  });
+  var numPrefixes = Graph.number(mdo.workflow);
 
   mdo.nodes.forEach(function(item) {
-    this.nodes.push(new Node(item.id, num_prefixes[item.id]+":"+item.name, item.type));
+    this.nodes.push(new Node(item.id,
+      numPrefixes[item.id] + ":" + item.name,
+      item.type));
   }, this);
 
   mdo.edges.forEach(function(item) {
@@ -56,42 +55,40 @@ function Graph(mdo) {
     this.edges.push(new Edge(item.from, item.to, item.name, idA, idB, isMulti));
   }, this);
 
-  mdo.chains.forEach(function(chain) {
-    var echain = Graph.expand(chain);
-    echain.forEach(function(leafChain) {
-      if (leafChain.length < 2) {
-        throw new Error("Bad process chain (" + leafChain.length + "elt)");
-      } else {
-        this.chains.push([]);
-        var ids = this.nodes.map(function(elt) {
-          return elt.id;
-        });
-        leafChain.forEach(function(item, j) {
-          if (j !== 0) {
-            var idA = ids.indexOf(leafChain[j - 1]);
-            if (idA < 0) {
-              throw new Error("Process chain element (" +
-                              leafChain[j - 1] + ") not found");
-            }
-            var idB = ids.indexOf(leafChain[j]);
-            if (idB < 0) {
-              throw new Error("Process chain element (" +
-                              leafChain[j] + ") not found");
-            }
-            if (idA !== idB) {
-              this.chains[this.chains.length - 1].push([idA, idB]);
-            }
+  var echain = Graph.expand(mdo.workflow);
+  echain.forEach(function(leafChain) {
+    if (leafChain.length < 2) {
+      throw new Error("Bad process chain (" + leafChain.length + "elt)");
+    } else {
+      this.chains.push([]);
+      var ids = this.nodes.map(function(elt) {
+        return elt.id;
+      });
+      leafChain.forEach(function(item, j) {
+        if (j !== 0) {
+          var idA = ids.indexOf(leafChain[j - 1]);
+          if (idA < 0) {
+            throw new Error("Process chain element (" +
+                            leafChain[j - 1] + ") not found");
           }
-        }, this);
-      }
-    }, this);
+          var idB = ids.indexOf(leafChain[j]);
+          if (idB < 0) {
+            throw new Error("Process chain element (" +
+                            leafChain[j] + ") not found");
+          }
+          if (idA !== idB) {
+            this.chains[this.chains.length - 1].push([idA, idB]);
+          }
+        }
+      }, this);
+    }
   }, this);
 }
 
-function _expand(chain) {
+function _expand(workflow) {
   var ret = [];
   var prev;
-  chain.forEach(function(item) {
+  workflow.forEach(function(item) {
     if (item instanceof Array) {
       if (item[0].hasOwnProperty('parallel')) {
         if (prev) {
@@ -100,7 +97,7 @@ function _expand(chain) {
                 return [prev].concat(_expand([elt]), prev);
               }));
         } else {
-          throw new Error("Bad chain structure : " +
+          throw new Error("Bad workflow structure : " +
               "cannot parallel loop without previous starting point.");
         }
       } else if (prev) {
@@ -166,51 +163,51 @@ Graph.expand = function(item) {
   return result;
 };
 
+Graph.number = function(workflow, num) {
+  num = (typeof num === 'undefined') ? 0 : num;
+  var toNum = {};
 
-Graph.number = function(wk_struct, num) {
-  num = typeof num !== 'undefined' ? num : 0;
-  to_num = {};
-  
-  function set_num(node_id, num) {
-    if (node_id in to_num) {
-      to_num[node_id] += "," + num;
+  function setNum(nodeId, num) {
+    if (nodeId in toNum) {
+      toNum[nodeId] += "," + num;
     } else {
-      to_num[node_id] = "" + num;
+      toNum[nodeId] = String(num);
     }
   }
-  
+
   function _number(wks, num) {
+    var ret = 0;
     if (wks instanceof Array) {
       if (wks.length === 0) {
-        return num;
+        ret = num;
       } else if (wks.length === 1) {
-        return _number(wks[0], num);
+        ret = _number(wks[0], num);
       } else {
         var head = wks[0];
         var tail = wks.slice(1);
         var beg = _number(head, num);
-        var end;
         if (tail[0] instanceof Array) {
-          end = _number(tail[0], beg);
-          set_num(head, end + "-" + beg);
+          var end = _number(tail[0], beg);
+          setNum(head, end + "-" + beg);
           beg = end + 1;
           tail.shift();
-        } 
-        end = _number(tail, beg);
-        return end;
+        }
+        ret = _number(tail, beg);
       }
     } else if ((wks instanceof Object) && 'parallel' in wks) {
-      var nums = wks.parallel.map(function (branch) { return _number(branch, num); });
-      end = Math.max.apply(null, nums);
-      return end;
+      var nums = wks.parallel.map(function(branch) {
+        return _number(branch, num);
+      });
+      ret = Math.max.apply(null, nums);
     } else {
-      set_num(wks, num);
-      return num + 1;
+      setNum(wks, num);
+      ret = num + 1;
     }
+    return ret;
   }
 
-  _number(wk_struct, num);
-  return to_num;
+  _number(workflow, num);
+  return toNum;
 };
 
 module.exports = Graph;
