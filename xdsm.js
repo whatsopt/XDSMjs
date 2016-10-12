@@ -28,11 +28,11 @@ d3.json("xdsm.json", function(error, mdo) {
   if (error) {
     throw error;
   }
-  var mdo_info = mdo;
+  var mdoInfo = mdo;
   if (mdo.hasOwnProperty("root")) {
-    mdo_info = mdo.root;  // manage transition to new format
+    mdoInfo = mdo.root;  // manage transition to new format
   }
-  var graph = new Graph(mdo_info);
+  var graph = new Graph(mdoInfo);
   xdsm(graph);
 });
 
