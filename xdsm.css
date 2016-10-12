@@ -26,6 +26,12 @@
     stroke-width: 1px;
 }
 
+.xdsm .mdo {
+    fill: #FFCCCC;
+    stroke: black;
+    stroke-width: 1px;
+}
+
 .xdsm .function {
     fill: #F2CCD9;
     stroke: black;

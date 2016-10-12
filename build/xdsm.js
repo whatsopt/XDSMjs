@@ -9920,7 +9920,11 @@ d3.json("xdsm.json", function(error, mdo) {
   if (error) {
     throw error;
   }
-  var graph = new Graph(mdo);
+  var mdo_info = mdo;
+  if (mdo.hasOwnProperty("root")) {
+    mdo_info = mdo.root;  // manage transition to new format
+  }
+  var graph = new Graph(mdo_info);
   xdsm(graph);
 });
 
