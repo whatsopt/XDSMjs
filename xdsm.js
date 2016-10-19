@@ -10,7 +10,7 @@ var Labelizer = require('./src/labelizer.js');
 
 var WIDTH = 1000;
 var HEIGHT = 500;
-var X_ORIG = 150;
+var X_ORIG = 100;
 var Y_ORIG = 20;
 var PADDING = 20;
 var CELL_W = 250;
@@ -28,12 +28,20 @@ d3.json("xdsm.json", function(error, mdo) {
   if (error) {
     throw error;
   }
-  var mdoInfo = mdo;
-  if (mdo.hasOwnProperty("root")) {
-    mdoInfo = mdo.root;  // manage transition to new format
+  var scenarioKeys = Object.keys(mdo).sort();
+  if (scenarioKeys.indexOf('root') !== -1) {
+    // new format managing several XDSM
+    scenarioKeys.forEach(function(k) {
+      if (mdo.hasOwnProperty(k)) {
+        var graph = new Graph(mdo[k], k);
+        xdsm(graph);
+      }
+    }, this);
+  } else {
+    // old format: mono xdsm
+    var graph = new Graph(mdo);
+    xdsm(graph);
   }
-  var graph = new Graph(mdoInfo);
-  xdsm(graph);
 });
 
 function xdsm(graph) {
@@ -46,6 +54,14 @@ function xdsm(graph) {
               .attr("height", HEIGHT)
               .attr("id", "main");
   var grid = [];
+
+  if (graph.title) {
+    var title = svg.append("text").text(graph.title);
+    var bbox = title[0][0].getBBox();
+    title.attr("x", X_ORIG)
+         .attr("y", Y_ORIG+bbox.height)
+         .classed("title", true); 
+  }
 
   // kind: node || edge
   function createTextGroup(kind) {

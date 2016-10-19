@@ -32,10 +32,11 @@ Edge.prototype.isIO = function() {
   return this.io.fromU || this.io.toU;
 };
 
-function Graph(mdo) {
+function Graph(mdo, title) {
   this.nodes = [new Node(UID, UID, "user")];
   this.edges = [];
   this.chains = [];
+  this.title = title || "";
 
   var numPrefixes = Graph.number(mdo.workflow);
 

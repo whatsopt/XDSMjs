@@ -9588,18 +9588,13 @@ Edge.prototype.isIO = function() {
   return this.io.fromU || this.io.toU;
 };
 
-function Graph(mdo, title) {
+function Graph(mdo) {
   this.nodes = [new Node(UID, UID, "user")];
   this.edges = [];
   this.chains = [];
-  this.title = title || "";
-
-  var numPrefixes = Graph.number(mdo.workflow);
 
   mdo.nodes.forEach(function(item) {
-    this.nodes.push(new Node(item.id,
-      numPrefixes[item.id] + ":" + item.name,
-      item.type));
+    this.nodes.push(new Node(item.id, item.name, item.type));
   }, this);
 
   mdo.edges.forEach(function(item) {
@@ -9612,285 +9607,28 @@ function Graph(mdo, title) {
     this.edges.push(new Edge(item.from, item.to, item.name, idA, idB, isMulti));
   }, this);
 
-  var echain = Graph.expand(mdo.workflow);
-  echain.forEach(function(leafChain) {
-    if (leafChain.length < 2) {
-      throw new Error("Bad process chain (" + leafChain.length + "elt)");
+  mdo.chains.forEach(function(chain, i) {
+    if (chain.length < 2) {
+      throw new Error("Bad process chain (" + chain.length + "elt)");
     } else {
       this.chains.push([]);
-      var ids = this.nodes.map(function(elt) {
-        return elt.id;
-      });
-      leafChain.forEach(function(item, j) {
+      chain.forEach(function(item, j) {
         if (j !== 0) {
-          var idA = ids.indexOf(leafChain[j - 1]);
-          if (idA < 0) {
-            throw new Error("Process chain element (" +
-                            leafChain[j - 1] + ") not found");
-          }
-          var idB = ids.indexOf(leafChain[j]);
-          if (idB < 0) {
-            throw new Error("Process chain element (" +
-                            leafChain[j] + ") not found");
-          }
-          if (idA !== idB) {
-            this.chains[this.chains.length - 1].push([idA, idB]);
-          }
+          var ids = this.nodes.map(function(elt) {
+            return elt.id;
+          });
+          var idA = ids.indexOf(chain[j - 1]);
+          var idB = ids.indexOf(chain[j]);
+          this.chains[i].push([idA, idB]);
         }
       }, this);
     }
   }, this);
 }
-
-function _expand(workflow) {
-  var ret = [];
-  var prev;
-  workflow.forEach(function(item) {
-    if (item instanceof Array) {
-      if (item[0].hasOwnProperty('parallel')) {
-        if (prev) {
-          ret = ret.slice(0, ret.length - 1).concat(item[0].parallel.map(
-              function(elt) {
-                return [prev].concat(_expand([elt]), prev);
-              }));
-        } else {
-          throw new Error("Bad workflow structure : " +
-              "cannot parallel loop without previous starting point.");
-        }
-      } else if (prev) {
-        ret = ret.concat(_expand(item), prev);
-      } else {
-        ret = ret.concat(_expand(item));
-      }
-      prev = ret[ret.length - 1];
-    } else if (item.hasOwnProperty('parallel')) {
-      if (prev) {
-        ret = ret.slice(0, ret.length - 1).concat(
-            item.parallel.map(function(elt) {
-              return [prev].concat(_expand([elt]));
-            }));
-      } else {
-        ret = ret.concat(item.parallel.map(
-            function(elt) {
-              return _expand([elt]);
-            }));
-      }
-      prev = undefined;
-    } else {
-      var i = ret.length - 1;
-      var flagParallel = false;
-      while (i >= 0 && (ret[i] instanceof Array)) {
-        ret[i] = ret[i].concat(item);
-        i -= 1;
-        flagParallel = true;
-      }
-      if (!flagParallel) {
-        ret.push(item);
-      }
-      prev = item;
-    }
-  }, this);
-  return ret;
-}
-
-Graph.expand = function(item) {
-  var expanded = _expand(item);
-  var result = [];
-  var current = [];
-  expanded.forEach(function(elt) {
-    if (elt instanceof Array) {
-      if (current.length > 0) {
-        current.push(elt[0]);
-        result.push(current);
-        current = [];
-      }
-      result.push(elt);
-    } else {
-      if (result.length > 0 && current.length === 0) {
-        var lastChain = result[result.length - 1];
-        var lastElt = lastChain[lastChain.length - 1];
-        current.push(lastElt);
-      }
-      current.push(elt);
-    }
-  }, this);
-  if (current.length > 0) {
-    result.push(current);
-  }
-  return result;
-};
-
-Graph.number = function(workflow, num) {
-  num = (typeof num === 'undefined') ? 0 : num;
-  var toNum = {};
-
-  function setNum(nodeId, num) {
-    if (nodeId in toNum) {
-      toNum[nodeId] += "," + num;
-    } else {
-      toNum[nodeId] = String(num);
-    }
-  }
-
-  function _number(wks, num) {
-    var ret = 0;
-    if (wks instanceof Array) {
-      if (wks.length === 0) {
-        ret = num;
-      } else if (wks.length === 1) {
-        ret = _number(wks[0], num);
-      } else {
-        var head = wks[0];
-        var tail = wks.slice(1);
-        var beg = _number(head, num);
-        if (tail[0] instanceof Array) {
-          var end = _number(tail[0], beg);
-          setNum(head, end + "-" + beg);
-          beg = end + 1;
-          tail.shift();
-        }
-        ret = _number(tail, beg);
-      }
-    } else if ((wks instanceof Object) && 'parallel' in wks) {
-      var nums = wks.parallel.map(function(branch) {
-        return _number(branch, num);
-      });
-      ret = Math.max.apply(null, nums);
-    } else {
-      setNum(wks, num);
-      ret = num + 1;
-    }
-    return ret;
-  }
-
-  _number(workflow, num);
-  return toNum;
-};
 
 module.exports = Graph;
 
 },{}],3:[function(require,module,exports){
-function Labelizer() {}
-
-Labelizer.strParse = function(str) {
-  if (str === "") {
-    return [{base: '', sub: undefined, sup: undefined}];
-  }
-
-  var lstr = str.split(',');
-  var rg = /([0-9\-]+:)?([A-Za-z0-9\-\.]+)(_[A-Za-z0-9\-\.]+)?(\^.+)?/;
-
-  var res = lstr.map(function(s) {
-    var base;
-    var sub;
-    var sup;
-    var m = s.match(rg);
-    if (m) {
-      base = (m[1] ? m[1] : "") + m[2];
-      if (m[3]) {
-        sub = m[3].substring(1);
-      }
-      if (m[4]) {
-        sup = m[4].substring(1);
-      }
-    } else {
-      throw new Error("Labelizer.strParse: Can not parse '" + s + "'");
-    }
-    return {base: base, sub: sub, sup: sup};
-  }, this);
-
-  return res;
-};
-
-Labelizer.labelize = function() {
-  var ellipsis = 0;
-
-  function createLabel(selection) {
-    selection.each(function(d) {
-      var tokens = Labelizer.strParse(d.name);
-      var text = selection.append("text");
-      tokens.every(function(token, i, ary) {
-        var offsetSub = 0;
-        var offsetSup = 0;
-        if (ellipsis < 1 || i < 5) {
-          text.append("tspan").text(token.base);
-          if (token.sub) {
-            offsetSub = 10;
-            text.append("tspan")
-              .attr("class", "sub")
-              .attr("dy", offsetSub)
-              .text(token.sub);
-          }
-          if (token.sup) {
-            offsetSup = -10;
-            text.append("tspan")
-              .attr("class", "sup")
-              .attr("dx", -5)
-              .attr("dy", -offsetSub + offsetSup)
-              .text(token.sup);
-            offsetSub = 0;
-          }
-        } else {
-          text.append("tspan")
-            .attr("dy", -offsetSub - offsetSup)
-            .text("...");
-          selection.classed("ellipsized", true);
-          return false;
-        }
-        if (i < ary.length - 1) {
-          text.append("tspan")
-            .attr("dy", -offsetSub - offsetSup)
-            .text(", ");
-        }
-        return true;
-      }, this);
-    });
-  }
-
-  createLabel.ellipsis = function(value) {
-    if (!arguments.length) {
-      return ellipsis;
-    }
-    ellipsis = value;
-    return createLabel;
-  };
-
-  return createLabel;
-};
-
-Labelizer.tooltipize = function() {
-  var text = "";
-
-  function createTooltip(selection) {
-    var tokens = Labelizer.strParse(text);
-    var html = [];
-    tokens.forEach(function(token) {
-      var item = token.base;
-      if (token.sub) {
-        item += "<sub>" + token.sub + "</sub>";
-      }
-      if (token.sup) {
-        item += "<sup>" + token.sup + "</sup>";
-      }
-      html.push(item);
-    }, this);
-    selection.html(html.join(", "));
-  }
-
-  createTooltip.text = function(value) {
-    if (!arguments.length) {
-      return text;
-    }
-    text = value;
-    return createTooltip;
-  };
-
-  return createTooltip;
-};
-
-module.exports = Labelizer;
-
-},{}],4:[function(require,module,exports){
 /*
  * XDSMjs
  * Copyright 2016 Rémi Lafage
@@ -9899,11 +9637,10 @@ module.exports = Labelizer;
 
 var d3 = require('d3');
 var Graph = require('./src/graph.js');
-var Labelizer = require('./src/labelizer.js');
 
 var WIDTH = 1000;
 var HEIGHT = 500;
-var X_ORIG = 100;
+var X_ORIG = 150;
 var Y_ORIG = 20;
 var PADDING = 20;
 var CELL_W = 250;
@@ -9921,44 +9658,20 @@ d3.json("xdsm.json", function(error, mdo) {
   if (error) {
     throw error;
   }
-  var scenarioKeys = Object.keys(mdo).sort();
-  if (scenarioKeys.indexOf('root') !== -1) {
-    // new format managing several XDSM
-    scenarioKeys.forEach(function(k) {
-      if (mdo.hasOwnProperty(k)) {
-        var graph = new Graph(mdo[k], k);
-        xdsm(graph);
-      }
-    }, this);
-  } else {
-    // old format: mono xdsm
-    var graph = new Graph(mdo);
-    xdsm(graph);
-  }
+  var graph = new Graph(mdo);
+  xdsm(graph);
 });
 
 function xdsm(graph) {
-  var div = d3.select("body").append("div")
-              .attr("class", "tooltip")
-              .style("opacity", 0);
-
   var svg = d3.select(".xdsm").append("svg")
               .attr("width", WIDTH)
               .attr("height", HEIGHT)
               .attr("id", "main");
   var grid = [];
 
-  if (graph.title) {
-    var title = svg.append("text").text(graph.title);
-    var bbox = title[0][0].getBBox();
-    title.attr("x", X_ORIG)
-         .attr("y", Y_ORIG+bbox.height)
-         .classed("title", true); 
-  }
-
   // kind: node || edge
   function createTextGroup(kind) {
-    var textGroups = svg.selectAll("." + kind)
+    return svg.selectAll("." + kind)
             .data(graph[kind + "s"])
           .enter().append("g")
           .attr("class", function(d) {
@@ -9969,27 +9682,11 @@ function xdsm(graph) {
             return kind + " " + klass;
           })
           .each(function() {
-            var labelize = Labelizer.labelize().ellipsis(5);
-            d3.select(this).call(labelize);
+            var that = d3.select(this);
+            that.append("text").text(function(d) {
+              return d.name;
+            });
           });
-
-    d3.selectAll(".ellipsized").on("mouseover", function(d) {
-      div.transition()
-        .duration(200)
-        .style("opacity", 0.9);
-      var tooltipize = Labelizer.tooltipize().text(d.name);
-      div.call(tooltipize)
-        .style("width", "200px")
-        .style("left", (d3.event.pageX) + "px")
-        .style("top", (d3.event.pageY - 28) + "px");
-    })
-    .on("mouseout", function() {
-      div.transition()
-        .duration(500)
-        .style("opacity", 0);
-    });
-
-    return textGroups;
   }
 
   var nodes = createTextGroup("node");
@@ -10056,11 +9753,10 @@ function xdsm(graph) {
         var data = item.data()[0];
         var m = (data.row === undefined) ? i : data.row;
         var n = (data.col === undefined) ? i : data.col;
-        var bbox = that[0][j].getBBox();
-        grid[m][n] = new Cell(-bbox.width / 2,
-                              0,
-                              bbox.width,
-                              bbox.height);
+        grid[m][n] = new Cell(-that[0][j].getBBox().width / 2,
+                              that[0][j].getBBox().height / 3,
+                              that[0][j].getBBox().width,
+                              that[0][j].getBBox().height);
         that.attr("x", function() {
           return grid[m][n].x;
         }).attr("y", function() {
@@ -10092,7 +9788,7 @@ function xdsm(graph) {
       return grid[i][i].x + offset - PADDING;
     })
     .attr("y", function() {
-      return -grid[i][i].height * 2 / 3 - PADDING - offset;
+      return -Math.abs(grid[i][i].y) - PADDING - offset;
     })
     .attr("width", function() {
       return grid[i][i].width + (PADDING * 2);
@@ -10124,16 +9820,13 @@ function xdsm(graph) {
   // trapezium for edges
   function customTrapz(edge, d, i, offset) {
     edge.insert("polygon", ":first-child").attr("points", function(d) {
-      var pad = 5;
+      var pad = 10;
       var w = grid[d.row][d.col].width;
       var h = grid[d.row][d.col].height;
-      var topleft = (-pad - w / 2 + offset) + ", " +
-                    (-pad - h * 2 / 3 - offset);
-      var topright = (w / 2 + pad + offset + 5) + ", " +
-                     (-pad - h * 2 / 3 - offset);
-      var botright = (w / 2 + pad + offset - 5 + 5) + ", " +
-                     (pad + h / 3 - offset);
-      var botleft = (-pad - w / 2 + offset - 5) + ", " + (pad + h / 3 - offset);
+      var topleft = (-2 * pad + 5 - w / 2 + offset) + ", " + (-h - offset);
+      var topright = (5 + w / 2 + pad + offset) + ", " + (-h - offset);
+      var botright = (w / 2 + pad + offset) + ", " + (pad + h / 2 - offset);
+      var botleft = (-2 * pad - w / 2 + offset) + ", " + (pad + h / 2 - offset);
       var tpz = [topleft, topright, botright, botleft].join(" ");
       return tpz;
     });
@@ -10249,4 +9942,4 @@ function computedStyleToInlineStyle(element, recursive) {
 }
 
 
-},{"./src/graph.js":2,"./src/labelizer.js":3,"d3":1}]},{},[4]);
+},{"./src/graph.js":2,"d3":1}]},{},[3]);

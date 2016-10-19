@@ -1,0 +1,27 @@
+    INFO - 11:46:24 :  
+    INFO - 11:46:24 : *** Start MDO Scenario execution ***
+    INFO - 11:46:24 : MDOScenario:
+    INFO - 11:46:24 : Disciplines:SobieskiPropulsion SobieskiAerodynamics SobieskiMission SobieskiStructure
+    INFO - 11:46:24 : MDOFormulation: MDFFormulation
+    INFO - 11:46:24 : Optimization problem:
+    INFO - 11:46:24 :       Minimize: -y_4(x_1, x_2, x_3, x_shared)
+    INFO - 11:46:24 : With respect to: 
+    INFO - 11:46:24 :     x_1, x_2, x_3, x_shared
+    INFO - 11:46:24 : Subject to constraints: 
+    INFO - 11:46:24 : g_1_g_2_g_3(x_1, x_2, x_3, x_shared) <= 0
+    INFO - 11:46:24 : 
+    INFO - 11:46:24 : Use algorithm :NLOPT_SLSQP from library :NLOPT
+    INFO - 11:46:24 : Option: xtol_abs = 1e-14
+    INFO - 11:46:24 : Option: ftol_rel = 1e-08
+    INFO - 11:46:24 : Option: max_iter = 20
+    INFO - 11:46:24 : Option: ftol_abs = 1e-14
+    INFO - 11:46:24 : Option: xtol_rel = 1e-08
+    INFO - 11:46:24 : Option: max_time = 0.0
+    INFO - 11:46:24 : Number of design variables: 10
+    INFO - 11:46:24 : Initial guess for design variables :
+    INFO - 11:46:24 : [  2.50000000e-01   1.00000000e+00   1.00000000e+00   5.00000000e-01
+   5.00000000e-02   4.50000000e+04   1.60000000e+00   5.50000000e+00
+   5.50000000e+01   1.00000000e+03]
+    INFO - 11:46:24 : Initial guess for design variables, normalized with respect to their bounds :
+    INFO - 11:46:24 : [ 0.5         0.5         0.5         0.44444444  0.5         0.5         0.5
+  0.5         0.5         0.5       ]

@@ -1,0 +1,65 @@
+    INFO - 14:15:52 :  
+    INFO - 14:15:52 : *** Start MDO Scenario execution ***
+    INFO - 14:15:52 : MDOScenario:
+    INFO - 14:15:52 : Disciplines:SobieskiStructure SobieskiPropulsion SobieskiAerodynamics SobieskiMission
+    INFO - 14:15:52 : MDOFormulation: MDFFormulation
+    INFO - 14:15:52 : Optimization problem:
+    INFO - 14:15:52 :       Minimize: -y_4(x_shared, x_1, x_2, x_3)
+    INFO - 14:15:52 : With respect to: 
+    INFO - 14:15:52 :     x_shared, x_1, x_2, x_3
+    INFO - 14:15:52 : Subject to constraints: 
+    INFO - 14:15:52 : g_1(x_shared, x_1, x_2, x_3) <= 0
+    INFO - 14:15:52 : g_2(x_shared, x_1, x_2, x_3) <= 0
+    INFO - 14:15:52 : g_3(x_shared, x_1, x_2, x_3) <= 0
+    INFO - 14:15:52 : 
+    INFO - 14:15:52 : Use algorithm :SLSQP from library :SCIPY
+    INFO - 14:15:52 : Option: disp = 0
+    INFO - 14:15:52 : Option: ftol = 1e-10
+    INFO - 14:15:52 : Option: maxiter = 15
+    INFO - 14:15:52 : Number of design variables: 10
+    INFO - 14:15:52 : Initial guess for design variables :
+    INFO - 14:15:52 : [  5.00000000e-02   4.50000000e+04   1.60000000e+00   5.50000000e+00
+   5.50000000e+01   1.00000000e+03   2.50000000e-01   1.00000000e+00
+   1.00000000e+00   5.00000000e-01]
+    INFO - 14:15:52 : Initial guess for design variables, normalized with respect to their bounds :
+    INFO - 14:15:52 : [ 0.5         0.5         0.5         0.5         0.5         0.5         0.5
+  0.5         0.5         0.44444444]
+    INFO - 14:15:52 : Optimization: |          | 0/15   0% [elapsed: 00:00 left: ?, ? iters/sec]
+    INFO - 14:15:52 : Optimization: |█▎        | 2/15  13% [elapsed: 00:00 left: 00:01, 10.00 iters/sec]
+    INFO - 14:15:52 : Optimization: |██        | 3/15  20% [elapsed: 00:00 left: 00:01,  9.98 iters/sec]
+    INFO - 14:15:53 : Optimization: |██▋       | 4/15  26% [elapsed: 00:00 left: 00:01,  9.96 iters/sec]
+    INFO - 14:15:53 : Optimization result: 
+    INFO - 14:15:53 : Design variables values at optimum :
+    INFO - 14:15:53 : [  6.00123533e-02   6.00000000e+04   1.40000000e+00   2.50000000e+00
+    INFO - 14:15:53 :    7.00000000e+01   1.50000000e+03   3.99997723e-01   7.50000000e-01
+    INFO - 14:15:53 :    7.50000000e-01   1.56219295e-01]
+    INFO - 14:15:53 : Objective value = -3963.6957913
+    INFO - 14:15:53 : Status :8
+    INFO - 14:15:53 : Optimizer message :Positive directional derivative for linesearch
+    INFO - 14:15:53 : Number of calls to the objective function by the optimizer :5
+    INFO - 14:15:53 : 
+    INFO - 14:15:53 : *** MDO Scenario run terminated ***
+    INFO - 14:15:53 : Export problem to file:mdf_history.h5
+    INFO - 14:15:53 : Export optimization history to file:mdf_history.h5
+    INFO - 14:15:53 : Export optimization history to file:mdf_history.h5
+    INFO - 14:15:53 : Export to ggobi for functions:set(['g_2', 'g_1', 'g_3', 'Iter', '-y_4'])
+    INFO - 14:15:53 : Export to ggobi file :mdf_history.xml
+    INFO - 14:15:53 : -3963.6957913
+    INFO - 14:15:53 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:15:54 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:15:56 : Building Self Organizing Map from optimization history:
+    INFO - 14:15:56 :     Number of neurons in x direction =4
+    INFO - 14:15:56 :     Number of neurons in y direction =4
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
+    INFO - 14:16:09 : Building Hessian approximation with 5 pairs of x and gradients
