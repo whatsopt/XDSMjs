@@ -7,8 +7,8 @@
     "example": "examples"
   },
   "scripts": {
-    "lint": "eslint xdsm.js ./src/* || true",
-    "build": "browserify . -o ./build/xdsm.js",
+    "lint": "eslint xdsm-main.js ./src/* || true",
+    "build": "browserify ./xdsm-main.js -o ./build/xdsm.js",
     "test": "node tests/xdsm-test.js | faucet || true",
     "testbrowser": "browserify tests/xdsm-test.js -o ./build/xdsm-test-bundle.js | firefox ./tests/index.html || true",
     "testfront": "browserify tests/xdsm-test.js | testling -x firefox || true"

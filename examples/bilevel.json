@@ -180,19 +180,19 @@
         "xdsm": "scn.1.1", 
         "type": "mdo", 
         "id": "Dis2", 
-        "name": "MDOScenario_scn.1.1"
+        "name": "MDOScenario"
       }, 
       {
         "xdsm": "scn.1.2", 
         "type": "mdo", 
         "id": "Dis3", 
-        "name": "MDOScenario_scn.1.2"
+        "name": "MDOScenario"
       }, 
       {
         "xdsm": "scn.1.3", 
         "type": "mdo", 
         "id": "Dis4", 
-        "name": "MDOScenario_scn.1.3"
+        "name": "MDOScenario"
       }, 
       {
         "type": "analysis", 
