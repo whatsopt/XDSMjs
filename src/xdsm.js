@@ -79,8 +79,11 @@ Xdsm.prototype.draw = function() {
 
 Xdsm.prototype._createTextGroup = function(kind) {
   var self = this;
+
+  var group = self.svg.append('g').attr("class", kind + "s");
+
   var textGroups =
-    self.svg.selectAll("." + kind)
+    group.selectAll("." + kind)
       .data(this.graph[kind + "s"])
     .enter()
       .append("g").attr("class", function(d) {
@@ -109,15 +112,18 @@ Xdsm.prototype._createTextGroup = function(kind) {
 };
 
 Xdsm.prototype._createWorkflow = function() {
-  this.svg.selectAll(".workflow")
-    .data(this.graph.chains).enter()
-  .insert("g", ":first-child")
-    .attr("class", "workflow")
-    .selectAll("polyline").data(function(d) {
-      return d;
-    })
+  console.log(JSON.stringify(this.graph.chains));
+  var workflow = this.svg.insert("g", ":first-child")
+                    .attr("class", "workflow");
+
+  workflow.selectAll("polyline")
+    .data(this.graph.chains)
+  .enter()
+    .insert('g').attr("class", "workflow-branch")
+    .selectAll('polyline')
+      .data(function(d) { return d; })
     .enter()
-      .insert("polyline", ":first-child").attr("points", function(d) {
+      .append("polyline").attr("points", function(d) {
         var i1 = d[0] < d[1] ? d[1] : d[0];
         var i2 = d[0] < d[1] ? d[0] : d[1];
         var w = CELL_W * (i1 - i2);
@@ -272,6 +278,11 @@ Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
     var tpz = [topleft, topright, botright, botleft].join(" ");
     return tpz;
   });
+};
+
+Xdsm.prototype.pulse = function(shape) {
+  shape.transition().style('stroke-width', 10).duration(200);
+  shape.transition().style('stroke-width', 1).delay(500).duration(1000);
 };
 
 module.exports = Xdsm;

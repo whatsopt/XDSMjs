@@ -19,19 +19,23 @@ d3.json("xdsm.json", function(error, mdo) {
                 .style("opacity", 0);
 
   var scenarioKeys = Object.keys(mdo).sort();
+  var xdsms = {};
   if (scenarioKeys.indexOf('root') === -1) {
     // old format: mono xdsm
     var graph = new Graph(mdo);
-    var xdsm = new Xdsm(graph);
-    xdsm.draw();
+    xdsm['root'] = new Xdsm(graph);
+    xdsm['root'].draw();
   } else {
     // new format managing several XDSM
     scenarioKeys.forEach(function(k) {
       if (mdo.hasOwnProperty(k)) {
         var graph = new Graph(mdo[k], k);
-        var xdsm = new Xdsm(graph, tooltip);
-        xdsm.draw();
+        xdsms[k] = new Xdsm(graph, tooltip);
+        xdsms[k].draw();
       }
     }, this);
   }
+
+  //xdsms['root'].pulse(d3.select('.node:nth-child(3) > rect'));
 });
+
