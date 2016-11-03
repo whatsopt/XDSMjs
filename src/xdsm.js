@@ -25,6 +25,8 @@ function Xdsm(graph, tooltip) {
              .attr("width", WIDTH)
              .attr("height", HEIGHT);
   this.grid = [];
+  this.nodes = [];
+  this.edges = [];
 }
 
 Xdsm.prototype.draw = function() {
@@ -38,18 +40,18 @@ Xdsm.prototype.draw = function() {
        .classed("title", true);
   }
 
-  var nodes = self._createTextGroup("node");
-  var edges = self._createTextGroup("edge");
+  self.nodes = self._createTextGroup("node");
+  self.edges = self._createTextGroup("edge");
 
   // Workflow
   self._createWorkflow();
 
   // Layout texts
-  self._layoutText(nodes);
-  self._layoutText(edges);
+  self._layoutText(self.nodes);
+  self._layoutText(self.edges);
 
   // Rectangles for nodes
-  nodes.each(function(d, i) {
+  self.nodes.each(function(d, i) {
     var that = d3.select(this);
     that.call(self._customRect.bind(self), d, i, 0);
     if (d.isMulti) {
@@ -59,7 +61,7 @@ Xdsm.prototype.draw = function() {
   });
 
   // Trapezium for edges
-  edges.each(function(d, i) {
+  self.edges.each(function(d, i) {
     var that = d3.select(this);
     that.call(self._customTrapz.bind(self), d, i, 0);
     if (d.isMulti) {
@@ -69,7 +71,7 @@ Xdsm.prototype.draw = function() {
   });
 
   // Dataflow
-  self._createDataflow(edges);
+  self._createDataflow(self.edges);
 
   // set svg size
   var w = CELL_W * (self.graph.nodes.length + 1);
@@ -119,15 +121,13 @@ Xdsm.prototype._createWorkflow = function() {
   workflow.selectAll("polyline")
     .data(this.graph.chains)
   .enter()
-    .insert('g').attr("class", "workflow-branch")
+    .insert('g').attr("class", "workflow-chain")
     .selectAll('polyline')
       .data(function(d) { return d; })
     .enter()
       .append("polyline").attr("points", function(d) {
-        var i1 = d[0] < d[1] ? d[1] : d[0];
-        var i2 = d[0] < d[1] ? d[0] : d[1];
-        var w = CELL_W * (i1 - i2);
-        var h = CELL_H * (i1 - i2);
+        var w = CELL_W * Math.abs(d[0]-d[1]);
+        var h = CELL_H * Math.abs(d[0]-d[1]);
         var points = [];
         if (d[0] < d[1]) {
           if (d[0] !== 0) {
@@ -147,17 +147,19 @@ Xdsm.prototype._createWorkflow = function() {
           }
         }
         return points.join(" ");
-      }).attr("transform", function(d) {
-        var i1 = d[0] < d[1] ? d[1] : d[0];
-        var i2 = d[0] < d[1] ? d[0] : d[1];
+      })
+      .attr("class", function(d) { return d[0]+"-"+d[1]; })
+      .attr("transform", function(d) {
+        var max = Math.max(d[0], d[1]);
+        var min = Math.min(d[0], d[1]);
         var w;
         var h;
         if (d[0] < d[1]) {
-          w = CELL_W * i1 + X_ORIG;
-          h = CELL_H * i2 + Y_ORIG;
+          w = CELL_W * max + X_ORIG;
+          h = CELL_H * min + Y_ORIG;
         } else {
-          w = CELL_W * i2 + X_ORIG;
-          h = CELL_H * i1 + Y_ORIG;
+          w = CELL_W * min + X_ORIG;
+          h = CELL_H * max + Y_ORIG;
         }
         return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
       });
@@ -283,6 +285,17 @@ Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
 Xdsm.prototype.pulse = function(shape) {
   shape.transition().style('stroke-width', 10).duration(200);
   shape.transition().style('stroke-width', 1).delay(500).duration(1000);
+};
+
+Xdsm.prototype.animate = function() {
+  var self = this;
+  var t = self.svg.transition();
+  this.graph.chains.forEach(function(chain) {
+    chain.forEach(function(link) {
+      var n = link[0]+1;
+      self.pulse(d3.select(".node:nth-child("+n+") > rect"));
+    }, this);
+  }, this);
 };
 
 module.exports = Xdsm;

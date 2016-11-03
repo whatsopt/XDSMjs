@@ -37,5 +37,6 @@ d3.json("xdsm.json", function(error, mdo) {
   }
 
   //xdsms['root'].pulse(d3.select('.node:nth-child(3) > rect'));
+  xdsms['root'].animate();
 });
 
