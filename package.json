@@ -36,7 +36,7 @@
     "testling": "^1.7.1"
   },
   "dependencies": {
-    "d3": "^3.5.17"
+    "d3": "^4"
   },
   "eslintConfig": {
     "extends": "google",
