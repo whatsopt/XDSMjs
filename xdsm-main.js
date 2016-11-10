@@ -7,6 +7,7 @@
 var d3 = require('d3');
 var Graph = require('./src/graph');
 var Xdsm = require('./src/xdsm');
+var Animation = require('./src/animation');
 
 d3.json("xdsm.json", function(error, mdo) {
   if (error) {
@@ -23,8 +24,8 @@ d3.json("xdsm.json", function(error, mdo) {
   if (scenarioKeys.indexOf('root') === -1) {
     // old format: mono xdsm
     var graph = new Graph(mdo);
-    xdsm['root'] = new Xdsm(graph);
-    xdsm['root'].draw();
+    xdsms['root'] = new Xdsm(graph);
+    xdsms['root'].draw();
   } else {
     // new format managing several XDSM
     scenarioKeys.forEach(function(k) {
@@ -36,6 +37,7 @@ d3.json("xdsm.json", function(error, mdo) {
     }, this);
   }
 
-  xdsms['root'].animate();
+  var anim = new Animation(xdsms);
+  anim.run();
 });
 
