@@ -34,7 +34,7 @@ Xdsm.prototype.draw = function() {
 
   if (self.graph.refname) {
     var ref = self.svg.append("text").text(self.graph.refname);
-    var bbox = ref[0][0].getBBox();
+    var bbox = ref.nodes()[0].getBBox();
     ref.attr("x", X_ORIG)
        .attr("y", Y_ORIG + bbox.height)
        .classed("title", true);
@@ -93,7 +93,7 @@ Xdsm.prototype._createTextGroup = function(kind) {
         if (klass === "dataInter" && d.isIO()) {
           klass = "dataIO";
         }
-        return kind + " " + klass;
+        return d.id + " " + kind + " " + klass;
       }).each(function() {
         var labelize = Labelizer.labelize().ellipsis(5);
         d3.select(this).call(labelize);
@@ -114,41 +114,42 @@ Xdsm.prototype._createTextGroup = function(kind) {
 };
 
 Xdsm.prototype._createWorkflow = function() {
-  console.log(JSON.stringify(this.graph.chains));
+  //console.log(JSON.stringify(this.graph.chains));
   var workflow = this.svg.insert("g", ":first-child")
                     .attr("class", "workflow");
 
-  workflow.selectAll("polyline")
+  workflow.selectAll("g")
     .data(this.graph.chains)
   .enter()
     .insert('g').attr("class", "workflow-chain")
     .selectAll('polyline')
       .data(function(d) { return d; })
     .enter()
-      .append("polyline").attr("points", function(d) {
-        var w = CELL_W * Math.abs(d[0]-d[1]);
-        var h = CELL_H * Math.abs(d[0]-d[1]);
-        var points = [];
-        if (d[0] < d[1]) {
-          if (d[0] !== 0) {
-            points.push((-w) + ",0");
+      .append("polyline")
+        .attr("class", function(d) { return "link_"+d[0]+"_"+d[1]; })
+        .attr("points", function(d) {
+          var w = CELL_W * Math.abs(d[0]-d[1]);
+          var h = CELL_H * Math.abs(d[0]-d[1]);
+          var points = [];
+          if (d[0] < d[1]) {
+            if (d[0] !== 0) {
+              points.push((-w) + ",0");
+            }
+            points.push("0,0");
+            if (d[1] !== 0) {
+              points.push("0," + h);
+            }
+          } else {
+            if (d[0] !== 0) {
+              points.push(w + ",0");
+            }
+            points.push("0,0");
+            if (d[1] !== 0) {
+              points.push("0," + (-h));
+            }
           }
-          points.push("0,0");
-          if (d[1] !== 0) {
-            points.push("0," + h);
-          }
-        } else {
-          if (d[0] !== 0) {
-            points.push(w + ",0");
-          }
-          points.push("0,0");
-          if (d[1] !== 0) {
-            points.push("0," + (-h));
-          }
-        }
-        return points.join(" ");
-      })
-      .attr("class", function(d) { return d[0]+"-"+d[1]; })
+          return points.join(" ");
+        })
       .attr("transform", function(d) {
         var max = Math.max(d[0], d[1]);
         var min = Math.min(d[0], d[1]);
@@ -166,16 +167,15 @@ Xdsm.prototype._createWorkflow = function() {
 };
 
 Xdsm.prototype._createDataflow = function(edges) {
+  var self = this;
   var dataflow = this.svg.insert("g", ":first-child")
                    .attr("class", "dataflow");
 
   edges.each(function(d, i) {
     dataflow.insert("polyline", ":first-child")
       .attr("points", function() {
-        var i1 = (d.iotype === "in") ? d.col : d.row;
-        var i2 = (d.iotype === "in") ? d.row : d.col;
-        var w = CELL_W * (i1 - i2);
-        var h = CELL_H * (i1 - i2);
+        var w = CELL_W * Math.abs(d.col - d.row);
+        var h = CELL_H * Math.abs(d.col - d.row);
         var points = [];
         if (d.iotype === "in") {
           if (!d.io.fromU) {
@@ -217,7 +217,7 @@ Xdsm.prototype._layoutText = function(items) {
       var data = item.data()[0];
       var m = (data.row === undefined) ? i : data.row;
       var n = (data.col === undefined) ? i : data.col;
-      var bbox = that[0][j].getBBox();
+      var bbox = that.nodes()[j].getBBox();
       grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
       that.attr("x", function() {
         return grid[m][n].x;
@@ -282,20 +282,29 @@ Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
   });
 };
 
-Xdsm.prototype.pulse = function(shape) {
-  shape.transition().style('stroke-width', 10).duration(200);
-  shape.transition().style('stroke-width', 1).delay(500).duration(1000);
+Xdsm.prototype.pulse = function(delay, shape) {
+  shape.transition().style('stroke-width', '8px').delay(delay).duration(200)
+    .transition().style('stroke-width', '1px').delay(500).duration(1000);
 };
 
 Xdsm.prototype.animate = function() {
   var self = this;
-  var t = self.svg.transition();
-  this.graph.chains.forEach(function(chain) {
-    chain.forEach(function(link) {
-      var n = link[0]+1;
-      self.pulse(d3.select(".node:nth-child("+n+") > rect"));
+  var n = 0;
+  var prev;
+  for (k in this.graph.nodesByStep) {
+    this.graph.nodesByStep[k].forEach(function(nodeId) {
+      if (n > 0) {
+        prev.forEach(function(prevNodeId) {
+          var from = self.graph.idxOf(prevNodeId);
+          var to = self.graph.idxOf(nodeId);
+          self.pulse(n*1200, d3.select("polyline.link_"+from+"_"+to));
+        });
+      }
+      self.pulse(n*1200, d3.select("g."+nodeId+"> rect"));
     }, this);
-  }, this);
+    prev = this.graph.nodesByStep[k];
+    n = n+1;
+  };
 };
 
 module.exports = Xdsm;

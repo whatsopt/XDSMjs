@@ -3,7 +3,7 @@ var MULTI_TYPE = "_multi";
 
 function Node(id, name, type) {
   if (typeof (name) === 'undefined') {
-    type = id;
+    name = id;
   }
   if (typeof (type) === 'undefined') {
     type = 'analysis';
@@ -16,7 +16,7 @@ function Node(id, name, type) {
 }
 
 function Edge(from, to, name, row, col, isMulti) {
-  this.id = from + "-" + to;
+  this.id = "link_"+from + "_" + to;
   this.name = name;
   this.row = row;
   this.col = col;
@@ -34,11 +34,14 @@ Edge.prototype.isIO = function() {
 
 function Graph(mdo, refname) {
   this.nodes = [new Node(UID, UID, "user")];
+  this.nodeIds = [UID];
   this.edges = [];
   this.chains = [];
   this.refname = refname || "";
 
-  var numPrefixes = Graph.number(mdo.workflow);
+  var numbering = Graph.number(mdo.workflow);
+  var numPrefixes = numbering.toNum;
+  this.nodesByStep = numbering.toNode;
 
   mdo.nodes.forEach(function(item) {
     this.nodes.push(new Node(item.id,
@@ -46,12 +49,13 @@ function Graph(mdo, refname) {
       item.type));
   }, this);
 
+  this.ids = this.nodes.map(function(elt) {
+    return elt.id;
+  });
+
   mdo.edges.forEach(function(item) {
-    var ids = this.nodes.map(function(elt) {
-      return elt.id;
-    });
-    var idA = ids.indexOf(item.from);
-    var idB = ids.indexOf(item.to);
+    var idA = this.idxOf(item.from);
+    var idB = this.idxOf(item.to);
     var isMulti = this.nodes[idA].isMulti || this.nodes[idB].isMulti;
     this.edges.push(new Edge(item.from, item.to, item.name, idA, idB, isMulti));
   }, this);
@@ -85,6 +89,10 @@ function Graph(mdo, refname) {
     }
   }, this);
 }
+
+Graph.prototype.idxOf = function(nodeId) {
+  return this.ids.indexOf(nodeId);
+};
 
 function _expand(workflow) {
   var ret = [];
@@ -167,12 +175,28 @@ Graph.expand = function(item) {
 Graph.number = function(workflow, num) {
   num = (typeof num === 'undefined') ? 0 : num;
   var toNum = {};
+  var toNode = {};
 
-  function setNum(nodeId, num) {
+  function setStep(step, nodeId) {
+    if (step in toNode) {
+      toNode[step].push(nodeId);
+    } else {
+      toNode[step]=[nodeId];
+    }
+  }
+
+  function setNum(nodeId, beg, end) {
+    if (end === undefined) {
+      num = String(beg);
+      setStep(beg, nodeId);
+    } else {
+      num = end + "-" + beg;
+      setStep(end, nodeId);
+    }
     if (nodeId in toNum) {
       toNum[nodeId] += "," + num;
     } else {
-      toNum[nodeId] = String(num);
+      toNum[nodeId] = num;
     }
   }
 
@@ -189,7 +213,7 @@ Graph.number = function(workflow, num) {
         var beg = _number(head, num);
         if (tail[0] instanceof Array) {
           var end = _number(tail[0], beg);
-          setNum(head, end + "-" + beg);
+          setNum(head, beg, end);
           beg = end + 1;
           tail.shift();
         }
@@ -208,7 +232,9 @@ Graph.number = function(workflow, num) {
   }
 
   _number(workflow, num);
-  return toNum;
+  console.log('toNodes=', JSON.stringify(toNode));
+  console.log('toNum=',JSON.stringify(toNum));
+  return {'toNum': toNum, 'toNode': toNode};
 };
 
 module.exports = Graph;
