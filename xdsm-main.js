@@ -24,14 +24,14 @@ d3.json("xdsm.json", function(error, mdo) {
   if (scenarioKeys.indexOf('root') === -1) {
     // old format: mono xdsm
     var graph = new Graph(mdo);
-    xdsms['root'] = new Xdsm(graph);
+    xdsms['root'] = new Xdsm(graph, 'root');
     xdsms['root'].draw();
   } else {
     // new format managing several XDSM
     scenarioKeys.forEach(function(k) {
       if (mdo.hasOwnProperty(k)) {
         var graph = new Graph(mdo[k], k);
-        xdsms[k] = new Xdsm(graph, tooltip);
+        xdsms[k] = new Xdsm(graph, k, tooltip);
         xdsms[k].draw();
       }
     }, this);

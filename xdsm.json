@@ -1,5 +1,5 @@
 {
-  "scn.1.2": {
+  "scn-1-2": {
     "nodes": [
       {
         "type": "optimization", 
@@ -54,7 +54,7 @@
       ]
     ]
   }, 
-  "scn.1.3": {
+  "scn-1-3": {
     "nodes": [
       {
         "type": "optimization", 
@@ -109,7 +109,7 @@
       ]
     ]
   }, 
-  "scn.1.1": {
+  "scn-1-1": {
     "nodes": [
       {
         "type": "optimization", 
@@ -197,22 +197,22 @@
         "name": "SobieskiMission"
       }, 
       {
-        "xdsm": "scn.1.1", 
+        "xdsm": "scn-1-1", 
         "type": "mdo", 
         "id": "Dis6", 
-        "name": "MDOScenario_scn.1.1"
+        "name": "MDOScenario_scn-1-1"
       }, 
       {
-        "xdsm": "scn.1.2", 
+        "xdsm": "scn-1-2", 
         "type": "mdo", 
         "id": "Dis7", 
-        "name": "MDOScenario_scn.1.2"
+        "name": "MDOScenario_scn-1-2"
       }, 
       {
-        "xdsm": "scn.1.3", 
+        "xdsm": "scn-1-3", 
         "type": "mdo", 
         "id": "Dis8", 
-        "name": "MDOScenario_scn.1.3"
+        "name": "MDOScenario_scn-1-3"
       }
     ], 
     "edges": [

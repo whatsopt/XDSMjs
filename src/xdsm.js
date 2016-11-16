@@ -17,13 +17,14 @@ function Cell(x, y, width, height) {
   this.height = height;
 }
 
-function Xdsm(graph, tooltip) {
+function Xdsm(graph, svgid, tooltip) {
   this.graph = graph;
   this.tooltip = tooltip;
   this.svg = d3.select(".xdsm")
                .append("svg")
              .attr("width", WIDTH)
-             .attr("height", HEIGHT);
+             .attr("height", HEIGHT)
+             .attr("class", svgid);
   this.grid = [];
   this.nodes = [];
   this.edges = [];
