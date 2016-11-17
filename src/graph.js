@@ -198,7 +198,7 @@ Graph.expand = function(item) {
 Graph.number = function(workflow, num) {
   num = (typeof num === 'undefined') ? 0 : num;
   var toNum = {};
-  var toNode = {};
+  var toNode = [];
 
   function setStep(step, nodeId) {
     if (step in toNode) {

@@ -283,29 +283,4 @@ Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
   });
 };
 
-Xdsm.prototype.pulse = function(delay, shape) {
-  shape.transition().style('stroke-width', '8px').delay(delay).duration(200)
-    .transition().style('stroke-width', '1px').delay(500).duration(1000);
-};
-
-Xdsm.prototype.animate = function() {
-  var self = this;
-  var n = 0;
-  var prev;
-  for (k in this.graph.nodesByStep) {
-    this.graph.nodesByStep[k].forEach(function(nodeId) {
-      if (n > 0) {
-        prev.forEach(function(prevNodeId) {
-          var from = self.graph.idxOf(prevNodeId);
-          var to = self.graph.idxOf(nodeId);
-          self.pulse(n*1200, d3.select("polyline.link_"+from+"_"+to));
-        });
-      }
-      self.pulse(n*1200, d3.select("g."+nodeId+"> rect"));
-    }, this);
-    prev = this.graph.nodesByStep[k];
-    n = n+1;
-  };
-};
-
 module.exports = Xdsm;

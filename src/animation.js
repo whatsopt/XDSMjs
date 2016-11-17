@@ -1,8 +1,9 @@
 var d3 = require('d3');
 
-var PULSE_DURATION = 2000;
+var PULSE_DURATION = 700;
 
-function Animation(xdsms, rootId) {
+function Animation(xdsms, rootId, delay) {
+
   this.rootId = rootId;
   if (typeof (rootId) === 'undefined') {
     this.rootId = 'root';
@@ -10,54 +11,59 @@ function Animation(xdsms, rootId) {
   this.root = xdsms[this.rootId];
   this.xdsms = xdsms;
   this.duration = PULSE_DURATION;
+  this.delay = delay || 0;
 }
 
-Animation.prototype._pulse2 = function(to_be_selected, transition) {
-  //console.log("svg."+this.rootId+" -> "+to_be_selected);
-  var t0 = transition.transition();
-  t0.select("svg."+this.rootId).select(to_be_selected).style('stroke-width', '8px').duration(200);
-  var t1 = t0.transition();
-  t1.select("svg."+this.rootId).select(to_be_selected).style('stroke-width', '1px').duration(PULSE_DURATION-200);
-  return t1;
+Animation.prototype._pulse = function(delay, to_be_selected, option) {
+  var sel = d3.select("svg."+this.rootId).select(to_be_selected).transition().delay(delay);
+  if (option !== "out") {
+    sel = sel.transition().style('stroke-width', '8px').duration(200);
+  }
+  if (option !== "in") {
+    sel.transition().style('stroke-width', '1px').duration(3*PULSE_DURATION);
+  }
 };
 
-Animation.prototype._animate = function(trans) {
+
+Animation.prototype._animate = function() {
   var self = this;
+  var graph = self.xdsms[self.rootId].graph;
   var n = 0;
   var prev;
-  var graph = self.xdsms[self.rootId].graph;
-
-  var transition = trans;
-  if (typeof(transition) === 'undefined') {
-    transition = d3.transition();
-  }
 
   for (var k in graph.nodesByStep) {
-    var transStep = transition;
+    var offsets = [];
     graph.nodesByStep[k].forEach(function(nodeId) {
       if (n > 0) {
         prev.forEach(function(prevNodeId) {
           var from = graph.idxOf(prevNodeId);
           var to = graph.idxOf(nodeId);
-          self._pulse2("polyline.link_"+from+"_"+to, transStep);
+          self._pulse(self.delay+n*PULSE_DURATION,"polyline.link_"+from+"_"+to);
         });
-      }
 
-      transition = self._pulse2("g."+nodeId+" > rect", transStep);
-
-      var nodeSel = d3.select("svg."+this.rootId).select("g."+nodeId);
-      if (nodeSel.classed("mdo")) {
-        var scnId = graph.getNode(nodeId).getScenarioId();
-        var anim = new Animation(self.xdsms, scnId);
-        transition = anim._animate(transStep);
+        var nodeSel = d3.select("svg."+self.rootId).select("g."+nodeId);
+        if (nodeSel.classed("mdo")) {
+          self._pulse(self.delay+n*PULSE_DURATION, "g."+nodeId+" > rect", "in");
+          var scnId = graph.getNode(nodeId).getScenarioId();
+          var anim = new Animation(self.xdsms, scnId, self.delay+n*PULSE_DURATION);
+          var offset = anim._animate();
+          offsets.push(offset);
+          self._pulse(self.delay+n*PULSE_DURATION+offset, "g."+nodeId+" > rect", "out");
+        } else {
+          self._pulse(self.delay+n*PULSE_DURATION, "g."+nodeId+" > rect");
+        }
       }
     }, this);
+
+    if (offsets.length > 0) {
+      self.delay += Math.max.apply(null, offsets);
+    }
 
     prev = graph.nodesByStep[k];
     n = n+1;
   };
 
-  return transition;
+  return graph.nodesByStep.length*PULSE_DURATION;
 };
 
 Animation.prototype.run = function() {
