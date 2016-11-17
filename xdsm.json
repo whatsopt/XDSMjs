@@ -1,5 +1,5 @@
 {
-  "scn.1.2": {
+  "scn-1-2": {
     "nodes": [
       {
         "type": "optimization", 
@@ -54,7 +54,7 @@
       ]
     ]
   }, 
-  "scn.1.3": {
+  "scn-1-3": {
     "nodes": [
       {
         "type": "optimization", 
@@ -109,7 +109,7 @@
       ]
     ]
   }, 
-  "scn.1.1": {
+  "scn-1-1": {
     "nodes": [
       {
         "type": "optimization", 
@@ -177,22 +177,19 @@
         "name": "MDAGaussSeidel"
       }, 
       {
-        "xdsm": "scn.1.1", 
-        "type": "mdo", 
+        "type": "analysis", 
         "id": "Dis2", 
-        "name": "MDOScenario_scn.1.1"
+        "name": "SobieskiPropulsion"
       }, 
       {
-        "xdsm": "scn.1.2", 
-        "type": "mdo", 
+        "type": "analysis", 
         "id": "Dis3", 
-        "name": "MDOScenario_scn.1.2"
+        "name": "SobieskiAerodynamics"
       }, 
       {
-        "xdsm": "scn.1.3", 
-        "type": "mdo", 
+        "type": "analysis", 
         "id": "Dis4", 
-        "name": "MDOScenario_scn.1.3"
+        "name": "SobieskiStructure"
       }, 
       {
         "type": "analysis", 
@@ -200,19 +197,22 @@
         "name": "SobieskiMission"
       }, 
       {
-        "type": "analysis", 
+        "xdsm": "scn-1-1", 
+        "type": "mdo", 
         "id": "Dis6", 
-        "name": "SobieskiPropulsion"
+        "name": "MDOScenario_scn-1-1"
       }, 
       {
-        "type": "analysis", 
+        "xdsm": "scn-1-2", 
+        "type": "mdo", 
         "id": "Dis7", 
-        "name": "SobieskiAerodynamics"
+        "name": "MDOScenario_scn-1-2"
       }, 
       {
-        "type": "analysis", 
+        "xdsm": "scn-1-3", 
+        "type": "mdo", 
         "id": "Dis8", 
-        "name": "SobieskiStructure"
+        "name": "MDOScenario_scn-1-3"
       }
     ], 
     "edges": [
@@ -279,17 +279,17 @@
       {
         "to": "_U_", 
         "from": "Dis2", 
-        "name": "x_opt^*, y_3^*, g_3^*, y_31^*, obj_opt^*, y_32^*, y_34^*"
+        "name": "y_31^*, y_32^*, y_3^*, y_34^*, g_3^*"
       }, 
       {
         "to": "_U_", 
         "from": "Dis3", 
-        "name": "y_2^*, g_2^*, y_24^*, obj_opt^*, x_opt^*, y_23^*, y_21^*"
+        "name": "y_24^*, y_2^*, y_23^*, g_2^*, y_21^*"
       }, 
       {
         "to": "_U_", 
         "from": "Dis4", 
-        "name": "g_1^*, y_1^*, y_12^*, y_11^*, y_14^*, obj_opt^*, x_opt^*"
+        "name": "y_12^*, y_11^*, g_1^*, y_1^*, y_14^*"
       }, 
       {
         "to": "Opt", 
@@ -299,17 +299,17 @@
       {
         "to": "_U_", 
         "from": "Dis6", 
-        "name": "y_31^*, y_32^*, y_3^*, y_34^*, g_3^*"
+        "name": "x_opt^*, y_3^*, g_3^*, y_31^*, obj_opt^*, y_32^*, y_34^*"
       }, 
       {
         "to": "_U_", 
         "from": "Dis7", 
-        "name": "y_24^*, y_2^*, y_23^*, g_2^*, y_21^*"
+        "name": "y_2^*, g_2^*, y_24^*, obj_opt^*, x_opt^*, y_23^*, y_21^*"
       }, 
       {
         "to": "_U_", 
         "from": "Dis8", 
-        "name": "y_12^*, y_11^*, g_1^*, y_1^*, y_14^*"
+        "name": "g_1^*, y_1^*, y_12^*, y_11^*, y_14^*, obj_opt^*, x_opt^*"
       }
     ], 
     "workflow": [
@@ -319,24 +319,24 @@
         [
           "Dis1", 
           [
-            "Dis6", 
-            "Dis7", 
-            "Dis8", 
+            "Dis2", 
+            "Dis3", 
+            "Dis4", 
             "Dis5"
           ], 
           {
             "parallel": [
-              "Dis2", 
-              "Dis3", 
-              "Dis4", 
+              "Dis6", 
+              "Dis7", 
+              "Dis8", 
               "Dis5"
             ]
           }, 
           "Dis1", 
           [
-            "Dis6", 
-            "Dis7", 
-            "Dis8", 
+            "Dis2", 
+            "Dis3", 
+            "Dis4", 
             "Dis5"
           ]
         ]
