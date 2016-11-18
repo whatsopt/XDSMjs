@@ -16,27 +16,24 @@ function Node(id, name, type) {
 }
 
 Node.prototype.isMdo = function() {
-  return this.type == "mdo";
+  return this.type === "mdo";
 };
 
 Node.prototype.getScenarioId = function() {
   if (this.isMdo()) {
     var idxscn = this.name.indexOf("_scn-");
     if (idxscn === -1) {
-      console.log("Warning: MDO Scenario not found. Bad type or name for node: "+JSON.stringify(this));
+      console.log("Warning: MDO Scenario not found. " +
+                  "Bad type or name for node: " + JSON.stringify(this));
       return null;
-    } else {
-      return this.name.substr(idxscn+1);
     }
-    return null;
-  } else {
-    return null;
+    return this.name.substr(idxscn + 1);
   }
+  return null;
 };
 
-
 function Edge(from, to, name, row, col, isMulti) {
-  this.id = "link_"+from + "_" + to;
+  this.id = "link_" + from + "_" + to;
   this.name = name;
   this.row = row;
   this.col = col;
@@ -204,7 +201,7 @@ Graph.number = function(workflow, num) {
     if (step in toNode) {
       toNode[step].push(nodeId);
     } else {
-      toNode[step]=[nodeId];
+      toNode[step] = [nodeId];
     }
   }
 
@@ -255,9 +252,9 @@ Graph.number = function(workflow, num) {
   }
 
   _number(workflow, num);
-  //console.log('toNodes=', JSON.stringify(toNode));
-  //console.log('toNum=',JSON.stringify(toNum));
-  return {'toNum': toNum, 'toNode': toNode};
+  // console.log('toNodes=', JSON.stringify(toNode));
+  // console.log('toNum=',JSON.stringify(toNum));
+  return {toNum: toNum, toNode: toNode};
 };
 
 module.exports = Graph;

@@ -16389,7 +16389,6 @@ var d3 = require('d3');
 var PULSE_DURATION = 700;
 
 function Animation(xdsms, rootId, delay) {
-
   this.rootId = rootId;
   if (typeof (rootId) === 'undefined') {
     this.rootId = 'root';
@@ -16398,47 +16397,48 @@ function Animation(xdsms, rootId, delay) {
   this.xdsms = xdsms;
   this.duration = PULSE_DURATION;
   this.delay = delay || 0;
-
-  console.log("Animation for "+this.rootId+ " with "+ this.delay +"s delay.");
 }
 
-Animation.prototype._pulse = function(delay, to_be_selected, option) {
-  var sel = d3.select("svg."+this.rootId).select(to_be_selected).transition().delay(delay);
+Animation.prototype._pulse = function(delay, toBeSelected, option) {
+  var sel = d3.select("svg." + this.rootId)
+              .select(toBeSelected)
+              .transition().delay(delay);
   if (option !== "out") {
     sel = sel.transition().style('stroke-width', '8px').duration(200);
   }
   if (option !== "in") {
-    sel.transition().style('stroke-width', '1px').duration(3*PULSE_DURATION);
+    sel.transition().style('stroke-width', '1px').duration(3 * PULSE_DURATION);
   }
 };
-
 
 Animation.prototype._animate = function() {
   var self = this;
   var graph = self.xdsms[self.rootId].graph;
-  var n = 0;
-  var prev;
 
-  for (var k in graph.nodesByStep) {
+  graph.nodesByStep.forEach(function(nodesAtStep, n, nodesByStep) {
     var offsets = [];
-    graph.nodesByStep[k].forEach(function(nodeId) {
+    nodesAtStep.forEach(function(nodeId) {
+      var elapsed = n * PULSE_DURATION;
+
       if (n > 0) {
-        prev.forEach(function(prevNodeId) {
+        nodesByStep[n-1].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
           var from = graph.idxOf(prevNodeId);
           var to = graph.idxOf(nodeId);
-          self._pulse(self.delay+n*PULSE_DURATION,"polyline.link_"+from+"_"+to);
+          self._pulse(self.delay + elapsed,
+                      "polyline.link_" + from + "_" + to);
         });
 
-        var nodeSel = d3.select("svg."+self.rootId).select("g."+nodeId);
+        var gnode = "g." + nodeId;
+        var nodeSel = d3.select("svg." + self.rootId).select(gnode);
         if (nodeSel.classed("mdo")) {
-          self._pulse(self.delay+n*PULSE_DURATION, "g."+nodeId+" > rect", "in");
+          self._pulse(self.delay + elapsed, gnode + " > rect", "in");
           var scnId = graph.getNode(nodeId).getScenarioId();
-          var anim = new Animation(self.xdsms, scnId, self.delay+n*PULSE_DURATION);
+          var anim = new Animation(self.xdsms, scnId, self.delay + elapsed);
           var offset = anim._animate();
           offsets.push(offset);
-          self._pulse(self.delay+n*PULSE_DURATION+offset, "g."+nodeId+" > rect", "out");
+          self._pulse(self.delay + offset + elapsed, gnode + " > rect", "out");
         } else {
-          self._pulse(self.delay+n*PULSE_DURATION, "g."+nodeId+" > rect");
+          self._pulse(self.delay + elapsed, gnode + " > rect");
         }
       }
     }, this);
@@ -16446,12 +16446,9 @@ Animation.prototype._animate = function() {
     if (offsets.length > 0) {
       self.delay += Math.max.apply(null, offsets);
     }
+  }, this);
 
-    prev = graph.nodesByStep[k];
-    n = n+1;
-  };
-
-  return graph.nodesByStep.length*PULSE_DURATION;
+  return graph.nodesByStep.length * PULSE_DURATION;
 };
 
 Animation.prototype.run = function() {
@@ -16479,27 +16476,24 @@ function Node(id, name, type) {
 }
 
 Node.prototype.isMdo = function() {
-  return this.type == "mdo";
+  return this.type === "mdo";
 };
 
 Node.prototype.getScenarioId = function() {
   if (this.isMdo()) {
     var idxscn = this.name.indexOf("_scn-");
     if (idxscn === -1) {
-      console.log("Warning: MDO Scenario not found. Bad type or name for node: "+JSON.stringify(this));
+      console.log("Warning: MDO Scenario not found. " +
+                  "Bad type or name for node: " + JSON.stringify(this));
       return null;
-    } else {
-      return this.name.substr(idxscn+1);
     }
-    return null;
-  } else {
-    return null;
+    return this.name.substr(idxscn + 1);
   }
+  return null;
 };
 
-
 function Edge(from, to, name, row, col, isMulti) {
-  this.id = "link_"+from + "_" + to;
+  this.id = "link_" + from + "_" + to;
   this.name = name;
   this.row = row;
   this.col = col;
@@ -16667,7 +16661,7 @@ Graph.number = function(workflow, num) {
     if (step in toNode) {
       toNode[step].push(nodeId);
     } else {
-      toNode[step]=[nodeId];
+      toNode[step] = [nodeId];
     }
   }
 
@@ -16718,9 +16712,9 @@ Graph.number = function(workflow, num) {
   }
 
   _number(workflow, num);
-  //console.log('toNodes=', JSON.stringify(toNode));
-  //console.log('toNum=',JSON.stringify(toNum));
-  return {'toNum': toNum, 'toNode': toNode};
+  // console.log('toNodes=', JSON.stringify(toNode));
+  // console.log('toNum=',JSON.stringify(toNum));
+  return {toNum: toNum, toNode: toNode};
 };
 
 module.exports = Graph;
@@ -16964,7 +16958,7 @@ Xdsm.prototype._createTextGroup = function(kind) {
 };
 
 Xdsm.prototype._createWorkflow = function() {
-  //console.log(JSON.stringify(this.graph.chains));
+  //  console.log(JSON.stringify(this.graph.chains));
   var workflow = this.svg.insert("g", ":first-child")
                     .attr("class", "workflow");
 
@@ -16973,13 +16967,15 @@ Xdsm.prototype._createWorkflow = function() {
   .enter()
     .insert('g').attr("class", "workflow-chain")
     .selectAll('polyline')
-      .data(function(d) { return d; })
+      .data(function(d) { return d; })  // eslint-disable-line brace-style
     .enter()
       .append("polyline")
-        .attr("class", function(d) { return "link_"+d[0]+"_"+d[1]; })
+        .attr("class", function(d) {
+          return "link_" + d[0] + "_" + d[1];
+        })
         .attr("points", function(d) {
-          var w = CELL_W * Math.abs(d[0]-d[1]);
-          var h = CELL_H * Math.abs(d[0]-d[1]);
+          var w = CELL_W * Math.abs(d[0] - d[1]);
+          var h = CELL_H * Math.abs(d[0] - d[1]);
           var points = [];
           if (d[0] < d[1]) {
             if (d[0] !== 0) {
@@ -17017,7 +17013,6 @@ Xdsm.prototype._createWorkflow = function() {
 };
 
 Xdsm.prototype._createDataflow = function(edges) {
-  var self = this;
   var dataflow = this.svg.insert("g", ":first-child")
                    .attr("class", "dataflow");
 
@@ -17161,8 +17156,8 @@ d3.json("xdsm.json", function(error, mdo) {
   if (scenarioKeys.indexOf('root') === -1) {
     // old format: mono xdsm
     var graph = new Graph(mdo);
-    xdsms['root'] = new Xdsm(graph, 'root');
-    xdsms['root'].draw();
+    xdsms.root = new Xdsm(graph, 'root');
+    xdsms.root.draw();
   } else {
     // new format managing several XDSM
     scenarioKeys.forEach(function(k) {

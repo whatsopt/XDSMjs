@@ -24,8 +24,8 @@ d3.json("xdsm.json", function(error, mdo) {
   if (scenarioKeys.indexOf('root') === -1) {
     // old format: mono xdsm
     var graph = new Graph(mdo);
-    xdsms['root'] = new Xdsm(graph, 'root');
-    xdsms['root'].draw();
+    xdsms.root = new Xdsm(graph, 'root');
+    xdsms.root.draw();
   } else {
     // new format managing several XDSM
     scenarioKeys.forEach(function(k) {
