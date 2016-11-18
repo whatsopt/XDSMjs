@@ -42,6 +42,10 @@ test("Labelizer.strParse('1:L-BFGS-B') returns [{'base':'1:L-BFGS-B', 'sub':unde
   t.deepEqual(Labelizer.strParse("1:L-BFGS-B"), [{'base':'1:L-BFGS-B', 'sub':undefined, 'sup':undefined}]);
   t.end();
 });
+test("Labelizer.strParse('y_12_y_23') returns [{'base':'1:L-BFGS-B', 'sub':undefined, 'sup':undefined}]", function(t) {
+  t.deepEqual(Labelizer.strParse("1:L-BFGS-B"), [{'base':'1:L-BFGS-B', 'sub':undefined, 'sup':undefined}]);
+  t.end();
+});
 
 test("Graph.expand(['a']) returns [['a']]", function(t) {
   t.deepEqual(Graph.expand(['a']), [['a']]);
@@ -174,18 +178,18 @@ test("Graph.chains should expand as list of index couples", function(t) {
 });
 
 
-test("Graph.number(['d1']) returns {'toNum':{d1: '0'}, 'toNodes':{'0':['d1']})", function(t) {
+test("Graph.number(['d1']) returns {'toNum':{d1: '0'}, 'toNodes':[['d1']])", function(t) {
   t.deepEqual(Graph.number(['d1']), {'toNum':{d1: '0'},
                                      'toNode':[['d1']]});
   t.equal(Graph.number(['d1']).toNode.length, 1);
   t.end();
 });
-test("Graph.number(['d1', 'd1']) returns {'toNum':{d1: '0,1'}, 'toNodes':{'0':['d1'], '1':['d1']}})", function(t) {
+test("Graph.number(['d1', 'd1']) returns {'toNum':{d1: '0,1'}, 'toNodes':[['d1'],['d1']]})", function(t) {
   t.deepEqual(Graph.number(['d1', 'd1']), {'toNum':{d1: '0,1'},
                                            'toNode':[['d1'],['d1']]});
   t.end();
 });
-test("Graph.number(['mda', 'd1']) returns {'toNum':{mda:'0', d1: '1'}, 'toNode':{'0':['mda'], '1':['d1']}})", function(t) {
+test("Graph.number(['mda', 'd1']) returns {'toNum':{mda:'0', d1: '1'}, 'toNode':[['mda'], ['d1']]})", function(t) {
   t.deepEqual(Graph.number(['mda', 'd1']), {'toNum':{mda:'0', d1: '1'},
                                             'toNode':[['mda'], ['d1']]});
   t.end();
@@ -202,7 +206,7 @@ test("Graph.number(['mda', {parallel:['d1', 'd2', 'd3']}]) returns {'mda': '0', 
   t.deepEqual(Graph.number(['mda', {parallel:['d1', 'd2', 'd3']}]).toNum, {'mda': '0', 'd1': '1', 'd2': '1', 'd3': '1'});
   t.end();
 });
-test("Graph.number(['mda', [{parallel:['d1', 'd2', 'd3']}]]) returns {'toNum':{'mda': '0,2-1', 'd1': '1', 'd2': '1', 'd3': '1'}, 'toNode':{'0':'mda', '1':['d1','d2','d3']})", function(t) {
+test("Graph.number(['mda', [{parallel:['d1', 'd2', 'd3']}]]) returns {'toNum':{'mda': '0,2-1', 'd1': '1', 'd2': '1', 'd3': '1'}, 'toNode':[['mda'], ['d1','d2','d3']]})", function(t) {
   t.deepEqual(Graph.number(['mda', [{parallel:['d1', 'd2', 'd3']}]]).toNum, {'mda': '0,2-1', 'd1': '1', 'd2': '1', 'd3': '1'});
   t.deepEqual(Graph.number(['mda', [{parallel:['d1', 'd2', 'd3']}]]).toNode, [['mda'], ['d1','d2','d3'], ['mda']]);
   t.end();
