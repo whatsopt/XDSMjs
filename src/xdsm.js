@@ -115,7 +115,7 @@ Xdsm.prototype._createTextGroup = function(kind) {
 };
 
 Xdsm.prototype._createWorkflow = function() {
-  //console.log(JSON.stringify(this.graph.chains));
+  //  console.log(JSON.stringify(this.graph.chains));
   var workflow = this.svg.insert("g", ":first-child")
                     .attr("class", "workflow");
 
@@ -124,13 +124,15 @@ Xdsm.prototype._createWorkflow = function() {
   .enter()
     .insert('g').attr("class", "workflow-chain")
     .selectAll('polyline')
-      .data(function(d) { return d; })
+      .data(function(d) { return d; })  // eslint-disable-line brace-style
     .enter()
       .append("polyline")
-        .attr("class", function(d) { return "link_"+d[0]+"_"+d[1]; })
+        .attr("class", function(d) {
+          return "link_" + d[0] + "_" + d[1];
+        })
         .attr("points", function(d) {
-          var w = CELL_W * Math.abs(d[0]-d[1]);
-          var h = CELL_H * Math.abs(d[0]-d[1]);
+          var w = CELL_W * Math.abs(d[0] - d[1]);
+          var h = CELL_H * Math.abs(d[0] - d[1]);
           var points = [];
           if (d[0] < d[1]) {
             if (d[0] !== 0) {
@@ -168,7 +170,6 @@ Xdsm.prototype._createWorkflow = function() {
 };
 
 Xdsm.prototype._createDataflow = function(edges) {
-  var self = this;
   var dataflow = this.svg.insert("g", ":first-child")
                    .attr("class", "dataflow");
 

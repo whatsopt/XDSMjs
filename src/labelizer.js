@@ -13,7 +13,7 @@ Labelizer.strParse = function(str) {
     var base;
     var sub;
     var sup;
-    
+
     if ((s.match(underscores) || []).length > 1) {
       return {base: s, sub: undefined, sup: undefined};
     }
