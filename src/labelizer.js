@@ -6,12 +6,17 @@ Labelizer.strParse = function(str) {
   }
 
   var lstr = str.split(',');
+  var underscores = /_/g;
   var rg = /([0-9\-]+:)?([A-Za-z0-9\-\.]+)(_[A-Za-z0-9\-\.]+)?(\^.+)?/;
 
   var res = lstr.map(function(s) {
     var base;
     var sub;
     var sup;
+    
+    if ((s.match(underscores) || []).length > 1) {
+      return {base: s, sub: undefined, sup: undefined};
+    }
     var m = s.match(rg);
     if (m) {
       base = (m[1] ? m[1] : "") + m[2];
