@@ -7,7 +7,7 @@ Labelizer.strParse = function(str) {
 
   var lstr = str.split(',');
   var underscores = /_/g;
-  var rg = /([0-9\-]+:)?([A-Za-z0-9\-\.]+)(_[A-Za-z0-9\-\.]+)?(\^.+)?/;
+  var rg = /([0-9\-]+:)?([A-Za-z0-9\-\.]+)(_[A-Za-z0-9\-\._]+)?(\^.+)?/;
 
   var res = lstr.map(function(s) {
     var base;
@@ -15,6 +15,10 @@ Labelizer.strParse = function(str) {
     var sup;
 
     if ((s.match(underscores) || []).length > 1) {
+      var mu = s.match(/(.+)\^(.+)/);
+      if (mu) {
+        return {base: mu[1], sub: undefined, sup: mu[2]};
+      }
       return {base: s, sub: undefined, sup: undefined};
     }
     var m = s.match(rg);
@@ -45,7 +49,7 @@ Labelizer.labelize = function() {
       tokens.every(function(token, i, ary) {
         var offsetSub = 0;
         var offsetSup = 0;
-        if (ellipsis < 1 || i < 5) {
+        if (ellipsis < 1 || (i < 5 && text.nodes()[0].getBBox().width < 100)) {
           text.append("tspan").text(token.base);
           if (token.sub) {
             offsetSub = 10;

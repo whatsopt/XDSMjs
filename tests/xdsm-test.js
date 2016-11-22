@@ -42,8 +42,12 @@ test("Labelizer.strParse('1:L-BFGS-B') returns [{'base':'1:L-BFGS-B', 'sub':unde
   t.deepEqual(Labelizer.strParse("1:L-BFGS-B"), [{'base':'1:L-BFGS-B', 'sub':undefined, 'sup':undefined}]);
   t.end();
 });
-test("Labelizer.strParse('y_12_y34') returns [{'base':'y_12_y_34', 'sub':undefined, 'sup':undefined}]", function(t) {
+test("Labelizer.strParse('y_12_y_34') returns [{'base':'y_12_y_34', 'sub':undefined, 'sup':undefined}]", function(t) {
   t.deepEqual(Labelizer.strParse("y_12_y_34"), [{'base':'y_12_y_34', 'sub':undefined, 'sup':undefined}]);
+  t.end();
+});
+test("Labelizer.strParse('y_12_y_34^*') returns [{'base':'y_12_y_34', 'sub':undefined, 'sup':'*'}]", function(t) {
+  t.deepEqual(Labelizer.strParse("y_12_y_34^*"), [{'base':'y_12_y_34', 'sub':undefined, 'sup':'*'}]);
   t.end();
 });
 
