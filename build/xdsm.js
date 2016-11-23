@@ -16403,11 +16403,19 @@ Animation.prototype._pulse = function(delay, toBeSelected, option) {
   var sel = d3.select("svg." + this.rootId)
               .select(toBeSelected)
               .transition().delay(delay);
+  var color = d3.rgb('black');
+  if (d3.select(".optimization").node()) {
+    color = d3.rgb(d3.select(".optimization").style("fill")).darker(); // try to use dark optim node color
+  }
   if (option !== "out") {
-    sel = sel.transition().style('stroke-width', '8px').duration(200);
+    sel = sel.transition().duration(200)
+            .style('stroke-width', '8px')
+            .style('stroke', color);
   }
   if (option !== "in") {
-    sel.transition().style('stroke-width', '1px').duration(3 * PULSE_DURATION);
+    sel.transition().duration(3 * PULSE_DURATION)
+            .style('stroke-width', '1px')
+            .style('stroke', 'black');
   }
 };
 
@@ -16737,14 +16745,12 @@ Labelizer.strParse = function(str) {
     var sup;
 
     if ((s.match(underscores) || []).length > 1) {
-      var m = s.match(/(.+)\^(.+)/);
-      if (m) {
-        return {base: m[1], sub: undefined, sup: m[2]};
-      } else {
-        return {base: s, sub: undefined, sup: undefined};
+      var mu = s.match(/(.+)\^(.+)/);
+      if (mu) {
+        return {base: mu[1], sub: undefined, sup: mu[2]};
       }
+      return {base: s, sub: undefined, sup: undefined};
     }
-
     var m = s.match(rg);
     if (m) {
       base = (m[1] ? m[1] : "") + m[2];

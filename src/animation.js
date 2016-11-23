@@ -17,11 +17,19 @@ Animation.prototype._pulse = function(delay, toBeSelected, option) {
   var sel = d3.select("svg." + this.rootId)
               .select(toBeSelected)
               .transition().delay(delay);
+  var color = d3.rgb('black');
+  if (d3.select(".optimization").node()) { // try to use darkened optim node color
+    color = d3.rgb(d3.select(".optimization").style("fill")).darker();
+  }
   if (option !== "out") {
-    sel = sel.transition().style('stroke-width', '8px').duration(200);
+    sel = sel.transition().duration(200)
+            .style('stroke-width', '8px')
+            .style('stroke', color);
   }
   if (option !== "in") {
-    sel.transition().style('stroke-width', '1px').duration(3 * PULSE_DURATION);
+    sel.transition().duration(3 * PULSE_DURATION)
+            .style('stroke-width', '1px')
+            .style('stroke', 'black');
   }
 };
 
