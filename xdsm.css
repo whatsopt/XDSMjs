@@ -57,7 +57,7 @@
 }
 
 /* Title */
-.xdsm .title { 
+.xdsm g.title text {
     display: block;
     font-size: 2em;
     margin-top: 0.67em;
@@ -66,9 +66,12 @@
     margin-right: 0;
     font-weight: bold;
 }
+.xdsm g.title rect {
+    fill: none;
+}
 
 
-/* Text */
+/* Text Default */
 .xdsm text {
   fill: black;
   stroke: none;
@@ -109,14 +112,14 @@
 }
 
 /* Tooltip */
-div.tooltip {	
-    position: absolute;			
-    text-align: center;						
-    padding: 10px;					
-    background: lightsteelblue;	
-    border: 0px;		
-    border-radius: 8px;			
-    pointer-events: none;			
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 10px;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
 }
 
 sub, sup {

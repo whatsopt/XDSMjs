@@ -34,11 +34,18 @@ Xdsm.prototype.draw = function() {
   var self = this;
 
   if (self.graph.refname) {
-    var ref = self.svg.append("text").text(self.graph.refname);
+    var ref = self.svg.append('g').classed('title', true);
+
+    ref.append("text").text(self.graph.refname);
     var bbox = ref.nodes()[0].getBBox();
-    ref.attr("x", X_ORIG)
-       .attr("y", Y_ORIG + bbox.height)
-       .classed("title", true);
+    ref.insert("rect", "text")
+        .attr('x', bbox.x)
+        .attr('y', bbox.y)
+        .attr('width', bbox.width)
+        .attr('height', bbox.height);
+
+    ref.attr('transform',
+             'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
   }
 
   self.nodes = self._createTextGroup("node");
