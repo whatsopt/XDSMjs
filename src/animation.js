@@ -42,11 +42,11 @@ Animation.prototype._animate = function() {
 
   var title = d3.select("svg." + self.rootId).select("g.title");
   title.select("text").transition().delay(delay).style("fill", ACTIVE_COLOR);
-  title.select("rect")
+  d3.select("svg." + self.rootId).select("rect.border")
     .transition().delay(delay)
-      .style("stroke", 'black').style("stroke-width", '3px')
+      .style("stroke-width", '3px').duration(500)
     .transition().duration(1000)
-      .style("stroke", null).style("stroke-width", null);
+      .style("stroke", 'black').style("stroke-width", '0px');
 
   graph.nodesByStep.forEach(function(nodesAtStep, n, nodesByStep) {
     var offsets = [];

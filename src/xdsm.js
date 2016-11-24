@@ -25,6 +25,7 @@ function Xdsm(graph, svgid, tooltip) {
              .attr("width", WIDTH)
              .attr("height", HEIGHT)
              .attr("class", svgid);
+
   this.grid = [];
   this.nodes = [];
   this.edges = [];
@@ -85,6 +86,19 @@ Xdsm.prototype.draw = function() {
   var w = CELL_W * (self.graph.nodes.length + 1);
   var h = CELL_H * (self.graph.nodes.length + 1);
   self.svg.attr("width", w).attr("height", h);
+
+  var border='3px';
+  var bordercolor='black';
+
+  var borderPath = self.svg.append("rect")
+            .classed("border", true)
+            .attr("x", 2)
+            .attr("y", 2)
+            .attr("height", h-2)
+            .attr("width", w-2)
+            .style("stroke", bordercolor)
+            .style("fill", "none")
+            .style("stroke-width", 0);
 };
 
 Xdsm.prototype._createTextGroup = function(kind) {

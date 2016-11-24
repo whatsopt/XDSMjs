@@ -16428,11 +16428,11 @@ Animation.prototype._animate = function() {
 
   var title = d3.select("svg." + self.rootId).select("g.title");
   title.select("text").transition().delay(delay).style("fill", ACTIVE_COLOR);
-  title.select("rect")
+  d3.select("svg." + self.rootId).select("rect.border")
     .transition().delay(delay)
-      .style("stroke", 'black').style("stroke-width", '3px')
+      .style("stroke-width", '3px').duration(500)
     .transition().duration(1000)
-      .style("stroke", null).style("stroke-width", null);
+      .style("stroke", 'black').style("stroke-width", '0px');
 
   graph.nodesByStep.forEach(function(nodesAtStep, n, nodesByStep) {
     var offsets = [];
@@ -16904,6 +16904,7 @@ function Xdsm(graph, svgid, tooltip) {
              .attr("width", WIDTH)
              .attr("height", HEIGHT)
              .attr("class", svgid);
+
   this.grid = [];
   this.nodes = [];
   this.edges = [];
@@ -16964,6 +16965,19 @@ Xdsm.prototype.draw = function() {
   var w = CELL_W * (self.graph.nodes.length + 1);
   var h = CELL_H * (self.graph.nodes.length + 1);
   self.svg.attr("width", w).attr("height", h);
+
+  var border='3px';
+  var bordercolor='black';
+
+  var borderPath = self.svg.append("rect")
+            .classed("border", true)
+            .attr("x", 2)
+            .attr("y", 2)
+            .attr("height", h-2)
+            .attr("width", w-2)
+            .style("stroke", bordercolor)
+            .style("fill", "none")
+            .style("stroke-width", 0);
 };
 
 Xdsm.prototype._createTextGroup = function(kind) {
