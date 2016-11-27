@@ -87,15 +87,13 @@ Xdsm.prototype.draw = function() {
   var h = CELL_H * (self.graph.nodes.length + 1);
   self.svg.attr("width", w).attr("height", h);
 
-  var border='3px';
-  var bordercolor='black';
-
-  var borderPath = self.svg.append("rect")
+  var bordercolor = 'black';
+  self.svg.append("rect")
             .classed("border", true)
-            .attr("x", 2)
-            .attr("y", 2)
-            .attr("height", h-2)
-            .attr("width", w-2)
+            .attr("x", 4)
+            .attr("y", 4)
+            .attr("height", h - 4)
+            .attr("width", w - 4)
             .style("stroke", bordercolor)
             .style("fill", "none")
             .style("stroke-width", 0);

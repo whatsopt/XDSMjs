@@ -1,6 +1,7 @@
 var d3 = require('d3');
 
 var PULSE_DURATION = 700;
+var SUB_ANIM_DELAY = 200;
 var ACTIVE_COLOR = d3.rgb("seagreen");
 
 function Animation(xdsms, rootId, delay) {
@@ -38,19 +39,19 @@ Animation.prototype._pulse = function(delay, toBeSelected, option) {
 Animation.prototype._animate = function() {
   var self = this;
   var delay = this.initialDelay;
+  var animDelay = SUB_ANIM_DELAY;
   var graph = self.xdsms[self.rootId].graph;
 
   var title = d3.select("svg." + self.rootId).select("g.title");
   title.select("text").transition().delay(delay).style("fill", ACTIVE_COLOR);
   d3.select("svg." + self.rootId).select("rect.border")
     .transition().delay(delay)
-      .style("stroke-width", '3px').duration(500)
+      .style("stroke-width", '5px').duration(200)
     .transition().duration(1000)
       .style("stroke", 'black').style("stroke-width", '0px');
 
   graph.nodesByStep.forEach(function(nodesAtStep, n, nodesByStep) {
     var offsets = [];
-    var animDelay = 0;
     nodesAtStep.forEach(function(nodeId) {
       var elapsed = delay + n * PULSE_DURATION;
 
@@ -67,8 +68,6 @@ Animation.prototype._animate = function() {
         if (nodeSel.classed("mdo")) {
           self._pulse(elapsed, gnode + " > rect", "in");
           var scnId = graph.getNode(nodeId).getScenarioId();
-          // add small 200ms latency for best animation sequence
-          animDelay += 2000;
           var anim = new Animation(self.xdsms, scnId, elapsed + animDelay);
           var offset = anim._animate();
           offsets.push(offset);
