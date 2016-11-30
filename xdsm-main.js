@@ -21,6 +21,7 @@ d3.json("xdsm.json", function(error, mdo) {
 
   var scenarioKeys = Object.keys(mdo).sort();
   var xdsms = {};
+
   if (scenarioKeys.indexOf('root') === -1) {
     // old format: mono xdsm
     var graph = new Graph(mdo);
@@ -38,6 +39,11 @@ d3.json("xdsm.json", function(error, mdo) {
   }
 
   var anim = new Animation(xdsms);
-  anim.run();
+  d3.select('input[value="Start"]').on('click', function() {
+    anim.start();
+  });
+  d3.select('input[value="Stop"]').on('click', function() {
+    anim.stop();
+  });
 });
 

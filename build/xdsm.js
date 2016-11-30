@@ -16477,8 +16477,28 @@ Animation.prototype._animate = function() {
   return graph.nodesByStep.length * PULSE_DURATION;
 };
 
-Animation.prototype.run = function() {
+Animation.prototype.start = function() {
   this._animate();
+};
+
+Animation.prototype.stop = function() {
+  d3.selectAll('rect').transition().duration(0)
+            .style('stroke-width', null)
+            .style('stroke', null);
+  d3.selectAll('.title > text').transition().duration(0)
+            .style('fill', null);
+
+  d3.selectAll('.node > rect').transition().duration(0)
+            .style('stroke-width', null)
+            .style('stroke', null)
+            .style('fill', null);
+  d3.selectAll('polyline').transition().duration(0)
+            .style('stroke-width', null)
+            .style('stroke', null)
+            .style('fill', null);
+};
+
+Animation.prototype.step = function() {
 };
 
 module.exports = Animation;
@@ -17207,6 +17227,7 @@ d3.json("xdsm.json", function(error, mdo) {
 
   var scenarioKeys = Object.keys(mdo).sort();
   var xdsms = {};
+
   if (scenarioKeys.indexOf('root') === -1) {
     // old format: mono xdsm
     var graph = new Graph(mdo);
@@ -17224,7 +17245,12 @@ d3.json("xdsm.json", function(error, mdo) {
   }
 
   var anim = new Animation(xdsms);
-  anim.run();
+  d3.select('input[value="Start"]').on('click', function() {
+    anim.start();
+  });
+  d3.select('input[value="Stop"]').on('click', function() {
+    anim.stop();
+  });
 });
 
 
