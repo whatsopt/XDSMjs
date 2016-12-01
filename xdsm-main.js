@@ -45,5 +45,8 @@ d3.json("xdsm.json", function(error, mdo) {
   d3.select('input[value="Stop"]').on('click', function() {
     anim.stop();
   });
+  d3.select('input[value="Step"]').on('click', function() {
+    anim.step();
+  });
 });
 
