@@ -16399,7 +16399,9 @@ function Animation(xdsms, rootId, delay) {
   this.xdsms = xdsms;
   this.duration = PULSE_DURATION;
   this.initialDelay = delay || 0;
-  this.curStep = 0;
+
+  this.curStep = 1;
+  this.subAnimations = {};
 }
 
 Animation.prototype._pulse = function(delay, toBeSelected, option) {
@@ -16423,14 +16425,14 @@ Animation.prototype._pulse = function(delay, toBeSelected, option) {
   }
 };
 
-Animation.prototype._pulse_link = function(delay, fromId, toId) {
+Animation.prototype._pulseLink = function(delay, fromId, toId) {
   var graph = this.xdsms[this.rootId].graph;
   var from = graph.idxOf(fromId);
   var to = graph.idxOf(toId);
   this._pulse(delay, "polyline.link_" + from + "_" + to);
 };
 
-Animation.prototype._on_animation_start = function(delay) {
+Animation.prototype._onAnimationStart = function(delay) {
   var title = d3.select("svg." + this.rootId).select("g.title");
   title.select("text").transition().delay(delay).style("fill", ACTIVE_COLOR);
   d3.select("svg." + this.rootId).select("rect.border")
@@ -16440,28 +16442,26 @@ Animation.prototype._on_animation_start = function(delay) {
       .style("stroke", 'black').style("stroke-width", '0px');
 };
 
-Animation.prototype._on_animation_stop = function(delay) {
+Animation.prototype._onAnimationStop = function(delay) {
   var title = d3.select("svg." + this.rootId).select("g.title");
   title.select("text").transition()
     .delay(delay)
     .style("fill", null);
 };
 
-Animation.prototype._is_sub_scenario = function(nodeId) {
-  console.log(nodeId);
+Animation.prototype._isSubScenario = function(nodeId) {
   var gnode = "g." + nodeId;
   var nodeSel = d3.select("svg." + this.rootId).select(gnode);
-  console.log(nodeSel);
   return nodeSel.classed("mdo");
 };
 
-Animation.prototype._schedule_animation = function() {
+Animation.prototype._scheduleAnimation = function() {
   var self = this;
   var delay = this.initialDelay;
   var animDelay = SUB_ANIM_DELAY;
   var graph = self.xdsms[self.rootId].graph;
 
-  self._on_animation_start(delay);
+  self._onAnimationStart(delay);
 
   graph.nodesByStep.forEach(function(nodesAtStep, n, nodesByStep) {
     var offsets = [];
@@ -16470,16 +16470,15 @@ Animation.prototype._schedule_animation = function() {
 
       if (n > 0) {
         nodesByStep[n-1].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
-          self._pulse_link(elapsed, prevNodeId, nodeId);
+          self._pulseLink(elapsed, prevNodeId, nodeId);
         });
 
         var gnode = "g." + nodeId;
-        var nodeSel = d3.select("svg." + self.rootId).select(gnode);
-        if (self._is_sub_scenario(nodeId)) {
+        if (self._isSubScenario(nodeId)) {
           self._pulse(elapsed, gnode + " > rect", "in");
           var scnId = graph.getNode(nodeId).getScenarioId();
           var anim = new Animation(self.xdsms, scnId, elapsed + animDelay);
-          var offset = anim._schedule_animation();
+          var offset = anim._scheduleAnimation();
           offsets.push(offset);
           self._pulse(offset + elapsed + animDelay, gnode + " > rect", "out");
         } else {
@@ -16494,70 +16493,118 @@ Animation.prototype._schedule_animation = function() {
     delay += animDelay;
   }, this);
 
-  self._on_animation_stop(graph.nodesByStep.length * PULSE_DURATION + delay);
+  self._onAnimationStop(graph.nodesByStep.length * PULSE_DURATION + delay);
 
   return graph.nodesByStep.length * PULSE_DURATION;
 };
 
-Animation.prototype._reset = function() {
-  d3.selectAll('rect').transition().duration(0)
+Animation.prototype._reset = function(all) {
+  var svg = d3.select("svg." + this.rootId);
+  if (all) {
+    var svg = d3.selectAll("svg");
+  }
+  svg.selectAll('rect').transition().duration(0)
             .style('stroke-width', null)
             .style('stroke', null);
-  d3.selectAll('.title > text').transition().duration(0)
+  svg.selectAll('.title > text').transition().duration(0)
             .style('fill', null);
 
-  d3.selectAll('.node > rect').transition().duration(0)
+  svg.selectAll('.node > rect').transition().duration(0)
             .style('stroke-width', null)
             .style('stroke', null)
             .style('fill', null);
-  d3.selectAll('polyline').transition().duration(0)
+  svg.selectAll('polyline').transition().duration(0)
             .style('stroke-width', null)
             .style('stroke', null)
             .style('fill', null);
+};
+
+Animation.prototype._resetPreviousStep = function() {
+  this.root.graph.nodesByStep[this.curStep - 1].forEach(function(nodeId) {
+    var gnode = "g." + nodeId;
+    this._pulse(0, gnode + " > rect", "out");
+  }, this);
 };
 
 Animation.prototype.start = function() {
   this.stop();
-  this._schedule_animation();
+  this._scheduleAnimation();
 };
 
 Animation.prototype.stop = function() {
-  this._reset();
-  this.curStep = 0;
+  this._reset("all");
+  this.curStep = 1;
+  this.subAnimations = {};
 };
 
-Animation.prototype.step_active = function() {
-  return this.curStep > 0;
+Animation.prototype.started = function() {
+  return this.curStep > 1;
+};
+
+Animation.prototype.done = function() {
+  return this.curStep === this.root.graph.nodesByStep.length;
+};
+
+Animation.prototype._allSubAnimationsDone = function() {
+  var allDone = true;
+  for (var k in this.subAnimations) {
+    if (this.subAnimations.hasOwnProperty(k)) {
+      allDone = allDone && this.subAnimations[k].done();
+    }
+  }
+  return allDone;
+};
+
+Animation.prototype._subAnimationInProgress = function() {
+  return Object.keys(this.subAnimations).length > 0;
+};
+Animation.prototype._resetSubAnimations = function() {
+  this.subAnimations = {};
 };
 
 Animation.prototype.step = function() {
   var self = this;
-  self._reset();
   var graph = self.xdsms[self.rootId].graph;
 
-  console.log("STEP= "+self.curStep);
-  if (self.step_active() && graph.nodesByStep[self.curStep].some(self._is_sub_scenario)) {
-    console.log("subscenarios !!!");
-  } else {
-    console.log("NOT subscenarios !!!");
-    self.curStep += 1;
-    if (self.curStep === graph.nodesByStep.length) {
-      self.curStep = 0;
+  if (!self._subAnimationInProgress()) {
+    self._reset();
+    if (self.done()) {
+      return;
     }
 
     var nodesAtStep = graph.nodesByStep[self.curStep];
     nodesAtStep.forEach(function(nodeId) {
-      graph.nodesByStep[self.curStep-1].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
-        self._pulse_link(0, prevNodeId, nodeId);
-        var gnode = "g." + prevNodeId;
-        var nodeSel = d3.select("svg." + self.rootId).select(gnode);
-        self._pulse(0, gnode + " > rect", "out");
-      });
-
+      if (self.started()) {
+        graph.nodesByStep[self.curStep-1].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
+          self._pulseLink(0, prevNodeId, nodeId);
+          var gnode = "g." + prevNodeId;
+          self._pulse(0, gnode + " > rect", "out");
+        });
+      }
       var gnode = "g." + nodeId;
-      var nodeSel = d3.select("svg." + self.rootId).select(gnode);
       self._pulse(0, gnode + " > rect", "in");
     });
+  }
+
+  if (graph.nodesByStep[self.curStep].some(self._isSubScenario, this)) {
+    graph.nodesByStep[self.curStep].forEach(function(nodeId) {
+      if (self._isSubScenario(nodeId)) {
+        var scnId = graph.getNode(nodeId).getScenarioId();
+        var anim;
+        if (self.subAnimations[scnId]) {
+          anim = self.subAnimations[scnId];
+        } else {
+          anim = self.subAnimations[scnId] = new Animation(self.xdsms, scnId);
+        }
+        if (!anim.done()) {
+          anim.step();
+        }
+      }
+    }, this);
+  }
+  if (self._allSubAnimationsDone()) {
+    this._resetSubAnimations();
+    self.curStep += 1;
   }
 };
 
