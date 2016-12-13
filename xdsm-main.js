@@ -39,13 +39,13 @@ d3.json("xdsm.json", function(error, mdo) {
   }
 
   var anim = new Animation(xdsms);
-  d3.select('input[value="Start"]').on('click', function() {
+  d3.select('button#start').on('click', function() {
     anim.start();
   });
-  d3.select('input[value="Stop"]').on('click', function() {
+  d3.select('button#stop').on('click', function() {
     anim.stop();
   });
-  d3.select('input[value="Step"]').on('click', function() {
+  d3.select('button#step').on('click', function() {
     anim.step();
   });
 });
