@@ -8,6 +8,7 @@ var d3 = require('d3');
 var Graph = require('./src/graph');
 var Xdsm = require('./src/xdsm');
 var Animation = require('./src/animation');
+var Controls = require('./src/controls');
 
 d3.json("xdsm.json", function(error, mdo) {
   if (error) {
@@ -38,15 +39,6 @@ d3.json("xdsm.json", function(error, mdo) {
     }, this);
   }
 
-  var anim = new Animation(xdsms);
-  d3.select('button#start').on('click', function() {
-    anim.start();
-  });
-  d3.select('button#stop').on('click', function() {
-    anim.stop();
-  });
-  d3.select('button#step').on('click', function() {
-    anim.step();
-  });
+  var ctrls = new Controls(new Animation(xdsms)); // eslint-disable-line no-unused-vars
 });
 

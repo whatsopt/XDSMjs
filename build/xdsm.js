@@ -16400,166 +16400,31 @@ function Animation(xdsms, rootId, delay) {
   this.duration = PULSE_DURATION;
   this.initialDelay = delay || 0;
 
-  this.curStep = 1;
-  this.subAnimations = {};
+  this._observers = [];
+  this.reset();
 }
 
-Animation.prototype._pulse = function(delay, toBeSelected, option) {
-  var sel = d3.select("svg." + this.rootId)
-              .selectAll(toBeSelected)
-              .transition().delay(delay);
-  if (option !== "out") {
-    sel = sel.transition().duration(200)
-            .style('stroke-width', '8px')
-            .style('stroke', ACTIVE_COLOR)
-            .style('fill', function(d) {
-              if (d.id) {
-                return ACTIVE_COLOR.brighter();
-              }});
-  }
-  if (option !== "in") {
-    sel.transition().duration(3 * PULSE_DURATION)
-            .style('stroke-width', null)
-            .style('stroke', null)
-            .style('fill', null);
-  }
-};
+Animation.STATUS = {INIT: "init",
+                    STARTED: "started",
+                    STOPPED: "stopped",
+                    STEPPED: "stepped",
+                    DONE: "done"};
 
-Animation.prototype._pulseLink = function(delay, fromId, toId) {
-  var graph = this.xdsms[this.rootId].graph;
-  var from = graph.idxOf(fromId);
-  var to = graph.idxOf(toId);
-  this._pulse(delay, "polyline.link_" + from + "_" + to);
-};
-
-Animation.prototype._onAnimationStart = function(delay) {
-  var title = d3.select("svg." + this.rootId).select("g.title");
-  title.select("text").transition().delay(delay).style("fill", ACTIVE_COLOR);
-  d3.select("svg." + this.rootId).select("rect.border")
-    .transition().delay(delay)
-      .style("stroke-width", '5px').duration(200)
-    .transition().duration(1000)
-      .style("stroke", 'black').style("stroke-width", '0px');
-};
-
-Animation.prototype._onAnimationStop = function(delay) {
-  var title = d3.select("svg." + this.rootId).select("g.title");
-  title.select("text").transition()
-    .delay(delay)
-    .style("fill", null);
-};
-
-Animation.prototype._isSubScenario = function(nodeId) {
-  var gnode = "g." + nodeId;
-  var nodeSel = d3.select("svg." + this.rootId).select(gnode);
-  return nodeSel.classed("mdo");
-};
-
-Animation.prototype._scheduleAnimation = function() {
-  var self = this;
-  var delay = this.initialDelay;
-  var animDelay = SUB_ANIM_DELAY;
-  var graph = self.xdsms[self.rootId].graph;
-
-  self._onAnimationStart(delay);
-
-  graph.nodesByStep.forEach(function(nodesAtStep, n, nodesByStep) {
-    var offsets = [];
-    nodesAtStep.forEach(function(nodeId) {
-      var elapsed = delay + n * PULSE_DURATION;
-
-      if (n > 0) {
-        nodesByStep[n-1].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
-          self._pulseLink(elapsed, prevNodeId, nodeId);
-        });
-
-        var gnode = "g." + nodeId;
-        if (self._isSubScenario(nodeId)) {
-          self._pulse(elapsed, gnode + " > rect", "in");
-          var scnId = graph.getNode(nodeId).getScenarioId();
-          var anim = new Animation(self.xdsms, scnId, elapsed + animDelay);
-          var offset = anim._scheduleAnimation();
-          offsets.push(offset);
-          self._pulse(offset + elapsed + animDelay, gnode + " > rect", "out");
-        } else {
-          self._pulse(elapsed, gnode + " > rect");
-        }
-      }
-    }, this);
-
-    if (offsets.length > 0) {
-      delay += Math.max.apply(null, offsets);
-    }
-    delay += animDelay;
-  }, this);
-
-  self._onAnimationStop(graph.nodesByStep.length * PULSE_DURATION + delay);
-
-  return graph.nodesByStep.length * PULSE_DURATION;
-};
-
-Animation.prototype._reset = function(all) {
-  var svg = d3.select("svg." + this.rootId);
-  if (all) {
-    svg = d3.selectAll("svg");
-  }
-  svg.selectAll('rect').transition().duration(0)
-            .style('stroke-width', null)
-            .style('stroke', null);
-  svg.selectAll('.title > text').transition().duration(0)
-            .style('fill', null);
-
-  svg.selectAll('.node > rect').transition().duration(0)
-            .style('stroke-width', null)
-            .style('stroke', null)
-            .style('fill', null);
-  svg.selectAll('polyline').transition().duration(0)
-            .style('stroke-width', null)
-            .style('stroke', null)
-            .style('fill', null);
-};
-
-Animation.prototype._resetPreviousStep = function() {
-  this.root.graph.nodesByStep[this.curStep - 1].forEach(function(nodeId) {
-    var gnode = "g." + nodeId;
-    this._pulse(0, gnode + " > rect", "out");
-  }, this);
+Animation.prototype.reset = function() {
+  this.curStep = 1;
+  this.subAnimations = {};
+  this.status = Animation.STATUS.INIT;
+  this._updateStatus(Animation.STATUS.INIT);
 };
 
 Animation.prototype.start = function() {
-  this.stop();
   this._scheduleAnimation();
+  this._updateStatus(Animation.STATUS.STARTED);
 };
 
 Animation.prototype.stop = function() {
   this._reset("all");
-  this.curStep = 1;
-  this.subAnimations = {};
-};
-
-Animation.prototype.started = function() {
-  return this.curStep > 1;
-};
-
-Animation.prototype.done = function() {
-  return this.curStep === this.root.graph.nodesByStep.length;
-};
-
-Animation.prototype._allSubAnimationsDone = function() {
-  var allDone = true;
-  for (var k in this.subAnimations) {
-    if (this.subAnimations.hasOwnProperty(k)) {
-      allDone = allDone && this.subAnimations[k].done();
-    }
-  }
-  return allDone;
-};
-
-Animation.prototype._subAnimationInProgress = function() {
-  return Object.keys(this.subAnimations).length > 0;
-};
-Animation.prototype._resetSubAnimations = function() {
-  this.subAnimations = {};
+  this._updateStatus(Animation.STATUS.STOPPED);
 };
 
 Animation.prototype.step = function() {
@@ -16606,11 +16471,244 @@ Animation.prototype.step = function() {
     this._resetSubAnimations();
     self.curStep += 1;
   }
+  if (this.done()) {
+    this._updateStatus(Animation.STATUS.DONE);
+  } else {
+    this._updateStatus(Animation.STATUS.STEPPED);
+  }
+};
+
+Animation.prototype.started = function() {
+  return this.curStep > 1;
+};
+
+Animation.prototype.done = function() {
+  return this.curStep === this.root.graph.nodesByStep.length;
+};
+
+Animation.prototype.addObserver = function(observer) {
+  if (observer) {
+    this._observers.push(observer);
+  }
+};
+
+Animation.prototype._updateStatus = function(status) {
+  this.status = status;
+  this._notifyObservers(status);
+};
+
+Animation.prototype._notifyObservers = function() {
+  this._observers.map((function(obs) {
+    obs.update(this.status);
+  }).bind(this));
+};
+
+Animation.prototype._pulse = function(delay, toBeSelected, option) {
+  var sel = d3.select("svg." + this.rootId)
+              .selectAll(toBeSelected)
+              .transition().delay(delay);
+  if (option !== "out") {
+    sel = sel.transition().duration(200)
+            .style('stroke-width', '8px')
+            .style('stroke', ACTIVE_COLOR)
+            .style('fill', function(d) {
+              if (d.id) {
+                return ACTIVE_COLOR.brighter();
+              }});
+  }
+  if (option !== "in") {
+    sel.transition().duration(3 * PULSE_DURATION)
+            .style('stroke-width', null)
+            .style('stroke', null)
+            .style('fill', null);
+  }
+};
+
+Animation.prototype._pulseLink = function(delay, fromId, toId) {
+  var graph = this.xdsms[this.rootId].graph;
+  var from = graph.idxOf(fromId);
+  var to = graph.idxOf(toId);
+  this._pulse(delay, "polyline.link_" + from + "_" + to);
+};
+
+Animation.prototype._onAnimationStart = function(delay) {
+  var title = d3.select("svg." + this.rootId).select("g.title");
+  title.select("text").transition().delay(delay).style("fill", ACTIVE_COLOR);
+  d3.select("svg." + this.rootId).select("rect.border")
+    .transition().delay(delay)
+      .style("stroke-width", '5px').duration(200)
+    .transition().duration(1000)
+      .style("stroke", 'black').style("stroke-width", '0px');
+};
+
+Animation.prototype._onAnimationDone = function(delay) {
+  var self = this;
+  var title = d3.select("svg." + this.rootId).select("g.title");
+  title.select("text").transition()
+    .delay(delay)
+    .style("fill", null).on("end", function() {
+      self._updateStatus(Animation.STATUS.DONE);
+    });
+};
+
+Animation.prototype._isSubScenario = function(nodeId) {
+  var gnode = "g." + nodeId;
+  var nodeSel = d3.select("svg." + this.rootId).select(gnode);
+  return nodeSel.classed("mdo");
+};
+
+Animation.prototype._scheduleAnimation = function() {
+  var self = this;
+  var delay = this.initialDelay;
+  var animDelay = SUB_ANIM_DELAY;
+  var graph = self.xdsms[self.rootId].graph;
+
+  self._onAnimationStart(delay);
+
+  graph.nodesByStep.forEach(function(nodesAtStep, n, nodesByStep) {
+    var offsets = [];
+    nodesAtStep.forEach(function(nodeId) {
+      var elapsed = delay + n * PULSE_DURATION;
+
+      if (n > 0) {
+        nodesByStep[n-1].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
+          self._pulseLink(elapsed, prevNodeId, nodeId);
+        });
+
+        var gnode = "g." + nodeId;
+        if (self._isSubScenario(nodeId)) {
+          self._pulse(elapsed, gnode + " > rect", "in");
+          var scnId = graph.getNode(nodeId).getScenarioId();
+          var anim = new Animation(self.xdsms, scnId, elapsed + animDelay);
+          var offset = anim._scheduleAnimation();
+          offsets.push(offset);
+          self._pulse(offset + elapsed + animDelay, gnode + " > rect", "out");
+        } else {
+          self._pulse(elapsed, gnode + " > rect");
+        }
+      }
+    }, this);
+
+    if (offsets.length > 0) {
+      delay += Math.max.apply(null, offsets);
+    }
+    delay += animDelay;
+  }, this);
+
+  self._onAnimationDone(graph.nodesByStep.length * PULSE_DURATION + delay);
+
+  return graph.nodesByStep.length * PULSE_DURATION;
+};
+
+Animation.prototype._reset = function(all) {
+  var svg = d3.select("svg." + this.rootId);
+  if (all) {
+    svg = d3.selectAll("svg");
+  }
+  svg.selectAll('rect').transition().duration(0)
+            .style('stroke-width', null)
+            .style('stroke', null);
+  svg.selectAll('.title > text').transition().duration(0)
+            .style('fill', null);
+
+  svg.selectAll('.node > rect').transition().duration(0)
+            .style('stroke-width', null)
+            .style('stroke', null)
+            .style('fill', null);
+  svg.selectAll('polyline').transition().duration(0)
+            .style('stroke-width', null)
+            .style('stroke', null)
+            .style('fill', null);
+};
+
+Animation.prototype._resetPreviousStep = function() {
+  this.root.graph.nodesByStep[this.curStep - 1].forEach(function(nodeId) {
+    var gnode = "g." + nodeId;
+    this._pulse(0, gnode + " > rect", "out");
+  }, this);
+};
+
+Animation.prototype._allSubAnimationsDone = function() {
+  var allDone = true;
+  for (var k in this.subAnimations) {
+    if (this.subAnimations.hasOwnProperty(k)) {
+      allDone = allDone && this.subAnimations[k].done();
+    }
+  }
+  return allDone;
+};
+
+Animation.prototype._subAnimationInProgress = function() {
+  return Object.keys(this.subAnimations).length > 0;
+};
+Animation.prototype._resetSubAnimations = function() {
+  this.subAnimations = {};
 };
 
 module.exports = Animation;
 
 },{"d3":1}],3:[function(require,module,exports){
+var d3 = require('d3');
+var Animation = require('./animation');
+
+function Controls(animation) {
+  this.animation = animation;
+
+  this.startButton = d3.select('button#start');
+  this.stopButton = d3.select('button#stop');
+  this.stepButton = d3.select('button#step');
+
+  this.startButton.on('click', (function() {
+    this.animation.start();
+  }).bind(this));
+  this.stopButton.on('click', (function() {
+    this.animation.stop();
+  }).bind(this));
+  this.stepButton.on('click', (function() {
+    this.animation.step();
+  }).bind(this));
+
+  this.animation.addObserver(this);
+  this.update(this.animation.status);
+}
+
+Controls.prototype.update = function(status) {
+  switch (status) {
+    case Animation.STATUS.STOPPED:
+    case Animation.STATUS.DONE:
+      this.animation.reset();  // trigger INIT status
+    case Animation.STATUS.INIT: // eslint-disable-line no-fallthrough
+      this._enable(this.startButton);
+      this._disable(this.stopButton);
+      this._enable(this.stepButton);
+      break;
+    case Animation.STATUS.STARTED:
+      this._disable(this.startButton);
+      this._enable(this.stopButton);
+      this._disable(this.stepButton);
+      break;
+    case Animation.STATUS.STEPPED:
+      this._disable(this.startButton);
+      this._enable(this.stopButton);
+      this._enable(this.stepButton);
+      break;
+    default:
+      console.log("Unexpected Event: " + status);
+      break;
+  }
+};
+
+Controls.prototype._enable = function(button) {
+  button.attr("disabled", null);
+};
+
+Controls.prototype._disable = function(button) {
+  button.attr("disabled", true);
+};
+
+module.exports = Controls;
+
+},{"./animation":2,"d3":1}],4:[function(require,module,exports){
 var UID = "_U_";
 var MULTI_TYPE = "_multi";
 
@@ -16872,7 +16970,7 @@ Graph.number = function(workflow, num) {
 
 module.exports = Graph;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 function Labelizer() {}
 
 Labelizer.strParse = function(str) {
@@ -17002,7 +17100,7 @@ Labelizer.tooltipize = function() {
 
 module.exports = Labelizer;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var d3 = require('d3');
 var Labelizer = require('./labelizer.js');
 
@@ -17310,7 +17408,7 @@ Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
 
 module.exports = Xdsm;
 
-},{"./labelizer.js":4,"d3":1}],6:[function(require,module,exports){
+},{"./labelizer.js":5,"d3":1}],7:[function(require,module,exports){
 /*
  * XDSMjs
  * Copyright 2016 Rémi Lafage
@@ -17321,6 +17419,7 @@ var d3 = require('d3');
 var Graph = require('./src/graph');
 var Xdsm = require('./src/xdsm');
 var Animation = require('./src/animation');
+var Controls = require('./src/controls');
 
 d3.json("xdsm.json", function(error, mdo) {
   if (error) {
@@ -17351,17 +17450,8 @@ d3.json("xdsm.json", function(error, mdo) {
     }, this);
   }
 
-  var anim = new Animation(xdsms);
-  d3.select('button#start').on('click', function() {
-    anim.start();
-  });
-  d3.select('button#stop').on('click', function() {
-    anim.stop();
-  });
-  d3.select('button#step').on('click', function() {
-    anim.step();
-  });
+  var ctrls = new Controls(new Animation(xdsms)); // eslint-disable-line no-unused-vars
 });
 
 
-},{"./src/animation":2,"./src/graph":3,"./src/xdsm":5,"d3":1}]},{},[6]);
+},{"./src/animation":2,"./src/controls":3,"./src/graph":4,"./src/xdsm":6,"d3":1}]},{},[7]);
