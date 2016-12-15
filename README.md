@@ -1,10 +1,10 @@
 # XDSMjs
-XDSM diagram generator written in javascript. 
+XDSM diagram generator written in javascript.
 
 [![Build Status](https://travis-ci.org/OneraHub/XDSMjs.svg?branch=master)](https://travis-ci.org/OneraHub/XDSMjs)
 
 ## XDSM
-The XDSM (eXtended Design Structure Matrix) is a notation used to visualize MDO processes. 
+The XDSM (eXtended Design Structure Matrix) is a notation used to visualize MDO processes.
 It was developed by A. B. Lambe and J. R. R. A. Martins, see [MDOLab website dedicated page.](http://mdolab.engin.umich.edu/content/xdsm-overview)
 
 XDSM permissions:
@@ -12,12 +12,12 @@ XDSM permissions:
 > A. B. Lambe and J. R. R. A. Martins, “Extensions to the Design Structure Matrix for the Description of Multidisciplinary Design, Analysis, and Optimization Processes”, Structural and Multidisciplinary Optimization, vol. 46, no. 2, p. 273-284, 2012.
 
 ## Description
-XDSMjs is a javascript generator allowing to display a XDSM diagram within a web page. 
-It is based on [D3](https://d3js.org/) and [Mathjax](https://www.mathjax.org/).
+XDSMjs is a javascript generator allowing to display a XDSM diagram within a web page.
+It is based on [D3](https://d3js.org/).
 Compared to the original latex generator it uses a json format as input (see example xdsm.json).
 
 ## Usage
-Open xdsm.html in your browser. To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page. 
+Open xdsm.html in your browser. To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page.
 
 ## Troubleshooting
 * If you don't see the diagram, may be you need to serve the files with your favourite HTTP server ('same origin' policy of your browser). An example with Python HTTP simple server:
