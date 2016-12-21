@@ -15,12 +15,31 @@ d3.json("xdsm.json", function(error, mdo) {
     throw error;
   }
 
+  // Tooltip for variable connexions
   var tooltip = d3.select("body").selectAll(".tooltip").data(['tooltip'])
                   .enter().append("div")
                 .attr("class", "tooltip")
                 .style("opacity", 0);
 
   var scenarioKeys = Object.keys(mdo).sort();
+
+  // Optimization Problem Display setup
+  d3.select("body").selectAll("optpb")
+                .data(scenarioKeys)
+              .enter()
+                .append("div")
+                .attr("class", function(d) {
+                  return "optpb " + d;
+                })
+                .style("opacity", 0)
+                .on("click", function() {
+                  d3.select(this).transition().duration(500)
+                    .style("opacity", 0)
+                    .style("pointer-events", "none");
+                }).append("pre").text(function(d) {
+                  return mdo[d].optpb;
+                });
+
   var xdsms = {};
 
   if (scenarioKeys.indexOf('root') === -1) {
@@ -35,6 +54,14 @@ d3.json("xdsm.json", function(error, mdo) {
         var graph = new Graph(mdo[k], k);
         xdsms[k] = new Xdsm(graph, k, tooltip);
         xdsms[k].draw();
+
+        xdsms[k].svg.select(".optimization").on("click", function() {
+          var info = d3.select(".optpb." + k);
+          info.style("opacity", 0.9);
+          info.style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 28) + "px");
+          info.style("pointer-events", "auto");
+        });
       }
     }, this);
   }

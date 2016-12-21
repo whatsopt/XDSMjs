@@ -76,6 +76,7 @@
   fill: black;
   stroke: none;
   font-size: large;
+  font-family: Arial, sans-serif;
 }
 .xdsm tspan.sub {
   font-size: small;
@@ -120,6 +121,16 @@ div.tooltip {
     border: 0px;
     border-radius: 8px;
     pointer-events: none;
+}
+
+/* Info */
+div.optpb {
+    position: absolute;
+    padding: 10px;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    font-size: 150%;
 }
 
 sub, sup {
