@@ -17434,22 +17434,23 @@ d3.json("xdsm.json", function(error, mdo) {
 
   var scenarioKeys = Object.keys(mdo).sort();
 
-  // Optimization Problem Display setup
+  // Optimization problem display setup
   d3.select("body").selectAll("optpb")
                 .data(scenarioKeys)
               .enter()
                 .append("div")
-                .attr("class", function(d) {
-                  return "optpb " + d;
-                })
-                .style("opacity", 0)
-                .on("click", function() {
-                  d3.select(this).transition().duration(500)
-                    .style("opacity", 0)
-                    .style("pointer-events", "none");
-                }).append("pre").text(function(d) {
-                  return mdo[d].optpb;
-                });
+                .filter(function(d) { return mdo[d].optpb; })
+                  .attr("class", function(d) {
+                    return "optpb " + d;
+                  })
+                  .style("opacity", 0)
+                  .on("click", function() {
+                    d3.select(this).transition().duration(500)
+                      .style("opacity", 0)
+                      .style("pointer-events", "none");
+                  }).append("pre").text(function(d) {
+                    return mdo[d].optpb;
+                  });
 
   var xdsms = {};
 
@@ -17466,6 +17467,7 @@ d3.json("xdsm.json", function(error, mdo) {
         xdsms[k] = new Xdsm(graph, k, tooltip);
         xdsms[k].draw();
 
+/*
         xdsms[k].svg.select(".optimization").on("click", function() {
           var info = d3.select(".optpb." + k);
           info.style("opacity", 0.9);
@@ -17473,9 +17475,22 @@ d3.json("xdsm.json", function(error, mdo) {
             .style("top", (d3.event.pageY - 28) + "px");
           info.style("pointer-events", "auto");
         });
+*/
       }
     }, this);
-  }
+  };
+
+  scenarioKeys.forEach(function(k) {
+    if (mdo.hasOwnProperty(k)) {
+        xdsms[k].svg.select(".optimization").on("click", function() {
+          var info = d3.select(".optpb." + k);
+          info.style("opacity", 0.9);
+          info.style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 28) + "px");
+          info.style("pointer-events", "auto");
+        });
+    }
+  }, this);
 
   var ctrls = new Controls(new Animation(xdsms)); // eslint-disable-line no-unused-vars
 });
