@@ -17,7 +17,11 @@ It is based on [D3](https://d3js.org/).
 Compared to the original latex generator it uses a json format as input (see example xdsm.json).
 
 ## Usage
-Open xdsm.html in your browser. To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page.
+Open `xdsm.html` in your browser. To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page.
+
+## Example
+Below an example describing BLISS formulation inspired from XDSM description given in [Martins and Lambe MDO architecture survey](http://arc.aiaa.org/doi/pdf/10.2514/1.J051895). While the formulation could have been described in one diagram as in the survey, the example below use XDSMjs multi-level diagram capability to separate system and discipline optimization levels.
+The corresponding [xdsm.json](./examples/bliss.json) file is available in the example directory.
 
 ![](gallery/xdsm_bliss_anim.gif)
 
