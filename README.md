@@ -19,7 +19,7 @@ Compared to the original latex generator it uses a json format as input (see exa
 ## Usage
 Open xdsm.html in your browser. To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page.
 
-![](gallery/xdsm_bilevel_anim.gif)
+![](gallery/xdsm_bliss_anim.gif)
 
 ## Troubleshooting
 * If you don't see the diagram, may be you need to serve the files with your favourite HTTP server ('same origin' policy of your browser). An example with Python HTTP simple server:
