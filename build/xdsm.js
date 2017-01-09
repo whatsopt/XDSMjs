@@ -16772,8 +16772,9 @@ function Graph(mdo, refname) {
   this.nodesByStep = numbering.toNode;
 
   mdo.nodes.forEach(function(item) {
+    var num = numPrefixes[item.id];
     this.nodes.push(new Node(item.id,
-      numPrefixes[item.id] + ":" + item.name,
+      num ? num + ":" + item.name : item.name,
       item.type));
   }, this);
 
@@ -16876,10 +16877,44 @@ function _expand(workflow) {
   return ret;
 }
 
+Graph._isPatchNeeded = function(toBePatched) {
+  var lastElts = toBePatched.map(function(arr) { return arr[arr.length-1]; })
+  var lastElt = lastElts[0];
+  for (var i=0; i<lastElts.length; i++) {
+    if (lastElts[i] !== lastElt) {
+      return true;
+    }
+  }
+  return false;
+}
+
+Graph._patchParallel = function (expanded) {
+  var patchNeeded = false;
+  var toBePatched = []
+  expanded.forEach(function(elt) {
+    if (elt instanceof Array) {
+      toBePatched.push(elt);
+    } else {
+      if (Graph._isPatchNeeded(toBePatched)) {
+        toBePatched.forEach(function(arr) {
+          arr.push(elt);
+        }, this);
+      }
+    }
+  }, this);
+}
+
 Graph.expand = function(item) {
   var expanded = _expand(item);
+  console.log(JSON.stringify(expanded));
   var result = [];
   var current = [];
+  
+  // first pass to add missing 'end link' in case of parallel branches at the end of a loop
+  // [a, [b, d], [b, c], a] -> [a, [b, d, a], [b, c, a], a]
+  Graph._patchParallel(expanded);
+  
+  // [a, aa, [b, c], d] -> [[a, aa, b], [b,c], [c, d]]
   expanded.forEach(function(elt) {
     if (elt instanceof Array) {
       if (current.length > 0) {
@@ -16900,6 +16935,7 @@ Graph.expand = function(item) {
   if (current.length > 0) {
     result.push(current);
   }
+  console.log(JSON.stringify(result));
   return result;
 };
 
@@ -16980,7 +17016,7 @@ Labelizer.strParse = function(str) {
 
   var lstr = str.split(',');
   var underscores = /_/g;
-  var rg = /([0-9\-]+:)?([A-Za-z0-9\-\.]+)(_[A-Za-z0-9\-\._]+)?(\^.+)?/;
+  var rg = /([0-9\-]+:)?([A-Za-z0-9\-\./]+)(_[A-Za-z0-9\-\._,]+)?(\^.+)?/;
 
   var res = lstr.map(function(s) {
     var base;
@@ -17435,22 +17471,20 @@ d3.json("xdsm.json", function(error, mdo) {
   var scenarioKeys = Object.keys(mdo).sort();
 
   // Optimization problem display setup
+  /* eslint-disable brace-style */
   d3.select("body").selectAll("optpb")
                 .data(scenarioKeys)
               .enter()
                 .append("div")
                 .filter(function(d) { return mdo[d].optpb; })
-                  .attr("class", function(d) {
-                    return "optpb " + d;
-                  })
+                  .attr("class", function(d) { return "optpb " + d; })
                   .style("opacity", 0)
                   .on("click", function() {
                     d3.select(this).transition().duration(500)
                       .style("opacity", 0)
                       .style("pointer-events", "none");
-                  }).append("pre").text(function(d) {
-                    return mdo[d].optpb;
-                  });
+                  }).append("pre").text(function(d) { return mdo[d].optpb; });
+  /* eslint-enable brace-style */
 
   var xdsms = {};
 
@@ -17466,29 +17500,20 @@ d3.json("xdsm.json", function(error, mdo) {
         var graph = new Graph(mdo[k], k);
         xdsms[k] = new Xdsm(graph, k, tooltip);
         xdsms[k].draw();
-
-/*
-        xdsms[k].svg.select(".optimization").on("click", function() {
-          var info = d3.select(".optpb." + k);
-          info.style("opacity", 0.9);
-          info.style("left", (d3.event.pageX) + "px")
-            .style("top", (d3.event.pageY - 28) + "px");
-          info.style("pointer-events", "auto");
-        });
-*/
       }
     }, this);
-  };
+  }
 
+  // Hook opt pb display to opt nodes
   scenarioKeys.forEach(function(k) {
     if (mdo.hasOwnProperty(k)) {
-        xdsms[k].svg.select(".optimization").on("click", function() {
-          var info = d3.select(".optpb." + k);
-          info.style("opacity", 0.9);
-          info.style("left", (d3.event.pageX) + "px")
-            .style("top", (d3.event.pageY - 28) + "px");
-          info.style("pointer-events", "auto");
-        });
+      xdsms[k].svg.select(".optimization").on("click", function() {
+        var info = d3.select(".optpb." + k);
+        info.style("opacity", 0.9);
+        info.style("left", (d3.event.pageX) + "px")
+          .style("top", (d3.event.pageY - 28) + "px");
+        info.style("pointer-events", "auto");
+      });
     }
   }, this);
 
