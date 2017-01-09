@@ -61,8 +61,9 @@ function Graph(mdo, refname) {
   this.nodesByStep = numbering.toNode;
 
   mdo.nodes.forEach(function(item) {
+    var num = numPrefixes[item.id];
     this.nodes.push(new Node(item.id,
-      numPrefixes[item.id] + ":" + item.name,
+      num ? num + ":" + item.name : item.name,
       item.type));
   }, this);
 
@@ -165,10 +166,44 @@ function _expand(workflow) {
   return ret;
 }
 
+Graph._isPatchNeeded = function(toBePatched) {
+  var lastElts = toBePatched.map(function(arr) { return arr[arr.length-1]; })
+  var lastElt = lastElts[0];
+  for (var i=0; i<lastElts.length; i++) {
+    if (lastElts[i] !== lastElt) {
+      return true;
+    }
+  }
+  return false;
+}
+
+Graph._patchParallel = function (expanded) {
+  var patchNeeded = false;
+  var toBePatched = []
+  expanded.forEach(function(elt) {
+    if (elt instanceof Array) {
+      toBePatched.push(elt);
+    } else {
+      if (Graph._isPatchNeeded(toBePatched)) {
+        toBePatched.forEach(function(arr) {
+          arr.push(elt);
+        }, this);
+      }
+    }
+  }, this);
+}
+
 Graph.expand = function(item) {
   var expanded = _expand(item);
+  console.log(JSON.stringify(expanded));
   var result = [];
   var current = [];
+  
+  // first pass to add missing 'end link' in case of parallel branches at the end of a loop
+  // [a, [b, d], [b, c], a] -> [a, [b, d, a], [b, c, a], a]
+  Graph._patchParallel(expanded);
+  
+  // [a, aa, [b, c], d] -> [[a, aa, b], [b,c], [c, d]]
   expanded.forEach(function(elt) {
     if (elt instanceof Array) {
       if (current.length > 0) {
@@ -189,6 +224,7 @@ Graph.expand = function(item) {
   if (current.length > 0) {
     result.push(current);
   }
+  console.log(JSON.stringify(result));
   return result;
 };
 

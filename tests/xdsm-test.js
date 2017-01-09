@@ -10,6 +10,10 @@ test("Labelizer.strParse('+A') throws an error", function(t) {
   t.throws(function() {Labelizer.strParse("+");}, "should throw an error");
   t.end();
 });
+test("Labelizer.strParse('ConvCheck') returns [{'base':'ConvCheck', 'sub':undefined, 'sup':undefined}]", function(t) {
+  t.deepEqual(Labelizer.strParse("ConvCheck"), [{'base':'ConvCheck', 'sub':undefined, 'sup':undefined}]);
+  t.end();
+});
 test("Labelizer.strParse('x') returns [{'base':'x', 'sub':undefined, 'sup':undefined}]", function(t) {
   t.deepEqual(Labelizer.strParse("x"), [{'base':'x', 'sub':undefined, 'sup':undefined}]);
   t.end();
@@ -50,7 +54,6 @@ test("Labelizer.strParse('y_12_y_34^*') returns [{'base':'y_12_y_34', 'sub':unde
   t.deepEqual(Labelizer.strParse("y_12_y_34^*"), [{'base':'y_12_y_34', 'sub':undefined, 'sup':'*'}]);
   t.end();
 });
-
 test("Graph.expand(['a']) returns [['a']]", function(t) {
   t.deepEqual(Graph.expand(['a']), [['a']]);
   t.end();
@@ -159,6 +162,14 @@ test("Graph.expand((['_U_', ['opt', ['mda', ['d1', 'd2'], {parallel: ['sc1', 'sc
       [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda'], ['mda', 'sc1', 'mda'], ['mda', 'sc2', 'mda'], ['mda', 'd1', 'd2', 'mda', 'opt', '_U_']]);
 t.end();
 });
+test("Graph.expand((['d1', {parallel: ['sc1', 'sc2']}, 'd2']) returns [['d1', 'sc1', 'd2'], ['d1', 'sc2', 'd2']]", function(t) {
+  t.deepEqual(Graph.expand(['d1', {parallel: ['sc1', 'sc2']}, 'd2']), [['d1', 'sc1', 'd2'], ['d1', 'sc2', 'd2']]);
+t.end();
+});
+test("Graph.expand((['opt', ['d1', {parallel: ['sc1', 'sc2']}]]) returns [['opt', 'd1'] ['d1', 'sc1', 'opt'], ['d1', 'sc2', 'opt']]", function(t) {
+  t.deepEqual(Graph.expand(['opt', ['d1', {"parallel": ['sc1', 'sc2']}]]), [['opt', 'd1'], ['d1', 'sc1', 'opt'], ['d1', 'sc2', 'opt'], ['opt', 'opt']]);
+t.end();
+});
 test("Graph.chains should expand as list of index couples", function(t) {
   g = new Graph({nodes:[{id:'Opt',name:'Opt'},
                         {id:'MDA',name:'MDA'},
@@ -180,8 +191,6 @@ test("Graph.chains should expand as list of index couples", function(t) {
   t.deepEqual(g.chains, [[[1,2], [2,1], [1,3], [3,1], [1,4], [4,1], [1,5]]]);
   t.end();
 });
-
-
 test("Graph.number(['d1']) returns {'toNum':{d1: '0'}, 'toNodes':[['d1']])", function(t) {
   t.deepEqual(Graph.number(['d1']), {'toNum':{d1: '0'},
                                      'toNode':[['d1']]});
