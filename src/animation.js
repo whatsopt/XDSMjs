@@ -25,7 +25,7 @@ Animation.STATUS = {INIT: "init",
                     DONE: "done"};
 
 Animation.prototype.reset = function() {
-  this.curStep = 1;
+  this.curStep = 0;
   this.subAnimations = {};
   this.status = Animation.STATUS.INIT;
   this._updateStatus(Animation.STATUS.INIT);
@@ -41,21 +41,39 @@ Animation.prototype.stop = function() {
   this._updateStatus(Animation.STATUS.STOPPED);
 };
 
-Animation.prototype.step = function() {
+Animation.prototype.step_prev = function() {
+  this._step("prev");
+};
+
+Animation.prototype.step_next = function() {
+  this._step("next");
+};
+
+Animation.prototype._step = function(dir) {
+  var backward = (dir=="prev");
   var self = this;
   var graph = self.xdsms[self.rootId].graph;
+  var nodesByStep = graph.nodesByStep;
+  var incr = backward?-1:1;
+
+  if ((!backward && self.done()) ||
+      (backward && !self.started())) {
+    return;
+  };
 
   if (!self._subAnimationInProgress()) {
+    self.curStep += incr;
     self._reset();
-    if (self.done()) {
-      return;
-    }
 
-    var nodesAtStep = graph.nodesByStep[self.curStep];
+    var nodesAtStep = nodesByStep[self.curStep];
     nodesAtStep.forEach(function(nodeId) {
       if (self.started()) {
-        graph.nodesByStep[self.curStep-1].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
-          self._pulseLink(0, prevNodeId, nodeId);
+        nodesByStep[self.curStep - incr].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
+          if (backward) {
+            self._pulseLink(0, nodeId, prevNodeId);
+          } else {
+            self._pulseLink(0, prevNodeId, nodeId);
+          }
           var gnode = "g." + prevNodeId;
           self._pulse(0, gnode + " > rect", "out");
         });
@@ -65,8 +83,8 @@ Animation.prototype.step = function() {
     });
   }
 
-  if (graph.nodesByStep[self.curStep].some(self._isSubScenario, this)) {
-    graph.nodesByStep[self.curStep].forEach(function(nodeId) {
+  if (nodesByStep[self.curStep].some(self._isSubScenario, this)) {
+    nodesByStep[self.curStep].forEach(function(nodeId) {
       if (self._isSubScenario(nodeId)) {
         var scnId = graph.getNode(nodeId).getScenarioId();
         var anim;
@@ -76,14 +94,13 @@ Animation.prototype.step = function() {
           anim = self.subAnimations[scnId] = new Animation(self.xdsms, scnId);
         }
         if (!anim.done()) {
-          anim.step();
+          anim._step(dir);
         }
       }
     }, this);
   }
   if (self._allSubAnimationsDone()) {
     this._resetSubAnimations();
-    self.curStep += 1;
   }
   if (this.done()) {
     this._updateStatus(Animation.STATUS.DONE);
@@ -92,12 +109,14 @@ Animation.prototype.step = function() {
   }
 };
 
+
+
 Animation.prototype.started = function() {
-  return this.curStep > 1;
+  return this.curStep > 0;
 };
 
 Animation.prototype.done = function() {
-  return this.curStep === this.root.graph.nodesByStep.length;
+  return this.curStep > this.root.graph.nodesByStep.length-1;
 };
 
 Animation.prototype.addObserver = function(observer) {

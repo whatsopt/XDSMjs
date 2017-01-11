@@ -16411,7 +16411,7 @@ Animation.STATUS = {INIT: "init",
                     DONE: "done"};
 
 Animation.prototype.reset = function() {
-  this.curStep = 1;
+  this.curStep = 0;
   this.subAnimations = {};
   this.status = Animation.STATUS.INIT;
   this._updateStatus(Animation.STATUS.INIT);
@@ -16427,11 +16427,23 @@ Animation.prototype.stop = function() {
   this._updateStatus(Animation.STATUS.STOPPED);
 };
 
-Animation.prototype.step = function() {
+Animation.prototype.step_prev = function() {
+  this._step("prev");
+};
+
+Animation.prototype.step_next = function() {
+  this._step("next");
+};
+
+/*
+Animation.prototype.step_next = function() {
   var self = this;
   var graph = self.xdsms[self.rootId].graph;
+  console.log(self.rootId+" -> self.curStep="+self.curStep);
+  console.log(self.rootId+" -> self.="+JSON.stringify(graph.nodesByStep));
 
   if (!self._subAnimationInProgress()) {
+    self.curStep += 1;
     self._reset();
     if (self.done()) {
       return;
@@ -16439,13 +16451,11 @@ Animation.prototype.step = function() {
 
     var nodesAtStep = graph.nodesByStep[self.curStep];
     nodesAtStep.forEach(function(nodeId) {
-      if (self.started()) {
-        graph.nodesByStep[self.curStep-1].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
-          self._pulseLink(0, prevNodeId, nodeId);
-          var gnode = "g." + prevNodeId;
-          self._pulse(0, gnode + " > rect", "out");
-        });
-      }
+      graph.nodesByStep[self.curStep-1].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
+        self._pulseLink(0, prevNodeId, nodeId);
+        var gnode = "g." + prevNodeId;
+        self._pulse(0, gnode + " > rect", "out");
+      });
       var gnode = "g." + nodeId;
       self._pulse(0, gnode + " > rect", "in");
     });
@@ -16462,14 +16472,73 @@ Animation.prototype.step = function() {
           anim = self.subAnimations[scnId] = new Animation(self.xdsms, scnId);
         }
         if (!anim.done()) {
-          anim.step();
+          anim.step_next();
         }
       }
     }, this);
   }
   if (self._allSubAnimationsDone()) {
     this._resetSubAnimations();
-    self.curStep += 1;
+  }
+  if (this.done()) {
+    this._updateStatus(Animation.STATUS.DONE);
+  } else {
+    this._updateStatus(Animation.STATUS.STEPPED);
+  }
+};
+*/
+Animation.prototype._step = function(dir) {
+  var backward = (dir=="prev");
+  var self = this;
+  var graph = self.xdsms[self.rootId].graph;
+  var nodesByStep = graph.nodesByStep;
+  var incr = backward?-1:1;
+
+  if ((!backward && self.done()) ||
+      (backward && !self.started())) {
+    return;
+  };
+
+  if (!self._subAnimationInProgress()) {
+    self.curStep += incr;
+    self._reset();
+
+    var nodesAtStep = nodesByStep[self.curStep];
+    nodesAtStep.forEach(function(nodeId) {
+      if (self.started()) {
+        nodesByStep[self.curStep - incr].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
+          if (backward) {
+            self._pulseLink(0, nodeId, prevNodeId);
+          } else {
+            self._pulseLink(0, prevNodeId, nodeId);
+          }
+          var gnode = "g." + prevNodeId;
+          self._pulse(0, gnode + " > rect", "out");
+        });
+      }
+      var gnode = "g." + nodeId;
+      self._pulse(0, gnode + " > rect", "in");
+    });
+  }
+
+  if (nodesByStep[self.curStep].some(self._isSubScenario, this)) {
+    nodesByStep[self.curStep].forEach(function(nodeId) {
+      if (self._isSubScenario(nodeId)) {
+        var scnId = graph.getNode(nodeId).getScenarioId();
+        var anim;
+        if (self.subAnimations[scnId]) {
+          anim = self.subAnimations[scnId];
+        } else {
+          anim = self.subAnimations[scnId] = new Animation(self.xdsms, scnId);
+        }
+        if (!anim.done()) {
+          anim._step(dir);
+        }
+      }
+    }, this);
+  }
+  if (self._allSubAnimationsDone()) {
+    this._resetSubAnimations();
   }
   if (this.done()) {
     this._updateStatus(Animation.STATUS.DONE);
@@ -16478,12 +16547,14 @@ Animation.prototype.step = function() {
   }
 };
 
+
+
 Animation.prototype.started = function() {
-  return this.curStep > 1;
+  return this.curStep > 0;
 };
 
 Animation.prototype.done = function() {
-  return this.curStep === this.root.graph.nodesByStep.length;
+  return this.curStep > this.root.graph.nodesByStep.length-1;
 };
 
 Animation.prototype.addObserver = function(observer) {
@@ -16656,7 +16727,8 @@ function Controls(animation) {
 
   this.startButton = d3.select('button#start');
   this.stopButton = d3.select('button#stop');
-  this.stepButton = d3.select('button#step');
+  this.stepPrevButton = d3.select('button#step-prev');
+  this.stepNextButton = d3.select('button#step-next');
 
   this.startButton.on('click', (function() {
     this.animation.start();
@@ -16664,8 +16736,11 @@ function Controls(animation) {
   this.stopButton.on('click', (function() {
     this.animation.stop();
   }).bind(this));
-  this.stepButton.on('click', (function() {
-    this.animation.step();
+  this.stepPrevButton.on('click', (function() {
+    this.animation.step_prev();
+  }).bind(this));
+  this.stepNextButton.on('click', (function() {
+    this.animation.step_next();
   }).bind(this));
 
   this.animation.addObserver(this);
@@ -16680,17 +16755,20 @@ Controls.prototype.update = function(status) {
     case Animation.STATUS.INIT: // eslint-disable-line no-fallthrough
       this._enable(this.startButton);
       this._disable(this.stopButton);
-      this._enable(this.stepButton);
+      this._enable(this.stepNextButton);
+      this._enable(this.stepPrevButton);
       break;
     case Animation.STATUS.STARTED:
       this._disable(this.startButton);
       this._enable(this.stopButton);
-      this._disable(this.stepButton);
+      this._disable(this.stepNextButton);
+      this._disable(this.stepPrevButton);
       break;
     case Animation.STATUS.STEPPED:
       this._disable(this.startButton);
       this._enable(this.stopButton);
-      this._enable(this.stepButton);
+      this._enable(this.stepNextButton);
+      this._enable(this.stepPrevButton);
       break;
     default:
       console.log("Unexpected Event: " + status);
@@ -16905,7 +16983,6 @@ Graph._patchParallel = function(expanded) {
 
 Graph.expand = function(item) {
   var expanded = _expand(item);
-  console.log(JSON.stringify(expanded));
   var result = [];
   var current = [];
   // first pass to add missing 'end link' in case of parallel branches at the end of a loop
@@ -16932,7 +17009,6 @@ Graph.expand = function(item) {
   if (current.length > 0) {
     result.push(current);
   }
-  console.log(JSON.stringify(result));
   return result;
 };
 

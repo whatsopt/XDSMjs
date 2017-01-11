@@ -6,7 +6,8 @@ function Controls(animation) {
 
   this.startButton = d3.select('button#start');
   this.stopButton = d3.select('button#stop');
-  this.stepButton = d3.select('button#step');
+  this.stepPrevButton = d3.select('button#step-prev');
+  this.stepNextButton = d3.select('button#step-next');
 
   this.startButton.on('click', (function() {
     this.animation.start();
@@ -14,8 +15,11 @@ function Controls(animation) {
   this.stopButton.on('click', (function() {
     this.animation.stop();
   }).bind(this));
-  this.stepButton.on('click', (function() {
-    this.animation.step();
+  this.stepPrevButton.on('click', (function() {
+    this.animation.step_prev();
+  }).bind(this));
+  this.stepNextButton.on('click', (function() {
+    this.animation.step_next();
   }).bind(this));
 
   this.animation.addObserver(this);
@@ -30,17 +34,20 @@ Controls.prototype.update = function(status) {
     case Animation.STATUS.INIT: // eslint-disable-line no-fallthrough
       this._enable(this.startButton);
       this._disable(this.stopButton);
-      this._enable(this.stepButton);
+      this._enable(this.stepNextButton);
+      this._enable(this.stepPrevButton);
       break;
     case Animation.STATUS.STARTED:
       this._disable(this.startButton);
       this._enable(this.stopButton);
-      this._disable(this.stepButton);
+      this._disable(this.stepNextButton);
+      this._disable(this.stepPrevButton);
       break;
     case Animation.STATUS.STEPPED:
       this._disable(this.startButton);
       this._enable(this.stopButton);
-      this._enable(this.stepButton);
+      this._enable(this.stepNextButton);
+      this._enable(this.stepPrevButton);
       break;
     default:
       console.log("Unexpected Event: " + status);
