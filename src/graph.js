@@ -194,7 +194,6 @@ Graph._patchParallel = function(expanded) {
 
 Graph.expand = function(item) {
   var expanded = _expand(item);
-  console.log(JSON.stringify(expanded));
   var result = [];
   var current = [];
   // first pass to add missing 'end link' in case of parallel branches at the end of a loop
