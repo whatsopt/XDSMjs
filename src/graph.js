@@ -220,7 +220,6 @@ Graph.expand = function(item) {
   if (current.length > 0) {
     result.push(current);
   }
-  console.log(JSON.stringify(result));
   return result;
 };
 
