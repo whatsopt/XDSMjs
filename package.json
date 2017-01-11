@@ -9,6 +9,7 @@
   "scripts": {
     "lint": "eslint xdsm-main.js ./src/* || true",
     "build": "browserify ./xdsm-main.js -o ./build/xdsm.js",
+    "postbuild": "uglifyjs ./build/xdsm.js > ./build/xdsm.min.js",
     "test": "node tests/xdsm-test.js | faucet || true",
     "testbrowser": "browserify tests/xdsm-test.js -o ./build/xdsm-test-bundle.js | firefox ./tests/index.html || true",
     "testfront": "browserify tests/xdsm-test.js | testling -x firefox || true"
@@ -33,7 +34,8 @@
     "eslint-config-google": "^0.5.0",
     "faucet": "0.0.1",
     "tape": "^4.5.1",
-    "testling": "^1.7.1"
+    "testling": "^1.7.1",
+    "uglify-js": "^2.7.5"
   },
   "dependencies": {
     "d3": "^4"

@@ -16878,42 +16878,39 @@ function _expand(workflow) {
 }
 
 Graph._isPatchNeeded = function(toBePatched) {
-  var lastElts = toBePatched.map(function(arr) { return arr[arr.length-1]; })
+  var lastElts = toBePatched.map(function(arr) {
+    return arr[arr.length - 1];
+  });
   var lastElt = lastElts[0];
-  for (var i=0; i<lastElts.length; i++) {
+  for (var i = 0; i < lastElts.length; i++) {
     if (lastElts[i] !== lastElt) {
       return true;
     }
   }
   return false;
-}
+};
 
-Graph._patchParallel = function (expanded) {
-  var patchNeeded = false;
-  var toBePatched = []
+Graph._patchParallel = function(expanded) {
+  var toBePatched = [];
   expanded.forEach(function(elt) {
     if (elt instanceof Array) {
       toBePatched.push(elt);
-    } else {
-      if (Graph._isPatchNeeded(toBePatched)) {
-        toBePatched.forEach(function(arr) {
-          arr.push(elt);
-        }, this);
-      }
+    } else if (Graph._isPatchNeeded(toBePatched)) {
+      toBePatched.forEach(function(arr) {
+        arr.push(elt);
+      }, this);
     }
   }, this);
-}
+};
 
 Graph.expand = function(item) {
   var expanded = _expand(item);
   console.log(JSON.stringify(expanded));
   var result = [];
   var current = [];
-  
   // first pass to add missing 'end link' in case of parallel branches at the end of a loop
   // [a, [b, d], [b, c], a] -> [a, [b, d, a], [b, c, a], a]
   Graph._patchParallel(expanded);
-  
   // [a, aa, [b, c], d] -> [[a, aa, b], [b,c], [c, d]]
   expanded.forEach(function(elt) {
     if (elt instanceof Array) {
@@ -17016,7 +17013,7 @@ Labelizer.strParse = function(str) {
 
   var lstr = str.split(',');
   var underscores = /_/g;
-  var rg = /([0-9\-]+:)?([A-Za-z0-9\-\./]+)(_[A-Za-z0-9\-\._,]+)?(\^.+)?/;
+  var rg = /([0-9\-]+:)?([A-Za-z0-9\-\.]+)(_[A-Za-z0-9\-\._]+)?(\^.+)?/;
 
   var res = lstr.map(function(s) {
     var base;
