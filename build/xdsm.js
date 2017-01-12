@@ -16404,22 +16404,21 @@ function Animation(xdsms, rootId, delay) {
   this.reset();
 }
 
-Animation.STATUS = {INIT: "init",
-                    STARTED: "started",
+Animation.STATUS = {READY: "ready",
+                    RUNNING_STEP: "running_step",
+                    RUNNING_AUTO: "running_auto",
                     STOPPED: "stopped",
-                    STEPPED: "stepped",
                     DONE: "done"};
 
 Animation.prototype.reset = function() {
-  this.curStep = 1;
+  this.curStep = 0;
   this.subAnimations = {};
-  this.status = Animation.STATUS.INIT;
-  this._updateStatus(Animation.STATUS.INIT);
+  this._updateStatus(Animation.STATUS.READY);
 };
 
 Animation.prototype.start = function() {
   this._scheduleAnimation();
-  this._updateStatus(Animation.STATUS.STARTED);
+  this._updateStatus(Animation.STATUS.RUNNING_AUTO);
 };
 
 Animation.prototype.stop = function() {
@@ -16427,21 +16426,41 @@ Animation.prototype.stop = function() {
   this._updateStatus(Animation.STATUS.STOPPED);
 };
 
-Animation.prototype.step = function() {
+Animation.prototype.stepPrev = function() {
+  this._step("prev");
+};
+
+Animation.prototype.stepNext = function() {
+  this._step("next");
+};
+
+Animation.prototype._step = function(dir) {
+  var backward = (dir === "prev");
   var self = this;
   var graph = self.xdsms[self.rootId].graph;
+  var nodesByStep = graph.nodesByStep;
+  var incr = backward ? -1 : 1;
+
+  // console.log("*************************************** STEP "+self.rootId);
+
+  if ((!backward && self.done()) ||
+      (backward && self.ready())) {
+    return;
+  }
 
   if (!self._subAnimationInProgress()) {
+    self.curStep += incr;
     self._reset();
-    if (self.done()) {
-      return;
-    }
 
-    var nodesAtStep = graph.nodesByStep[self.curStep];
+    var nodesAtStep = nodesByStep[self.curStep];
     nodesAtStep.forEach(function(nodeId) {
-      if (self.started()) {
-        graph.nodesByStep[self.curStep-1].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
-          self._pulseLink(0, prevNodeId, nodeId);
+      if (self.running()) {
+        nodesByStep[self.curStep - incr].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
+          if (backward) {
+            self._pulseLink(0, nodeId, prevNodeId);
+          } else {
+            self._pulseLink(0, prevNodeId, nodeId);
+          }
           var gnode = "g." + prevNodeId;
           self._pulse(0, gnode + " > rect", "out");
         });
@@ -16451,8 +16470,12 @@ Animation.prototype.step = function() {
     });
   }
 
-  if (graph.nodesByStep[self.curStep].some(self._isSubScenario, this)) {
-    graph.nodesByStep[self.curStep].forEach(function(nodeId) {
+  // console.log(self.rootId+" -> nodesByStep = "+JSON.stringify(nodesByStep));
+  // console.log(self.rootId+" -> nodesAtStep = "+JSON.stringify(nodesAtStep));
+  // console.log(self.rootId+" -> self.curStep = "+self.curStep);
+
+  if (nodesByStep[self.curStep].some(self._isSubScenario, this)) {
+    nodesByStep[self.curStep].forEach(function(nodeId) {
       if (self._isSubScenario(nodeId)) {
         var scnId = graph.getNode(nodeId).getScenarioId();
         var anim;
@@ -16461,29 +16484,30 @@ Animation.prototype.step = function() {
         } else {
           anim = self.subAnimations[scnId] = new Animation(self.xdsms, scnId);
         }
-        if (!anim.done()) {
-          anim.step();
-        }
+        anim._step(dir);
       }
     }, this);
   }
-  if (self._allSubAnimationsDone()) {
-    this._resetSubAnimations();
-    self.curStep += 1;
-  }
   if (this.done()) {
     this._updateStatus(Animation.STATUS.DONE);
+  } else if (this.ready()) {
+    this._updateStatus(Animation.STATUS.READY);
   } else {
-    this._updateStatus(Animation.STATUS.STEPPED);
+    this._updateStatus(Animation.STATUS.RUNNING_STEP);
   }
 };
 
-Animation.prototype.started = function() {
-  return this.curStep > 1;
+Animation.prototype.running = function() {
+  return !this.ready() && !this.done();
 };
-
+Animation.prototype.ready = function() {
+  return this.curStep === 0;
+};
 Animation.prototype.done = function() {
-  return this.curStep === this.root.graph.nodesByStep.length;
+  return this.curStep === this.root.graph.nodesByStep.length - 1;
+};
+Animation.prototype.isStatus = function(status) {
+  return this.status === status;
 };
 
 Animation.prototype.addObserver = function(observer) {
@@ -16628,21 +16652,14 @@ Animation.prototype._resetPreviousStep = function() {
   }, this);
 };
 
-Animation.prototype._allSubAnimationsDone = function() {
-  var allDone = true;
+Animation.prototype._subAnimationInProgress = function() {
+  var running = false;
   for (var k in this.subAnimations) {
     if (this.subAnimations.hasOwnProperty(k)) {
-      allDone = allDone && this.subAnimations[k].done();
+      running = running || this.subAnimations[k].running();
     }
   }
-  return allDone;
-};
-
-Animation.prototype._subAnimationInProgress = function() {
-  return Object.keys(this.subAnimations).length > 0;
-};
-Animation.prototype._resetSubAnimations = function() {
-  this.subAnimations = {};
+  return running;
 };
 
 module.exports = Animation;
@@ -16656,7 +16673,8 @@ function Controls(animation) {
 
   this.startButton = d3.select('button#start');
   this.stopButton = d3.select('button#stop');
-  this.stepButton = d3.select('button#step');
+  this.stepPrevButton = d3.select('button#step-prev');
+  this.stepNextButton = d3.select('button#step-next');
 
   this.startButton.on('click', (function() {
     this.animation.start();
@@ -16664,8 +16682,11 @@ function Controls(animation) {
   this.stopButton.on('click', (function() {
     this.animation.stop();
   }).bind(this));
-  this.stepButton.on('click', (function() {
-    this.animation.step();
+  this.stepPrevButton.on('click', (function() {
+    this.animation.stepPrev();
+  }).bind(this));
+  this.stepNextButton.on('click', (function() {
+    this.animation.stepNext();
   }).bind(this));
 
   this.animation.addObserver(this);
@@ -16673,24 +16694,28 @@ function Controls(animation) {
 }
 
 Controls.prototype.update = function(status) {
+  // console.log("Controls receives: "+status);
   switch (status) {
     case Animation.STATUS.STOPPED:
     case Animation.STATUS.DONE:
-      this.animation.reset();  // trigger INIT status
-    case Animation.STATUS.INIT: // eslint-disable-line no-fallthrough
+      this.animation.reset();  // trigger READY status
+    case Animation.STATUS.READY: // eslint-disable-line no-fallthrough
       this._enable(this.startButton);
       this._disable(this.stopButton);
-      this._enable(this.stepButton);
+      this._enable(this.stepNextButton);
+      this._enable(this.stepPrevButton);
       break;
-    case Animation.STATUS.STARTED:
+    case Animation.STATUS.RUNNING_AUTO:
       this._disable(this.startButton);
       this._enable(this.stopButton);
-      this._disable(this.stepButton);
+      this._disable(this.stepNextButton);
+      this._disable(this.stepPrevButton);
       break;
-    case Animation.STATUS.STEPPED:
+    case Animation.STATUS.RUNNING_STEP:
       this._disable(this.startButton);
       this._enable(this.stopButton);
-      this._enable(this.stepButton);
+      this._enable(this.stepNextButton);
+      this._enable(this.stepPrevButton);
       break;
     default:
       console.log("Unexpected Event: " + status);
@@ -16905,7 +16930,6 @@ Graph._patchParallel = function(expanded) {
 
 Graph.expand = function(item) {
   var expanded = _expand(item);
-  console.log(JSON.stringify(expanded));
   var result = [];
   var current = [];
   // first pass to add missing 'end link' in case of parallel branches at the end of a loop
@@ -16932,7 +16956,6 @@ Graph.expand = function(item) {
   if (current.length > 0) {
     result.push(current);
   }
-  console.log(JSON.stringify(result));
   return result;
 };
 
