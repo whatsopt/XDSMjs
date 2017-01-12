@@ -16426,27 +16426,27 @@ Animation.prototype.stop = function() {
   this._updateStatus(Animation.STATUS.STOPPED);
 };
 
-Animation.prototype.step_prev = function() {
+Animation.prototype.stepPrev = function() {
   this._step("prev");
 };
 
-Animation.prototype.step_next = function() {
+Animation.prototype.stepNext = function() {
   this._step("next");
 };
 
 Animation.prototype._step = function(dir) {
-  var backward = (dir=="prev");
+  var backward = (dir === "prev");
   var self = this;
   var graph = self.xdsms[self.rootId].graph;
   var nodesByStep = graph.nodesByStep;
-  var incr = backward?-1:1;
+  var incr = backward ? -1 : 1;
 
-  console.log("*************************************** STEP "+self.rootId);
+  // console.log("*************************************** STEP "+self.rootId);
 
   if ((!backward && self.done()) ||
       (backward && self.ready())) {
     return;
-  };
+  }
 
   if (!self._subAnimationInProgress()) {
     self.curStep += incr;
@@ -16470,9 +16470,9 @@ Animation.prototype._step = function(dir) {
     });
   }
 
-  console.log(self.rootId+" -> nodesByStep = "+JSON.stringify(nodesByStep));
-  console.log(self.rootId+" -> nodesAtStep = "+JSON.stringify(nodesAtStep));
-  console.log(self.rootId+" -> self.curStep = "+self.curStep);
+  // console.log(self.rootId+" -> nodesByStep = "+JSON.stringify(nodesByStep));
+  // console.log(self.rootId+" -> nodesAtStep = "+JSON.stringify(nodesAtStep));
+  // console.log(self.rootId+" -> self.curStep = "+self.curStep);
 
   if (nodesByStep[self.curStep].some(self._isSubScenario, this)) {
     nodesByStep[self.curStep].forEach(function(nodeId) {
@@ -16498,18 +16498,17 @@ Animation.prototype._step = function(dir) {
 };
 
 Animation.prototype.running = function() {
-  return !this.ready() && !this.done() ;
+  return !this.ready() && !this.done();
 };
 Animation.prototype.ready = function() {
   return this.curStep === 0;
 };
 Animation.prototype.done = function() {
-  return this.curStep === this.root.graph.nodesByStep.length-1;
+  return this.curStep === this.root.graph.nodesByStep.length - 1;
 };
 Animation.prototype.isStatus = function(status) {
   return this.status === status;
 };
-
 
 Animation.prototype.addObserver = function(observer) {
   if (observer) {
@@ -16653,26 +16652,6 @@ Animation.prototype._resetPreviousStep = function() {
   }, this);
 };
 
-Animation.prototype._allSubAnimationsDone = function() {
-  var allDone = true;
-  for (var k in this.subAnimations) {
-    if (this.subAnimations.hasOwnProperty(k)) {
-      allDone = allDone && this.subAnimations[k].done();
-    }
-  }
-  return allDone;
-};
-
-Animation.prototype._allSubAnimationsCheckedFor = function(status) {
-  var allChecked = true;
-  for (var k in this.subAnimations) {
-    if (this.subAnimations.hasOwnProperty(k)) {
-      allChecked = allChecked && this.subAnimations[k].isStatus(status);
-    }
-  }
-  return allChecked;
-};
-
 Animation.prototype._subAnimationInProgress = function() {
   var running = false;
   for (var k in this.subAnimations) {
@@ -16704,10 +16683,10 @@ function Controls(animation) {
     this.animation.stop();
   }).bind(this));
   this.stepPrevButton.on('click', (function() {
-    this.animation.step_prev();
+    this.animation.stepPrev();
   }).bind(this));
   this.stepNextButton.on('click', (function() {
-    this.animation.step_next();
+    this.animation.stepNext();
   }).bind(this));
 
   this.animation.addObserver(this);
@@ -16715,7 +16694,7 @@ function Controls(animation) {
 }
 
 Controls.prototype.update = function(status) {
-  console.log("Controls receives: "+status);
+  // console.log("Controls receives: "+status);
   switch (status) {
     case Animation.STATUS.STOPPED:
     case Animation.STATUS.DONE:

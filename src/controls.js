@@ -16,10 +16,10 @@ function Controls(animation) {
     this.animation.stop();
   }).bind(this));
   this.stepPrevButton.on('click', (function() {
-    this.animation.step_prev();
+    this.animation.stepPrev();
   }).bind(this));
   this.stepNextButton.on('click', (function() {
-    this.animation.step_next();
+    this.animation.stepNext();
   }).bind(this));
 
   this.animation.addObserver(this);
@@ -27,7 +27,7 @@ function Controls(animation) {
 }
 
 Controls.prototype.update = function(status) {
-  console.log("Controls receives: "+status);
+  // console.log("Controls receives: "+status);
   switch (status) {
     case Animation.STATUS.STOPPED:
     case Animation.STATUS.DONE:
