@@ -18,22 +18,21 @@ function Animation(xdsms, rootId, delay) {
   this.reset();
 }
 
-Animation.STATUS = {INIT: "init",
-                    STARTED: "started",
+Animation.STATUS = {READY: "ready",
+                    RUNNING_STEP: "running_step",
+                    RUNNING_AUTO: "running_auto",
                     STOPPED: "stopped",
-                    STEPPED: "stepped",
                     DONE: "done"};
 
 Animation.prototype.reset = function() {
   this.curStep = 0;
   this.subAnimations = {};
-  this.status = Animation.STATUS.INIT;
-  this._updateStatus(Animation.STATUS.INIT);
+  this._updateStatus(Animation.STATUS.READY);
 };
 
 Animation.prototype.start = function() {
   this._scheduleAnimation();
-  this._updateStatus(Animation.STATUS.STARTED);
+  this._updateStatus(Animation.STATUS.RUNNING_AUTO);
 };
 
 Animation.prototype.stop = function() {
@@ -56,8 +55,10 @@ Animation.prototype._step = function(dir) {
   var nodesByStep = graph.nodesByStep;
   var incr = backward?-1:1;
 
+  console.log("*************************************** STEP "+self.rootId);
+
   if ((!backward && self.done()) ||
-      (backward && !self.started())) {
+      (backward && self.ready())) {
     return;
   };
 
@@ -67,7 +68,7 @@ Animation.prototype._step = function(dir) {
 
     var nodesAtStep = nodesByStep[self.curStep];
     nodesAtStep.forEach(function(nodeId) {
-      if (self.started()) {
+      if (self.running()) {
         nodesByStep[self.curStep - incr].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
           if (backward) {
             self._pulseLink(0, nodeId, prevNodeId);
@@ -83,6 +84,10 @@ Animation.prototype._step = function(dir) {
     });
   }
 
+  console.log(self.rootId+" -> nodesByStep = "+JSON.stringify(nodesByStep));
+  console.log(self.rootId+" -> nodesAtStep = "+JSON.stringify(nodesAtStep));
+  console.log(self.rootId+" -> self.curStep = "+self.curStep);
+
   if (nodesByStep[self.curStep].some(self._isSubScenario, this)) {
     nodesByStep[self.curStep].forEach(function(nodeId) {
       if (self._isSubScenario(nodeId)) {
@@ -93,31 +98,32 @@ Animation.prototype._step = function(dir) {
         } else {
           anim = self.subAnimations[scnId] = new Animation(self.xdsms, scnId);
         }
-        if (!anim.done()) {
-          anim._step(dir);
-        }
+        anim._step(dir);
       }
     }, this);
   }
-  if (self._allSubAnimationsDone()) {
-    this._resetSubAnimations();
-  }
   if (this.done()) {
     this._updateStatus(Animation.STATUS.DONE);
+  } else if (this.ready()) {
+    this._updateStatus(Animation.STATUS.READY);
   } else {
-    this._updateStatus(Animation.STATUS.STEPPED);
+    this._updateStatus(Animation.STATUS.RUNNING_STEP);
   }
 };
 
-
-
-Animation.prototype.started = function() {
-  return this.curStep > 0;
+Animation.prototype.running = function() {
+  return !this.ready() && !this.done() ;
 };
-
+Animation.prototype.ready = function() {
+  return this.curStep === 0;
+};
 Animation.prototype.done = function() {
-  return this.curStep > this.root.graph.nodesByStep.length-1;
+  return this.curStep === this.root.graph.nodesByStep.length-1;
 };
+Animation.prototype.isStatus = function(status) {
+  return this.status === status;
+};
+
 
 Animation.prototype.addObserver = function(observer) {
   if (observer) {
@@ -271,11 +277,24 @@ Animation.prototype._allSubAnimationsDone = function() {
   return allDone;
 };
 
-Animation.prototype._subAnimationInProgress = function() {
-  return Object.keys(this.subAnimations).length > 0;
+Animation.prototype._allSubAnimationsCheckedFor = function(status) {
+  var allChecked = true;
+  for (var k in this.subAnimations) {
+    if (this.subAnimations.hasOwnProperty(k)) {
+      allChecked = allChecked && this.subAnimations[k].isStatus(status);
+    }
+  }
+  return allChecked;
 };
-Animation.prototype._resetSubAnimations = function() {
-  this.subAnimations = {};
+
+Animation.prototype._subAnimationInProgress = function() {
+  var running = false;
+  for (var k in this.subAnimations) {
+    if (this.subAnimations.hasOwnProperty(k)) {
+      running = running || this.subAnimations[k].running();
+    }
+  }
+  return running;
 };
 
 module.exports = Animation;

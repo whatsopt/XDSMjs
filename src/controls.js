@@ -27,23 +27,24 @@ function Controls(animation) {
 }
 
 Controls.prototype.update = function(status) {
+  console.log("Controls receives: "+status);
   switch (status) {
     case Animation.STATUS.STOPPED:
     case Animation.STATUS.DONE:
-      this.animation.reset();  // trigger INIT status
-    case Animation.STATUS.INIT: // eslint-disable-line no-fallthrough
+      this.animation.reset();  // trigger READY status
+    case Animation.STATUS.READY: // eslint-disable-line no-fallthrough
       this._enable(this.startButton);
       this._disable(this.stopButton);
       this._enable(this.stepNextButton);
       this._enable(this.stepPrevButton);
       break;
-    case Animation.STATUS.STARTED:
+    case Animation.STATUS.RUNNING_AUTO:
       this._disable(this.startButton);
       this._enable(this.stopButton);
       this._disable(this.stepNextButton);
       this._disable(this.stepPrevButton);
       break;
-    case Animation.STATUS.STEPPED:
+    case Animation.STATUS.RUNNING_STEP:
       this._disable(this.startButton);
       this._enable(this.stopButton);
       this._enable(this.stepNextButton);
