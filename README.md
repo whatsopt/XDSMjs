@@ -14,7 +14,7 @@ XDSM permissions:
 ## Description
 XDSMjs is a javascript generator allowing to display a XDSM diagram within a web page.
 It is based on [D3](https://d3js.org/).
-It uses the xdsm.json file as input which contains required information to generate the XDSM diagram. See the dedicated Wiki page for a description of the [XDSMjs json format](https://github.com/OneraHub/XDSMjs/wiki/XDMSjs-JSON-format)
+It uses the xdsm.json file as input which contains required information to generate the XDSM diagram. See the dedicated Wiki page for a description of the [XDSMjs json format](https://github.com/OneraHub/XDSMjs/wiki/XDMSjs-JSON-format).
 
 ## Usage
 Open `xdsm.html` in your browser. To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page.
