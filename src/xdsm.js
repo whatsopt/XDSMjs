@@ -35,18 +35,7 @@ Xdsm.prototype.draw = function() {
   var self = this;
 
   if (self.graph.refname) {
-    var ref = self.svg.append('g').classed('title', true);
-
-    ref.append("text").text(self.graph.refname);
-    var bbox = ref.nodes()[0].getBBox();
-    ref.insert("rect", "text")
-        .attr('x', bbox.x)
-        .attr('y', bbox.y)
-        .attr('width', bbox.width)
-        .attr('height', bbox.height);
-
-    ref.attr('transform',
-             'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
+    self._addTitle();
   }
 
   self.nodes = self._createTextGroup("node");
@@ -303,4 +292,18 @@ Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
   });
 };
 
+Xdsm.prototype._addTitle = function() {
+  var ref = self.svg.append('g').classed('title', true);
+
+  ref.append("text").text(self.graph.refname);
+  var bbox = ref.nodes()[0].getBBox();
+  ref.insert("rect", "text")
+      .attr('x', bbox.x)
+      .attr('y', bbox.y)
+      .attr('width', bbox.width)
+      .attr('height', bbox.height);
+
+  ref.attr('transform',
+           'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
+}
 module.exports = Xdsm;
