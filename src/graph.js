@@ -111,8 +111,13 @@ function Graph(mdo, refname) {
 Graph.prototype.idxOf = function(nodeId) {
   return this.ids.indexOf(nodeId);
 };
+
 Graph.prototype.getNode = function(nodeId) {
   return this.nodes[this.ids.indexOf(nodeId)];
+};
+
+Graph.prototype.addNode = function(nodeName) {
+  this.nodes.push(new Node(nodeName, nodeName, "analysis"));
 };
 
 function _expand(workflow) {

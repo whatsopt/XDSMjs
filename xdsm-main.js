@@ -44,7 +44,7 @@ d3.json("xdsm.json", function(error, mdo) {
   if (scenarioKeys.indexOf('root') === -1) {
     // old format: mono xdsm
     var graph = new Graph(mdo);
-    xdsms.root = new Xdsm(graph, 'root');
+    xdsms.root = new Xdsm(graph, 'root', tooltip);
     xdsms.root.draw();
   } else {
     // new format managing several XDSM
@@ -53,23 +53,22 @@ d3.json("xdsm.json", function(error, mdo) {
         var graph = new Graph(mdo[k], k);
         xdsms[k] = new Xdsm(graph, k, tooltip);
         xdsms[k].draw();
+        xdsms[k].svg.select(".optimization").on("click", function() {
+          var info = d3.select(".optpb." + k);
+          info.style("opacity", 0.9);
+          info.style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 28) + "px");
+          info.style("pointer-events", "auto");
+        });
       }
     }, this);
   }
 
-  // Hook opt pb display to opt nodes
-  scenarioKeys.forEach(function(k) {
-    if (mdo.hasOwnProperty(k)) {
-      xdsms[k].svg.select(".optimization").on("click", function() {
-        var info = d3.select(".optpb." + k);
-        info.style("opacity", 0.9);
-        info.style("left", (d3.event.pageX) + "px")
-          .style("top", (d3.event.pageY - 28) + "px");
-        info.style("pointer-events", "auto");
-      });
-    }
-  }, this);
-
   var ctrls = new Controls(new Animation(xdsms)); // eslint-disable-line no-unused-vars
+
+  var addButton = d3.select('button#add');
+  addButton.on('click', function() {
+    xdsms.root.addNode("Discipline");
+  });
 });
 

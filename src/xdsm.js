@@ -9,6 +9,7 @@ var PADDING = 20;
 var CELL_W = 250;
 var CELL_H = 75;
 var MULTI_OFFSET = 3;
+var BORDER_PADDING = 4;
 
 function Cell(x, y, width, height) {
   this.x = x;
@@ -29,69 +30,51 @@ function Xdsm(graph, svgid, tooltip) {
   this.grid = [];
   this.nodes = [];
   this.edges = [];
+
+  this._initialize();
 }
 
-Xdsm.prototype.draw = function() {
+Xdsm.prototype.addNode = function(nodeName) {
+  this.graph.addNode(nodeName);
+  this.draw();
+};
+
+Xdsm.prototype._initialize = function() {
   var self = this;
 
   if (self.graph.refname) {
     self._addTitle();
   }
+  self.nodeGroup = self.svg.append('g').attr("class", "nodes");
+  self.edgeGroup = self.svg.append('g').attr("class", "edges");
+};
 
-  self.nodes = self._createTextGroup("node");
-  self.edges = self._createTextGroup("edge");
+Xdsm.prototype.draw = function() {
+  var self = this;
+
+  self.nodes = self._createTextGroup("node", self.nodeGroup, self._customRect);
+  self.edges = self._createTextGroup("edge", self.edgeGroup, self._customTrapz);
 
   // Workflow
   self._createWorkflow();
 
-  // Layout texts
-  self._layoutText(self.nodes);
-  self._layoutText(self.edges);
-
-  // Rectangles for nodes
-  self.nodes.each(function(d, i) {
-    var that = d3.select(this);
-    that.call(self._customRect.bind(self), d, i, 0);
-    if (d.isMulti) {
-      that.call(self._customRect.bind(self), d, i, 1 * Number(MULTI_OFFSET));
-      that.call(self._customRect.bind(self), d, i, 2 * Number(MULTI_OFFSET));
-    }
-  });
-
-  // Trapezium for edges
-  self.edges.each(function(d, i) {
-    var that = d3.select(this);
-    that.call(self._customTrapz.bind(self), d, i, 0);
-    if (d.isMulti) {
-      that.call(self._customTrapz.bind(self), d, i, 1 * Number(MULTI_OFFSET));
-      that.call(self._customTrapz.bind(self), d, i, 2 * Number(MULTI_OFFSET));
-    }
-  });
-
   // Dataflow
-  self._createDataflow(self.edges);
+  self._createDataflow();
 
-  // set svg size
+  // Border (used by animation)
+  self._createBorder();
+
+  // update size
   var w = CELL_W * (self.graph.nodes.length + 1);
   var h = CELL_H * (self.graph.nodes.length + 1);
   self.svg.attr("width", w).attr("height", h);
-
-  var bordercolor = 'black';
-  self.svg.append("rect")
-            .classed("border", true)
-            .attr("x", 4)
-            .attr("y", 4)
-            .attr("height", h - 4)
-            .attr("width", w - 4)
-            .style("stroke", bordercolor)
-            .style("fill", "none")
-            .style("stroke-width", 0);
+  self.svg.selectAll(".border")
+    .attr("height", h - BORDER_PADDING)
+    .attr("width", w - BORDER_PADDING);
 };
 
-Xdsm.prototype._createTextGroup = function(kind) {
+Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
   var self = this;
-
-  var group = self.svg.append('g').attr("class", kind + "s");
 
   var textGroups =
     group.selectAll("." + kind)
@@ -119,13 +102,18 @@ Xdsm.prototype._createTextGroup = function(kind) {
     self.tooltip.transition().duration(500).style("opacity", 0);
   });
 
+  self._layoutText(textGroups, decorate);
+
   return textGroups;
 };
 
 Xdsm.prototype._createWorkflow = function() {
   //  console.log(JSON.stringify(this.graph.chains));
-  var workflow = this.svg.insert("g", ":first-child")
-                    .attr("class", "workflow");
+  var workflow = this.svg.selectAll(".workflow")
+    .data([self.graph])
+  .enter()
+    .insert("g", ":first-child")
+    .attr("class", "workflow");
 
   workflow.selectAll("g")
     .data(this.graph.chains)
@@ -177,11 +165,15 @@ Xdsm.prototype._createWorkflow = function() {
       });
 };
 
-Xdsm.prototype._createDataflow = function(edges) {
-  var dataflow = this.svg.insert("g", ":first-child")
-                   .attr("class", "dataflow");
+Xdsm.prototype._createDataflow = function() {
+  var self = this;
+  var dataflow = self.svg.selectAll(".dataflow")
+    .data([self])
+  .enter()
+    .insert("g", ":first-child")
+    .attr("class", "dataflow");
 
-  edges.each(function(d, i) {
+  self.edges.each(function(d, i) {
     dataflow.insert("polyline", ":first-child")
       .attr("points", function() {
         var w = CELL_W * Math.abs(d.col - d.row);
@@ -215,8 +207,9 @@ Xdsm.prototype._createDataflow = function(edges) {
   });
 };
 
-Xdsm.prototype._layoutText = function(items) {
-  var grid = this.grid;
+Xdsm.prototype._layoutText = function(items, decorate) {
+  var self = this;
+  var grid = self.grid;
   items.each(function(d, i) {
     var item = d3.select(this);
     if (grid[i] === undefined) {
@@ -247,6 +240,15 @@ Xdsm.prototype._layoutText = function(items) {
     var w = CELL_W * m + X_ORIG;
     var h = CELL_H * n + Y_ORIG;
     return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+  });
+
+  items.each(function(d, i) {
+    var that = d3.select(this);
+    that.call(decorate.bind(self), d, i, 0);
+    if (d.isMulti) {
+      that.call(self._customRect.bind(self), d, i, 1 * Number(MULTI_OFFSET));
+      that.call(self._customRect.bind(self), d, i, 2 * Number(MULTI_OFFSET));
+    }
   });
 };
 
@@ -293,10 +295,16 @@ Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
 };
 
 Xdsm.prototype._addTitle = function() {
-  var ref = self.svg.append('g').classed('title', true);
+  var self = this;
+  var ref = self.svg.selectAll(".title")
+    .data([self.graph.refname])
+  .enter()
+    .append('g')
+    .classed('title', true)
+    .append("text").text(self.graph.refname);
 
-  ref.append("text").text(self.graph.refname);
   var bbox = ref.nodes()[0].getBBox();
+
   ref.insert("rect", "text")
       .attr('x', bbox.x)
       .attr('y', bbox.y)
@@ -305,5 +313,20 @@ Xdsm.prototype._addTitle = function() {
 
   ref.attr('transform',
            'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
-}
+};
+
+Xdsm.prototype._addBorder = function() {
+  var bordercolor = 'black';
+  self.svg.selectAll(".border")
+    .data([self])
+  .enter()
+    .append("rect")
+    .classed("border", true)
+    .attr("x", BORDER_PADDING)
+    .attr("y", BORDER_PADDING)
+    .style("stroke", bordercolor)
+    .style("fill", "none")
+    .style("stroke-width", 0);
+};
+
 module.exports = Xdsm;
