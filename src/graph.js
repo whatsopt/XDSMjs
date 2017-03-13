@@ -119,6 +119,33 @@ Graph.prototype.getNode = function(nodeId) {
 Graph.prototype.addNode = function(nodeName) {
   this.nodes.push(new Node(nodeName, nodeName, "analysis"));
 };
+Graph.prototype.removeNode = function(index) {
+  var self = this;
+  var node;
+  if (index) {
+    node = this.nodes.pop();
+  } else {
+    node = this.nodes.splice(index, 1)[0];
+  }
+  var edges = this.findEdgesOf(node);
+  edges.forEach(function(edge) {
+    var idx = self.edges.indexOf(edge);
+    if (idx > -1) {
+      this.edges.splice(idx, 1);
+    }
+  }, this);
+};
+
+Graph.prototype.findEdgesOf = function(node) {
+  var nodeIdx = this.idxOf(node.id);
+  var edges = [];
+  this.edges.forEach(function(edge) {
+    if ((edge.row === nodeIdx) || (edge.col === nodeIdx)) {
+      edges.push(edge);
+    }
+  }, this);
+  return edges;
+};
 
 function _expand(workflow) {
   var ret = [];

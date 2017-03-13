@@ -39,11 +39,16 @@ Xdsm.prototype.addNode = function(nodeName) {
   this.draw();
 };
 
+Xdsm.prototype.removeNode = function() {
+  this.graph.removeNode(this.graph.nodes.length - 1);
+  this.draw();
+};
+
 Xdsm.prototype._initialize = function() {
   var self = this;
 
   if (self.graph.refname) {
-    self._addTitle();
+    self._createTitle();
   }
   self.nodeGroup = self.svg.append('g').attr("class", "nodes");
   self.edgeGroup = self.svg.append('g').attr("class", "edges");
@@ -76,9 +81,12 @@ Xdsm.prototype.draw = function() {
 Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
   var self = this;
 
-  var textGroups =
+  var selection =
     group.selectAll("." + kind)
-      .data(this.graph[kind + "s"])
+      .data(this.graph[kind + "s"],
+            function(d) { return d.id; }); // eslint-disable-line brace-style
+
+  var textGroups = selection
     .enter()
       .append("g").attr("class", function(d) {
         var klass = kind === "node" ? d.type : "dataInter";
@@ -90,6 +98,7 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
         var labelize = Labelizer.labelize().ellipsis(5);
         d3.select(this).call(labelize);
       });
+  selection.exit().remove();
 
   d3.selectAll(".ellipsized").on("mouseover", function(d) {
     self.tooltip.transition().duration(200).style("opacity", 0.9);
@@ -120,7 +129,7 @@ Xdsm.prototype._createWorkflow = function() {
   .enter()
     .insert('g').attr("class", "workflow-chain")
     .selectAll('polyline')
-      .data(function(d) { return d; })  // eslint-disable-line brace-style
+      .data(function(d) { return d.id; })  // eslint-disable-line brace-style
     .enter()
       .append("polyline")
         .attr("class", function(d) {
@@ -167,15 +176,21 @@ Xdsm.prototype._createWorkflow = function() {
 
 Xdsm.prototype._createDataflow = function() {
   var self = this;
-  var dataflow = self.svg.selectAll(".dataflow")
+
+  self.svg.selectAll(".dataflow")
     .data([self])
   .enter()
     .insert("g", ":first-child")
     .attr("class", "dataflow");
 
-  self.edges.each(function(d, i) {
-    dataflow.insert("polyline", ":first-child")
-      .attr("points", function() {
+  var selection =
+    d3.select(".dataflow").selectAll("polyline")
+      .data(this.graph.edges,
+            function(d) { return d.id; });  // eslint-disable-line brace-style
+
+  selection.enter()
+    .append("polyline")
+      .attr("points", function(d) {
         var w = CELL_W * Math.abs(d.col - d.row);
         var h = CELL_H * Math.abs(d.col - d.row);
         var points = [];
@@ -197,14 +212,14 @@ Xdsm.prototype._createDataflow = function() {
           }
         }
         return points.join(" ");
-      }).attr("transform", function() {
+      }).attr("transform", function(d, i) {
         var m = (d.col === undefined) ? i : d.col;
         var n = (d.row === undefined) ? i : d.row;
         var w = CELL_W * m + X_ORIG;
         var h = CELL_H * n + Y_ORIG;
         return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
       });
-  });
+  selection.exit().remove();
 };
 
 Xdsm.prototype._layoutText = function(items, decorate) {
@@ -294,7 +309,7 @@ Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
   });
 };
 
-Xdsm.prototype._addTitle = function() {
+Xdsm.prototype._createTitle = function() {
   var self = this;
   var ref = self.svg.selectAll(".title")
     .data([self.graph.refname])
@@ -315,7 +330,8 @@ Xdsm.prototype._addTitle = function() {
            'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
 };
 
-Xdsm.prototype._addBorder = function() {
+Xdsm.prototype._createBorder = function() {
+  var self = this;
   var bordercolor = 'black';
   self.svg.selectAll(".border")
     .data([self])

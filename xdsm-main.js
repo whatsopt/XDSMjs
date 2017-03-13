@@ -70,5 +70,9 @@ d3.json("xdsm.json", function(error, mdo) {
   addButton.on('click', function() {
     xdsms.root.addNode("Discipline");
   });
+  var delButton = d3.select('button#del');
+  delButton.on('click', function() {
+    xdsms.root.removeNode();
+  });
 });
 
