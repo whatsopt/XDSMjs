@@ -123,9 +123,9 @@ Graph.prototype.removeNode = function(index) {
   var self = this;
   var node;
   if (index) {
-    node = this.nodes.pop();
+    node = (this.nodes.splice(index, 1))[0];
   } else {
-    node = this.nodes.splice(index, 1)[0];
+    node = this.nodes.pop();
   }
   var edges = this.findEdgesOf(node);
   edges.forEach(function(edge) {

@@ -236,4 +236,18 @@ test("Graph.number([['Opt', ['mda', ['d1'], 's1']]]) returns {'Opt': '0,5-1', 'm
   t.deepEqual(Graph.number([['Opt', ['mda', ['d1'], 's1']]]).toNum, {'Opt': '0,5-1', 'mda': '1,3-2', 'd1': '2', 's1': '4'});
   t.end();
 });
+test("Graph.findEdgesOf(node: A,B,C; edges: AB, CB) returns 1", function(t) {
+    var mdo = {'nodes':[{'id':'A'}, {'id':'B'}, {'id':'C'}, {'id':'D'}], 
+               'edges':[{'from':'A', 'to':'B', 'name':'AB'},
+                        {'from':'C', 'to':'A', 'name':'CA'},
+                        {'from':'C', 'to':'B', 'name':'CB'},
+                        {'from':'C', 'to':'D', 'name':'CD'}], 
+               'workflow':[]};
+    var graph = new Graph(mdo);
+    t.deepEqual(graph.findEdgesOf(graph.nodes[1]).length, 2);
+    t.deepEqual(graph.findEdgesOf(graph.nodes[3]).length, 3);
+    graph.removeNode(4);
+    t.deepEqual(graph.findEdgesOf(graph.nodes[3]).length, 2);    
+    t.end();
+});
 
