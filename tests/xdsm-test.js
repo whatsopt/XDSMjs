@@ -237,17 +237,25 @@ test("Graph.number([['Opt', ['mda', ['d1'], 's1']]]) returns {'Opt': '0,5-1', 'm
   t.end();
 });
 test("Graph.findEdgesOf(node: A,B,C; edges: AB, CB) returns 1", function(t) {
-    var mdo = {'nodes':[{'id':'A'}, {'id':'B'}, {'id':'C'}, {'id':'D'}], 
+    var mdo = {'nodes':[{'id':'A'}, {'id':'B'}, {'id':'C'}, {'id':'D'}, {'id':'E'}], 
                'edges':[{'from':'A', 'to':'B', 'name':'AB'},
                         {'from':'C', 'to':'A', 'name':'CA'},
                         {'from':'C', 'to':'B', 'name':'CB'},
-                        {'from':'C', 'to':'D', 'name':'CD'}], 
+                        {'from':'C', 'to':'D', 'name':'CD'},
+                        {'from':'E', 'to':'A', 'name':'EA'}], 
                'workflow':[]};
-    var graph = new Graph(mdo);
-    t.deepEqual(graph.findEdgesOf(graph.nodes[1]).length, 2);
-    t.deepEqual(graph.findEdgesOf(graph.nodes[3]).length, 3);
-    graph.removeNode(4);
-    t.deepEqual(graph.findEdgesOf(graph.nodes[3]).length, 2);    
+    var g = new Graph(mdo);
+    // find edges if A removed
+    t.deepEqual(g.findEdgesOf(g.nodes[1]), {'toRemove':[g.edges[0], g.edges[1], g.edges[4]], 'toShift':[g.edges[2], g.edges[3]]});
+    // find edges if C removed
+    t.deepEqual(g.findEdgesOf(g.nodes[3]), {'toRemove':[g.edges[1], g.edges[2], g.edges[3]], 'toShift':[g.edges[4]]});
+    // find edges if D removed
+    t.deepEqual(g.findEdgesOf(g.nodes[4]), {'toRemove':[g.edges[3]], 'toShift':[g.edges[4]]});
+    // remove D
+    g.removeNode(4);
+    t.equal(g.nodes.length, 5);
+    // find edges if C removed again
+    t.deepEqual(g.findEdgesOf(g.nodes[3]), {'toRemove':[g.edges[1], g.edges[2]], 'toShift':[g.edges[3]]});    
     t.end();
 });
 

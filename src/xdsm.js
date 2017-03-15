@@ -40,7 +40,7 @@ Xdsm.prototype.addNode = function(nodeName) {
 };
 
 Xdsm.prototype.removeNode = function() {
-  this.graph.removeNode(this.graph.nodes.length - 1);
+  this.graph.removeNode(2);
   this.draw();
 };
 
@@ -97,7 +97,9 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
       }).each(function() {
         var labelize = Labelizer.labelize().ellipsis(5);
         d3.select(this).call(labelize);
-      });
+      })
+    .merge(selection);
+  
   selection.exit().remove();
 
   d3.selectAll(".ellipsized").on("mouseover", function(d) {
@@ -113,7 +115,52 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
 
   self._layoutText(textGroups, decorate);
 
-  return textGroups;
+  return selection;
+};
+
+Xdsm.prototype._layoutText = function(items, decorate) {
+  var self = this;
+  var grid = self.grid;
+  items.each(function(d, i) {
+    var item = d3.select(this);
+    if (grid[i] === undefined) {
+      grid[i] = new Array(items.length);
+    }
+    item.select("text").each(function(d, j) {
+      var that = d3.select(this);
+      var data = item.data()[0];
+      var m = (data.row === undefined) ? i : data.row;
+      var n = (data.col === undefined) ? i : data.col;
+      var bbox = that.nodes()[j].getBBox();
+      grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
+      that.attr("x", function() {
+        return grid[m][n].x;
+      }).attr("y", function() {
+        return grid[m][n].y;
+      }).attr("width", function() {
+        return grid[m][n].width;
+      }).attr("height", function() {
+        return grid[m][n].height;
+      });
+    });
+  });
+
+  items.attr("transform", function(d, i) {
+    var m = (d.col === undefined) ? i : d.col;
+    var n = (d.row === undefined) ? i : d.row;
+    var w = CELL_W * m + X_ORIG;
+    var h = CELL_H * n + Y_ORIG;
+    return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+  });
+
+  items.each(function(d, i) {
+    var that = d3.select(this);
+    that.call(decorate.bind(self), d, i, 0);
+    if (d.isMulti) {
+      that.call(self._customRect.bind(self), d, i, 1 * Number(MULTI_OFFSET));
+      that.call(self._customRect.bind(self), d, i, 2 * Number(MULTI_OFFSET));
+    }
+  });
 };
 
 Xdsm.prototype._createWorkflow = function() {
@@ -220,51 +267,6 @@ Xdsm.prototype._createDataflow = function() {
         return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
       });
   selection.exit().remove();
-};
-
-Xdsm.prototype._layoutText = function(items, decorate) {
-  var self = this;
-  var grid = self.grid;
-  items.each(function(d, i) {
-    var item = d3.select(this);
-    if (grid[i] === undefined) {
-      grid[i] = new Array(items.length);
-    }
-    item.select("text").each(function(d, j) {
-      var that = d3.select(this);
-      var data = item.data()[0];
-      var m = (data.row === undefined) ? i : data.row;
-      var n = (data.col === undefined) ? i : data.col;
-      var bbox = that.nodes()[j].getBBox();
-      grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
-      that.attr("x", function() {
-        return grid[m][n].x;
-      }).attr("y", function() {
-        return grid[m][n].y;
-      }).attr("width", function() {
-        return grid[m][n].width;
-      }).attr("height", function() {
-        return grid[m][n].height;
-      });
-    });
-  });
-
-  items.attr("transform", function(d, i) {
-    var m = (d.col === undefined) ? i : d.col;
-    var n = (d.row === undefined) ? i : d.row;
-    var w = CELL_W * m + X_ORIG;
-    var h = CELL_H * n + Y_ORIG;
-    return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
-  });
-
-  items.each(function(d, i) {
-    var that = d3.select(this);
-    that.call(decorate.bind(self), d, i, 0);
-    if (d.isMulti) {
-      that.call(self._customRect.bind(self), d, i, 1 * Number(MULTI_OFFSET));
-      that.call(self._customRect.bind(self), d, i, 2 * Number(MULTI_OFFSET));
-    }
-  });
 };
 
 Xdsm.prototype._customRect = function(node, d, i, offset) {

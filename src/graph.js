@@ -119,6 +119,7 @@ Graph.prototype.getNode = function(nodeId) {
 Graph.prototype.addNode = function(nodeName) {
   this.nodes.push(new Node(nodeName, nodeName, "analysis"));
 };
+
 Graph.prototype.removeNode = function(index) {
   var self = this;
   var node;
@@ -128,23 +129,30 @@ Graph.prototype.removeNode = function(index) {
     node = this.nodes.pop();
   }
   var edges = this.findEdgesOf(node);
-  edges.forEach(function(edge) {
+  edges['toRemove'].forEach(function(edge) {
     var idx = self.edges.indexOf(edge);
     if (idx > -1) {
       this.edges.splice(idx, 1);
     }
   }, this);
+  edges['toShift'].forEach(function(edge) {
+    if (edge.row > 1) { edge.row -= 1; }
+    if (edge.col > 1) { edge.col -= 1; }
+  }, this);  
 };
 
 Graph.prototype.findEdgesOf = function(node) {
   var nodeIdx = this.idxOf(node.id);
-  var edges = [];
+  var toRemove = [];
+  var toShift = [];
   this.edges.forEach(function(edge) {
     if ((edge.row === nodeIdx) || (edge.col === nodeIdx)) {
-      edges.push(edge);
-    }
+      toRemove.push(edge);
+    } else if ((edge.row > nodeIdx) || (edge.col > nodeIdx)) {
+      toShift.push(edge);
+    }    
   }, this);
-  return edges;
+  return {'toRemove': toRemove, 'toShift': toShift};
 };
 
 function _expand(workflow) {
