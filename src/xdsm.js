@@ -10,6 +10,7 @@ var CELL_W = 250;
 var CELL_H = 75;
 var MULTI_OFFSET = 3;
 var BORDER_PADDING = 4;
+var ANIM_DURATION = 1000; //ms
 
 function Cell(x, y, width, height) {
   this.x = x;
@@ -113,12 +114,12 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
     self.tooltip.transition().duration(500).style("opacity", 0);
   });
 
-  self._layoutText(textGroups, decorate);
+  self._layoutText(textGroups, decorate,selection.empty()?0:ANIM_DURATION);
 
   return selection;
 };
 
-Xdsm.prototype._layoutText = function(items, decorate) {
+Xdsm.prototype._layoutText = function(items, decorate, delay) {
   var self = this;
   var grid = self.grid;
   items.each(function(d, i) {
@@ -133,19 +134,19 @@ Xdsm.prototype._layoutText = function(items, decorate) {
       var n = (data.col === undefined) ? i : data.col;
       var bbox = that.nodes()[j].getBBox();
       grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
-      that.attr("x", function() {
-        return grid[m][n].x;
-      }).attr("y", function() {
-        return grid[m][n].y;
-      }).attr("width", function() {
+      that.attr("width", function() {
         return grid[m][n].width;
       }).attr("height", function() {
         return grid[m][n].height;
+      }).attr("x", function() {
+        return grid[m][n].x;
+      }).attr("y", function() {
+        return grid[m][n].y;
       });
     });
   });
 
-  items.attr("transform", function(d, i) {
+  items.transition().duration(delay).attr("transform", function(d, i) {
     var m = (d.col === undefined) ? i : d.col;
     var n = (d.row === undefined) ? i : d.row;
     var w = CELL_W * m + X_ORIG;
@@ -175,14 +176,28 @@ Xdsm.prototype._createWorkflow = function() {
     .data(this.graph.chains)
   .enter()
     .insert('g').attr("class", "workflow-chain")
-    .selectAll('polyline')
+    .selectAll('path')
       .data(function(d) { return d.id; })  // eslint-disable-line brace-style
     .enter()
-      .append("polyline")
+      .append("path")
         .attr("class", function(d) {
           return "link_" + d[0] + "_" + d[1];
         })
-        .attr("points", function(d) {
+        .attr("transform", function(d) {
+          var max = Math.max(d[0], d[1]);
+          var min = Math.min(d[0], d[1]);
+          var w;
+          var h;
+          if (d[0] < d[1]) {
+            w = CELL_W * max + X_ORIG;
+            h = CELL_H * min + Y_ORIG;
+          } else {
+            w = CELL_W * min + X_ORIG;
+            h = CELL_H * max + Y_ORIG;
+          }
+          return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+        })
+        .attr("d", function(d) {
           var w = CELL_W * Math.abs(d[0] - d[1]);
           var h = CELL_H * Math.abs(d[0] - d[1]);
           var points = [];
@@ -203,22 +218,8 @@ Xdsm.prototype._createWorkflow = function() {
               points.push("0," + (-h));
             }
           }
-          return points.join(" ");
-        })
-      .attr("transform", function(d) {
-        var max = Math.max(d[0], d[1]);
-        var min = Math.min(d[0], d[1]);
-        var w;
-        var h;
-        if (d[0] < d[1]) {
-          w = CELL_W * max + X_ORIG;
-          h = CELL_H * min + Y_ORIG;
-        } else {
-          w = CELL_W * min + X_ORIG;
-          h = CELL_H * max + Y_ORIG;
-        }
-        return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
-      });
+          return "M" + points.join(" ");
+        });
 };
 
 Xdsm.prototype._createDataflow = function() {
@@ -231,14 +232,22 @@ Xdsm.prototype._createDataflow = function() {
     .attr("class", "dataflow");
 
   var selection =
-    d3.select(".dataflow").selectAll("polyline")
-      .data(this.graph.edges,
-            function(d) { return d.id; });  // eslint-disable-line brace-style
+    d3.select(".dataflow").selectAll("path")
+      .data(this.graph.edges, function(d) { 
+        return d.id; 
+      });
 
   selection.enter()
-    .append("polyline")
+      .append("path")
     .merge(selection)
-      .attr("points", function(d) {
+      .transition().duration(selection.empty()?0:ANIM_DURATION).attr("transform", function(d, i) {
+        var m = (d.col === undefined) ? i : d.col;
+        var n = (d.row === undefined) ? i : d.row;
+        var w = CELL_W * m + X_ORIG;
+        var h = CELL_H * n + Y_ORIG;
+        return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+      }) 
+      .attr("d", function(d) {
         var w = CELL_W * Math.abs(d.col - d.row);
         var h = CELL_H * Math.abs(d.col - d.row);
         var points = [];
@@ -259,14 +268,7 @@ Xdsm.prototype._createDataflow = function() {
             points.push("0," + (-h));
           }
         }
-        return points.join(" ");
-      })
-      .attr("transform", function(d, i) {
-        var m = (d.col === undefined) ? i : d.col;
-        var n = (d.row === undefined) ? i : d.row;
-        var w = CELL_W * m + X_ORIG;
-        var h = CELL_H * n + Y_ORIG;
-        return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+        return "M"+points.join(" ");
       });
   selection.exit().remove();
 };

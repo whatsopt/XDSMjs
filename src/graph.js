@@ -51,11 +51,11 @@ Edge.prototype.isIO = function() {
 
 function Graph(mdo, refname) {
   this.nodes = [new Node(UID, UID, "user")];
-  this.nodeIds = [UID];
   this.edges = [];
   this.chains = [];
   this.refname = refname || "";
-
+  this._newNodeCount = 0;
+  
   var numbering = Graph.number(mdo.workflow);
   var numPrefixes = numbering.toNum;
   this.nodesByStep = numbering.toNode;
@@ -115,7 +115,8 @@ Graph.prototype.getNode = function(nodeId) {
 };
 
 Graph.prototype.addNode = function(nodeName) {
-  this.nodes.push(new Node(nodeName, nodeName, "analysis"));
+  this._newNodeCount += 1;
+  this.nodes.push(new Node("NewNode"+this._newNodeCount, nodeName, "analysis"));
 };
 
 Graph.prototype.removeNode = function(index) {
