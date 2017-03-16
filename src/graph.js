@@ -67,10 +67,6 @@ function Graph(mdo, refname) {
       item.type));
   }, this);
 
-  this.ids = this.nodes.map(function(elt) {
-    return elt.id;
-  });
-
   mdo.edges.forEach(function(item) {
     var idA = this.idxOf(item.from);
     var idB = this.idxOf(item.to);
@@ -109,7 +105,9 @@ function Graph(mdo, refname) {
 }
 
 Graph.prototype.idxOf = function(nodeId) {
-  return this.ids.indexOf(nodeId);
+  return this.nodes.map(function(elt) {
+    return elt.id;
+  }).indexOf(nodeId);
 };
 
 Graph.prototype.getNode = function(nodeId) {
@@ -122,27 +120,29 @@ Graph.prototype.addNode = function(nodeName) {
 
 Graph.prototype.removeNode = function(index) {
   var self = this;
-  var node;
-  if (index) {
-    node = (this.nodes.splice(index, 1))[0];
-  } else {
-    node = this.nodes.pop();
-  }
-  var edges = this.findEdgesOf(node);
-  edges['toRemove'].forEach(function(edge) {
+
+  // Update edges
+  var edges = this.findEdgesOf(index);
+  edges.toRemove.forEach(function(edge) {
     var idx = self.edges.indexOf(edge);
     if (idx > -1) {
-      this.edges.splice(idx, 1);
+      self.edges.splice(idx, 1);
     }
   }, this);
-  edges['toShift'].forEach(function(edge) {
-    if (edge.row > 1) { edge.row -= 1; }
-    if (edge.col > 1) { edge.col -= 1; }
-  }, this);  
+  edges.toShift.forEach(function(edge) {
+    if (edge.row > 1) {
+      edge.row -= 1;
+    }
+    if (edge.col > 1) {
+      edge.col -= 1;
+    }
+  }, this);
+
+  // Update nodes
+  this.nodes.splice(index, 1);
 };
 
-Graph.prototype.findEdgesOf = function(node) {
-  var nodeIdx = this.idxOf(node.id);
+Graph.prototype.findEdgesOf = function(nodeIdx) {
   var toRemove = [];
   var toShift = [];
   this.edges.forEach(function(edge) {
@@ -150,9 +150,9 @@ Graph.prototype.findEdgesOf = function(node) {
       toRemove.push(edge);
     } else if ((edge.row > nodeIdx) || (edge.col > nodeIdx)) {
       toShift.push(edge);
-    }    
+    }
   }, this);
-  return {'toRemove': toRemove, 'toShift': toShift};
+  return {toRemove: toRemove, toShift: toShift};
 };
 
 function _expand(workflow) {

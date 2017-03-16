@@ -83,11 +83,11 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
 
   var selection =
     group.selectAll("." + kind)
-      .data(this.graph[kind + "s"],
+      .data(this.graph[kind + "s"],        // DATA JOIN
             function(d) { return d.id; }); // eslint-disable-line brace-style
 
   var textGroups = selection
-    .enter()
+    .enter() // ENTER
       .append("g").attr("class", function(d) {
         var klass = kind === "node" ? d.type : "dataInter";
         if (klass === "dataInter" && d.isIO()) {
@@ -98,9 +98,9 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
         var labelize = Labelizer.labelize().ellipsis(5);
         d3.select(this).call(labelize);
       })
-    .merge(selection);
-  
-  selection.exit().remove();
+    .merge(selection);  // UPDATE + ENTER
+
+  selection.exit().remove();  // EXIT
 
   d3.selectAll(".ellipsized").on("mouseover", function(d) {
     self.tooltip.transition().duration(200).style("opacity", 0.9);
@@ -237,6 +237,7 @@ Xdsm.prototype._createDataflow = function() {
 
   selection.enter()
     .append("polyline")
+    .merge(selection)
       .attr("points", function(d) {
         var w = CELL_W * Math.abs(d.col - d.row);
         var h = CELL_H * Math.abs(d.col - d.row);
@@ -259,7 +260,8 @@ Xdsm.prototype._createDataflow = function() {
           }
         }
         return points.join(" ");
-      }).attr("transform", function(d, i) {
+      })
+      .attr("transform", function(d, i) {
         var m = (d.col === undefined) ? i : d.col;
         var n = (d.row === undefined) ? i : d.row;
         var w = CELL_W * m + X_ORIG;
