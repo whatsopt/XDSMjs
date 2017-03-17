@@ -10,7 +10,7 @@ var CELL_W = 250;
 var CELL_H = 75;
 var MULTI_OFFSET = 3;
 var BORDER_PADDING = 4;
-var ANIM_DURATION = 1000; //ms
+var ANIM_DURATION = 1000; // ms
 
 function Cell(x, y, width, height) {
   this.x = x;
@@ -114,7 +114,7 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
     self.tooltip.transition().duration(500).style("opacity", 0);
   });
 
-  self._layoutText(textGroups, decorate,selection.empty()?0:ANIM_DURATION);
+  self._layoutText(textGroups, decorate, selection.empty() ? 0 : ANIM_DURATION);
 
   return selection;
 };
@@ -233,20 +233,21 @@ Xdsm.prototype._createDataflow = function() {
 
   var selection =
     d3.select(".dataflow").selectAll("path")
-      .data(this.graph.edges, function(d) { 
-        return d.id; 
+      .data(this.graph.edges, function(d) {
+        return d.id;
       });
 
   selection.enter()
       .append("path")
     .merge(selection)
-      .transition().duration(selection.empty()?0:ANIM_DURATION).attr("transform", function(d, i) {
+      .transition().duration(selection.empty() ? 0 : ANIM_DURATION)
+      .attr("transform", function(d, i) {
         var m = (d.col === undefined) ? i : d.col;
         var n = (d.row === undefined) ? i : d.row;
         var w = CELL_W * m + X_ORIG;
         var h = CELL_H * n + Y_ORIG;
         return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
-      }) 
+      })
       .attr("d", function(d) {
         var w = CELL_W * Math.abs(d.col - d.row);
         var h = CELL_H * Math.abs(d.col - d.row);
@@ -268,7 +269,7 @@ Xdsm.prototype._createDataflow = function() {
             points.push("0," + (-h));
           }
         }
-        return "M"+points.join(" ");
+        return "M" + points.join(" ");
       });
   selection.exit().remove();
 };
