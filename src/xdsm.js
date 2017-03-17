@@ -289,6 +289,7 @@ Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
 };
 
 Xdsm.prototype._addTitle = function() {
+  var self = this;
   var ref = self.svg.append('g').classed('title', true);
 
   ref.append("text").text(self.graph.refname);
