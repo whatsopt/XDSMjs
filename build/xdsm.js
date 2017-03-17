@@ -17194,18 +17194,7 @@ Xdsm.prototype.draw = function() {
   var self = this;
 
   if (self.graph.refname) {
-    var ref = self.svg.append('g').classed('title', true);
-
-    ref.append("text").text(self.graph.refname);
-    var bbox = ref.nodes()[0].getBBox();
-    ref.insert("rect", "text")
-        .attr('x', bbox.x)
-        .attr('y', bbox.y)
-        .attr('width', bbox.width)
-        .attr('height', bbox.height);
-
-    ref.attr('transform',
-             'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
+    self._addTitle();
   }
 
   self.nodes = self._createTextGroup("node");
@@ -17302,7 +17291,7 @@ Xdsm.prototype._createWorkflow = function() {
   .enter()
     .insert('g').attr("class", "workflow-chain")
     .selectAll('polyline')
-      .data(function(d) { return d; })  // eslint-disable-line brace-style
+      .data(function(d) { return d; })
     .enter()
       .append("polyline")
         .attr("class", function(d) {
@@ -17399,15 +17388,11 @@ Xdsm.prototype._layoutText = function(items) {
       var n = (data.col === undefined) ? i : data.col;
       var bbox = that.nodes()[j].getBBox();
       grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
-      that.attr("x", function() {
-        return grid[m][n].x;
-      }).attr("y", function() {
-        return grid[m][n].y;
-      }).attr("width", function() {
-        return grid[m][n].width;
-      }).attr("height", function() {
-        return grid[m][n].height;
-      });
+      that
+        .attr("x", function() { return grid[m][n].x; })
+        .attr("y", function() { return grid[m][n].y; })
+        .attr("width", function() { return grid[m][n].width; })
+        .attr("height", function() { return grid[m][n].height; });
     });
   });
 
@@ -17460,6 +17445,22 @@ Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
     var tpz = [topleft, topright, botright, botleft].join(" ");
     return tpz;
   });
+};
+
+Xdsm.prototype._addTitle = function() {
+  var self = this;
+  var ref = self.svg.append('g').classed('title', true);
+
+  ref.append("text").text(self.graph.refname);
+  var bbox = ref.nodes()[0].getBBox();
+  ref.insert("rect", "text")
+      .attr('x', bbox.x)
+      .attr('y', bbox.y)
+      .attr('width', bbox.width)
+      .attr('height', bbox.height);
+
+  ref.attr('transform',
+           'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
 };
 
 module.exports = Xdsm;
