@@ -132,7 +132,7 @@ Xdsm.prototype._createWorkflow = function() {
   .enter()
     .insert('g').attr("class", "workflow-chain")
     .selectAll('polyline')
-      .data(function(d) { return d; })  // eslint-disable-line brace-style
+      .data(function(d) { return d; })
     .enter()
       .append("polyline")
         .attr("class", function(d) {
@@ -229,15 +229,11 @@ Xdsm.prototype._layoutText = function(items) {
       var n = (data.col === undefined) ? i : data.col;
       var bbox = that.nodes()[j].getBBox();
       grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
-      that.attr("x", function() {
-        return grid[m][n].x;
-      }).attr("y", function() {
-        return grid[m][n].y;
-      }).attr("width", function() {
-        return grid[m][n].width;
-      }).attr("height", function() {
-        return grid[m][n].height;
-      });
+      that
+        .attr("x", function() { return grid[m][n].x; })
+        .attr("y", function() { return grid[m][n].y; })
+        .attr("width", function() { return grid[m][n].width; })
+        .attr("height", function() { return grid[m][n].height; });
     });
   });
 
@@ -305,5 +301,6 @@ Xdsm.prototype._addTitle = function() {
 
   ref.attr('transform',
            'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
-}
+};
+
 module.exports = Xdsm;
