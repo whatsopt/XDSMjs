@@ -1,7 +1,7 @@
 {
   "name": "xdsmjs",
-  "version": "0.1.0",
-  "description": "XDSM diagram generator ",
+  "version": "0.4.1",
+  "description": "XDSM diagram generator",
   "main": "xdsm.js",
   "directories": {
     "example": "examples"
@@ -48,7 +48,8 @@
     },
     "rules": {
       "linebreak-style": "off",
-      "require-jsdoc": "off"
+      "require-jsdoc": "off",
+      "brace-style": "off"
     }
   }
 }

@@ -16787,10 +16787,10 @@ Edge.prototype.isIO = function() {
 
 function Graph(mdo, refname) {
   this.nodes = [new Node(UID, UID, "user")];
-  this.nodeIds = [UID];
   this.edges = [];
   this.chains = [];
   this.refname = refname || "";
+  this._newNodeCount = 0;
 
   var numbering = Graph.number(mdo.workflow);
   var numPrefixes = numbering.toNum;
@@ -16802,10 +16802,6 @@ function Graph(mdo, refname) {
       num ? num + ":" + item.name : item.name,
       item.type));
   }, this);
-
-  this.ids = this.nodes.map(function(elt) {
-    return elt.id;
-  });
 
   mdo.edges.forEach(function(item) {
     var idA = this.idxOf(item.from);
@@ -16845,10 +16841,56 @@ function Graph(mdo, refname) {
 }
 
 Graph.prototype.idxOf = function(nodeId) {
-  return this.ids.indexOf(nodeId);
+  return this.nodes.map(function(elt) {
+    return elt.id;
+  }).indexOf(nodeId);
 };
+
 Graph.prototype.getNode = function(nodeId) {
   return this.nodes[this.ids.indexOf(nodeId)];
+};
+
+Graph.prototype.addNode = function(nodeName) {
+  this._newNodeCount += 1;
+  this.nodes.push(
+      new Node("NewNode" + this._newNodeCount, nodeName, "analysis"));
+};
+
+Graph.prototype.removeNode = function(index) {
+  var self = this;
+
+  // Update edges
+  var edges = this.findEdgesOf(index);
+  edges.toRemove.forEach(function(edge) {
+    var idx = self.edges.indexOf(edge);
+    if (idx > -1) {
+      self.edges.splice(idx, 1);
+    }
+  }, this);
+  edges.toShift.forEach(function(edge) {
+    if (edge.row > 1) {
+      edge.row -= 1;
+    }
+    if (edge.col > 1) {
+      edge.col -= 1;
+    }
+  }, this);
+
+  // Update nodes
+  this.nodes.splice(index, 1);
+};
+
+Graph.prototype.findEdgesOf = function(nodeIdx) {
+  var toRemove = [];
+  var toShift = [];
+  this.edges.forEach(function(edge) {
+    if ((edge.row === nodeIdx) || (edge.col === nodeIdx)) {
+      toRemove.push(edge);
+    } else if ((edge.row > nodeIdx) || (edge.col > nodeIdx)) {
+      toShift.push(edge);
+    }
+  }, this);
+  return {toRemove: toRemove, toShift: toShift};
 };
 
 function _expand(workflow) {
@@ -17168,6 +17210,8 @@ var PADDING = 20;
 var CELL_W = 250;
 var CELL_H = 75;
 var MULTI_OFFSET = 3;
+var BORDER_PADDING = 4;
+var ANIM_DURATION = 1000; // ms
 
 function Cell(x, y, width, height) {
   this.x = x;
@@ -17188,85 +17232,64 @@ function Xdsm(graph, svgid, tooltip) {
   this.grid = [];
   this.nodes = [];
   this.edges = [];
+
+  this._initialize();
 }
+
+Xdsm.prototype.addNode = function(nodeName) {
+  this.graph.addNode(nodeName);
+  this.draw();
+};
+
+Xdsm.prototype.removeNode = function() {
+  this.graph.removeNode(2);
+  this.draw();
+};
+
+Xdsm.prototype._initialize = function() {
+  var self = this;
+
+  if (self.graph.refname) {
+    self._createTitle();
+  }
+  self.nodeGroup = self.svg.append('g').attr("class", "nodes");
+  self.edgeGroup = self.svg.append('g').attr("class", "edges");
+};
 
 Xdsm.prototype.draw = function() {
   var self = this;
 
-  if (self.graph.refname) {
-    var ref = self.svg.append('g').classed('title', true);
-
-    ref.append("text").text(self.graph.refname);
-    var bbox = ref.nodes()[0].getBBox();
-    ref.insert("rect", "text")
-        .attr('x', bbox.x)
-        .attr('y', bbox.y)
-        .attr('width', bbox.width)
-        .attr('height', bbox.height);
-
-    ref.attr('transform',
-             'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
-  }
-
-  self.nodes = self._createTextGroup("node");
-  self.edges = self._createTextGroup("edge");
+  self.nodes = self._createTextGroup("node", self.nodeGroup, self._customRect);
+  self.edges = self._createTextGroup("edge", self.edgeGroup, self._customTrapz);
 
   // Workflow
   self._createWorkflow();
 
-  // Layout texts
-  self._layoutText(self.nodes);
-  self._layoutText(self.edges);
-
-  // Rectangles for nodes
-  self.nodes.each(function(d, i) {
-    var that = d3.select(this);
-    that.call(self._customRect.bind(self), d, i, 0);
-    if (d.isMulti) {
-      that.call(self._customRect.bind(self), d, i, 1 * Number(MULTI_OFFSET));
-      that.call(self._customRect.bind(self), d, i, 2 * Number(MULTI_OFFSET));
-    }
-  });
-
-  // Trapezium for edges
-  self.edges.each(function(d, i) {
-    var that = d3.select(this);
-    that.call(self._customTrapz.bind(self), d, i, 0);
-    if (d.isMulti) {
-      that.call(self._customTrapz.bind(self), d, i, 1 * Number(MULTI_OFFSET));
-      that.call(self._customTrapz.bind(self), d, i, 2 * Number(MULTI_OFFSET));
-    }
-  });
-
   // Dataflow
-  self._createDataflow(self.edges);
+  self._createDataflow();
 
-  // set svg size
+  // Border (used by animation)
+  self._createBorder();
+
+  // update size
   var w = CELL_W * (self.graph.nodes.length + 1);
   var h = CELL_H * (self.graph.nodes.length + 1);
   self.svg.attr("width", w).attr("height", h);
-
-  var bordercolor = 'black';
-  self.svg.append("rect")
-            .classed("border", true)
-            .attr("x", 4)
-            .attr("y", 4)
-            .attr("height", h - 4)
-            .attr("width", w - 4)
-            .style("stroke", bordercolor)
-            .style("fill", "none")
-            .style("stroke-width", 0);
+  self.svg.selectAll(".border")
+    .attr("height", h - BORDER_PADDING)
+    .attr("width", w - BORDER_PADDING);
 };
 
-Xdsm.prototype._createTextGroup = function(kind) {
+Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
   var self = this;
 
-  var group = self.svg.append('g').attr("class", kind + "s");
-
-  var textGroups =
+  var selection =
     group.selectAll("." + kind)
-      .data(this.graph[kind + "s"])
-    .enter()
+      .data(this.graph[kind + "s"],        // DATA JOIN
+            function(d) { return d.id; }); // eslint-disable-line brace-style
+
+  var textGroups = selection
+    .enter() // ENTER
       .append("g").attr("class", function(d) {
         var klass = kind === "node" ? d.type : "dataInter";
         if (klass === "dataInter" && d.isIO()) {
@@ -17276,7 +17299,10 @@ Xdsm.prototype._createTextGroup = function(kind) {
       }).each(function() {
         var labelize = Labelizer.labelize().ellipsis(5);
         d3.select(this).call(labelize);
-      });
+      })
+    .merge(selection);  // UPDATE + ENTER
+
+  selection.exit().remove();  // EXIT
 
   d3.selectAll(".ellipsized").on("mouseover", function(d) {
     self.tooltip.transition().duration(200).style("opacity", 0.9);
@@ -17289,26 +17315,90 @@ Xdsm.prototype._createTextGroup = function(kind) {
     self.tooltip.transition().duration(500).style("opacity", 0);
   });
 
-  return textGroups;
+  self._layoutText(textGroups, decorate, selection.empty() ? 0 : ANIM_DURATION);
+
+  return selection;
+};
+
+Xdsm.prototype._layoutText = function(items, decorate, delay) {
+  var self = this;
+  var grid = self.grid;
+  items.each(function(d, i) {
+    var item = d3.select(this);
+    if (grid[i] === undefined) {
+      grid[i] = new Array(items.length);
+    }
+    item.select("text").each(function(d, j) {
+      var that = d3.select(this);
+      var data = item.data()[0];
+      var m = (data.row === undefined) ? i : data.row;
+      var n = (data.col === undefined) ? i : data.col;
+      var bbox = that.nodes()[j].getBBox();
+      grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
+      that.attr("width", function() {
+        return grid[m][n].width;
+      }).attr("height", function() {
+        return grid[m][n].height;
+      }).attr("x", function() {
+        return grid[m][n].x;
+      }).attr("y", function() {
+        return grid[m][n].y;
+      });
+    });
+  });
+
+  items.transition().duration(delay).attr("transform", function(d, i) {
+    var m = (d.col === undefined) ? i : d.col;
+    var n = (d.row === undefined) ? i : d.row;
+    var w = CELL_W * m + X_ORIG;
+    var h = CELL_H * n + Y_ORIG;
+    return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+  });
+
+  items.each(function(d, i) {
+    var that = d3.select(this);
+    that.call(decorate.bind(self), d, i, 0);
+    if (d.isMulti) {
+      that.call(self._customRect.bind(self), d, i, 1 * Number(MULTI_OFFSET));
+      that.call(self._customRect.bind(self), d, i, 2 * Number(MULTI_OFFSET));
+    }
+  });
 };
 
 Xdsm.prototype._createWorkflow = function() {
   //  console.log(JSON.stringify(this.graph.chains));
-  var workflow = this.svg.insert("g", ":first-child")
-                    .attr("class", "workflow");
+  var workflow = this.svg.selectAll(".workflow")
+    .data([self.graph])
+  .enter()
+    .insert("g", ":first-child")
+    .attr("class", "workflow");
 
   workflow.selectAll("g")
     .data(this.graph.chains)
   .enter()
     .insert('g').attr("class", "workflow-chain")
-    .selectAll('polyline')
-      .data(function(d) { return d; })  // eslint-disable-line brace-style
+    .selectAll('path')
+      .data(function(d) { return d.id; })  // eslint-disable-line brace-style
     .enter()
-      .append("polyline")
+      .append("path")
         .attr("class", function(d) {
           return "link_" + d[0] + "_" + d[1];
         })
-        .attr("points", function(d) {
+        .attr("transform", function(d) {
+          var max = Math.max(d[0], d[1]);
+          var min = Math.min(d[0], d[1]);
+          var w;
+          var h;
+          if (d[0] < d[1]) {
+            w = CELL_W * max + X_ORIG;
+            h = CELL_H * min + Y_ORIG;
+          } else {
+            w = CELL_W * min + X_ORIG;
+            h = CELL_H * max + Y_ORIG;
+          }
+          return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+        })
+        .attr("d", function(d) {
           var w = CELL_W * Math.abs(d[0] - d[1]);
           var h = CELL_H * Math.abs(d[0] - d[1]);
           var points = [];
@@ -17329,31 +17419,37 @@ Xdsm.prototype._createWorkflow = function() {
               points.push("0," + (-h));
             }
           }
-          return points.join(" ");
-        })
-      .attr("transform", function(d) {
-        var max = Math.max(d[0], d[1]);
-        var min = Math.min(d[0], d[1]);
-        var w;
-        var h;
-        if (d[0] < d[1]) {
-          w = CELL_W * max + X_ORIG;
-          h = CELL_H * min + Y_ORIG;
-        } else {
-          w = CELL_W * min + X_ORIG;
-          h = CELL_H * max + Y_ORIG;
-        }
-        return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
-      });
+          return "M" + points.join(" ");
+        });
 };
 
-Xdsm.prototype._createDataflow = function(edges) {
-  var dataflow = this.svg.insert("g", ":first-child")
-                   .attr("class", "dataflow");
+Xdsm.prototype._createDataflow = function() {
+  var self = this;
 
-  edges.each(function(d, i) {
-    dataflow.insert("polyline", ":first-child")
-      .attr("points", function() {
+  self.svg.selectAll(".dataflow")
+    .data([self])
+  .enter()
+    .insert("g", ":first-child")
+    .attr("class", "dataflow");
+
+  var selection =
+    d3.select(".dataflow").selectAll("path")
+      .data(this.graph.edges, function(d) {
+        return d.id;
+      });
+
+  selection.enter()
+      .append("path")
+    .merge(selection)
+      .transition().duration(selection.empty() ? 0 : ANIM_DURATION)
+      .attr("transform", function(d, i) {
+        var m = (d.col === undefined) ? i : d.col;
+        var n = (d.row === undefined) ? i : d.row;
+        var w = CELL_W * m + X_ORIG;
+        var h = CELL_H * n + Y_ORIG;
+        return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+      })
+      .attr("d", function(d) {
         var w = CELL_W * Math.abs(d.col - d.row);
         var h = CELL_H * Math.abs(d.col - d.row);
         var points = [];
@@ -17374,50 +17470,9 @@ Xdsm.prototype._createDataflow = function(edges) {
             points.push("0," + (-h));
           }
         }
-        return points.join(" ");
-      }).attr("transform", function() {
-        var m = (d.col === undefined) ? i : d.col;
-        var n = (d.row === undefined) ? i : d.row;
-        var w = CELL_W * m + X_ORIG;
-        var h = CELL_H * n + Y_ORIG;
-        return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+        return "M" + points.join(" ");
       });
-  });
-};
-
-Xdsm.prototype._layoutText = function(items) {
-  var grid = this.grid;
-  items.each(function(d, i) {
-    var item = d3.select(this);
-    if (grid[i] === undefined) {
-      grid[i] = new Array(items.length);
-    }
-    item.select("text").each(function(d, j) {
-      var that = d3.select(this);
-      var data = item.data()[0];
-      var m = (data.row === undefined) ? i : data.row;
-      var n = (data.col === undefined) ? i : data.col;
-      var bbox = that.nodes()[j].getBBox();
-      grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
-      that.attr("x", function() {
-        return grid[m][n].x;
-      }).attr("y", function() {
-        return grid[m][n].y;
-      }).attr("width", function() {
-        return grid[m][n].width;
-      }).attr("height", function() {
-        return grid[m][n].height;
-      });
-    });
-  });
-
-  items.attr("transform", function(d, i) {
-    var m = (d.col === undefined) ? i : d.col;
-    var n = (d.row === undefined) ? i : d.row;
-    var w = CELL_W * m + X_ORIG;
-    var h = CELL_H * n + Y_ORIG;
-    return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
-  });
+  selection.exit().remove();
 };
 
 Xdsm.prototype._customRect = function(node, d, i, offset) {
@@ -17460,6 +17515,42 @@ Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
     var tpz = [topleft, topright, botright, botleft].join(" ");
     return tpz;
   });
+};
+
+Xdsm.prototype._createTitle = function() {
+  var self = this;
+  var ref = self.svg.selectAll(".title")
+    .data([self.graph.refname])
+  .enter()
+    .append('g')
+    .classed('title', true)
+    .append("text").text(self.graph.refname);
+
+  var bbox = ref.nodes()[0].getBBox();
+
+  ref.insert("rect", "text")
+      .attr('x', bbox.x)
+      .attr('y', bbox.y)
+      .attr('width', bbox.width)
+      .attr('height', bbox.height);
+
+  ref.attr('transform',
+           'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
+};
+
+Xdsm.prototype._createBorder = function() {
+  var self = this;
+  var bordercolor = 'black';
+  self.svg.selectAll(".border")
+    .data([self])
+  .enter()
+    .append("rect")
+    .classed("border", true)
+    .attr("x", BORDER_PADDING)
+    .attr("y", BORDER_PADDING)
+    .style("stroke", bordercolor)
+    .style("fill", "none")
+    .style("stroke-width", 0);
 };
 
 module.exports = Xdsm;
@@ -17511,7 +17602,7 @@ d3.json("xdsm.json", function(error, mdo) {
   if (scenarioKeys.indexOf('root') === -1) {
     // old format: mono xdsm
     var graph = new Graph(mdo);
-    xdsms.root = new Xdsm(graph, 'root');
+    xdsms.root = new Xdsm(graph, 'root', tooltip);
     xdsms.root.draw();
   } else {
     // new format managing several XDSM
@@ -17520,24 +17611,27 @@ d3.json("xdsm.json", function(error, mdo) {
         var graph = new Graph(mdo[k], k);
         xdsms[k] = new Xdsm(graph, k, tooltip);
         xdsms[k].draw();
+        xdsms[k].svg.select(".optimization").on("click", function() {
+          var info = d3.select(".optpb." + k);
+          info.style("opacity", 0.9);
+          info.style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 28) + "px");
+          info.style("pointer-events", "auto");
+        });
       }
     }, this);
   }
 
-  // Hook opt pb display to opt nodes
-  scenarioKeys.forEach(function(k) {
-    if (mdo.hasOwnProperty(k)) {
-      xdsms[k].svg.select(".optimization").on("click", function() {
-        var info = d3.select(".optpb." + k);
-        info.style("opacity", 0.9);
-        info.style("left", (d3.event.pageX) + "px")
-          .style("top", (d3.event.pageY - 28) + "px");
-        info.style("pointer-events", "auto");
-      });
-    }
-  }, this);
-
   var ctrls = new Controls(new Animation(xdsms)); // eslint-disable-line no-unused-vars
+
+  var addButton = d3.select('button#add');
+  addButton.on('click', function() {
+    xdsms.root.addNode("Discipline");
+  });
+  var delButton = d3.select('button#del');
+  delButton.on('click', function() {
+    xdsms.root.removeNode();
+  });
 });
 
 
