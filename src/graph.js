@@ -111,7 +111,13 @@ Graph.prototype.idxOf = function(nodeId) {
 };
 
 Graph.prototype.getNode = function(nodeId) {
-  return this.nodes[this.ids.indexOf(nodeId)];
+  var theNode;
+  this.nodes.forEach(function(node) {
+    if (node.id === nodeId) {
+      theNode = node;
+    }
+  }, this);
+  return theNode;
 };
 
 Graph.prototype.addNode = function(nodeName) {
