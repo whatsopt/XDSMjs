@@ -166,7 +166,7 @@ Animation.prototype._pulseLink = function(delay, fromId, toId) {
   var graph = this.xdsms[this.rootId].graph;
   var from = graph.idxOf(fromId);
   var to = graph.idxOf(toId);
-  this._pulse(delay, "polyline.link_" + from + "_" + to);
+  this._pulse(delay, "path.link_" + from + "_" + to);
 };
 
 Animation.prototype._onAnimationStart = function(delay) {
@@ -253,7 +253,7 @@ Animation.prototype._reset = function(all) {
             .style('stroke-width', null)
             .style('stroke', null)
             .style('fill', null);
-  svg.selectAll('polyline').transition().duration(0)
+  svg.selectAll('path').transition().duration(0)
             .style('stroke-width', null)
             .style('stroke', null)
             .style('fill', null);
