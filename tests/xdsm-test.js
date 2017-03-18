@@ -271,4 +271,15 @@ test("Graph.removeNode()", function(t) {
   t.equal(g.nodes.length, 5);        
   t.end();
 });
-
+test("Graph.getNode()", function(t) {
+  var g = makeGraph();
+  t.equal(g.getNode("A"), g.nodes[1]);
+  t.equal(g.getNode("E"), g.nodes[5]);   
+  t.end();
+});
+test("Graph.idxOf()", function(t) {
+  var g = makeGraph();
+  t.equal(g.idxOf("B"), 2);
+  t.equal(g.idxOf("E"), 5);   
+  t.end();
+});
