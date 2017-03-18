@@ -85,7 +85,7 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
   var selection =
     group.selectAll("." + kind)
       .data(this.graph[kind + "s"],        // DATA JOIN
-            function(d) { return d.id; }); // eslint-disable-line brace-style
+            function(d) { return d.id; });
 
   var textGroups = selection
     .enter() // ENTER
@@ -115,8 +115,6 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
   });
 
   self._layoutText(textGroups, decorate, selection.empty() ? 0 : ANIM_DURATION);
-
-  return selection;
 };
 
 Xdsm.prototype._layoutText = function(items, decorate, delay) {
@@ -134,15 +132,11 @@ Xdsm.prototype._layoutText = function(items, decorate, delay) {
       var n = (data.col === undefined) ? i : data.col;
       var bbox = that.nodes()[j].getBBox();
       grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
-      that.attr("width", function() {
-        return grid[m][n].width;
-      }).attr("height", function() {
-        return grid[m][n].height;
-      }).attr("x", function() {
-        return grid[m][n].x;
-      }).attr("y", function() {
-        return grid[m][n].y;
-      });
+      that
+        .attr("width", function() { return grid[m][n].width; })
+        .attr("height", function() { return grid[m][n].height; })
+        .attr("x", function() { return grid[m][n].x; })
+        .attr("y", function() { return grid[m][n].y; });
     });
   });
 
@@ -158,14 +152,14 @@ Xdsm.prototype._layoutText = function(items, decorate, delay) {
     var that = d3.select(this);
     that.call(decorate.bind(self), d, i, 0);
     if (d.isMulti) {
-      that.call(self._customRect.bind(self), d, i, 1 * Number(MULTI_OFFSET));
-      that.call(self._customRect.bind(self), d, i, 2 * Number(MULTI_OFFSET));
+      that.call(decorate.bind(self), d, i, 1 * Number(MULTI_OFFSET));
+      that.call(decorate.bind(self), d, i, 2 * Number(MULTI_OFFSET));
     }
   });
 };
 
 Xdsm.prototype._createWorkflow = function() {
-  //  console.log(JSON.stringify(this.graph.chains));
+  var self = this;
   var workflow = this.svg.selectAll(".workflow")
     .data([self.graph])
   .enter()
@@ -173,11 +167,11 @@ Xdsm.prototype._createWorkflow = function() {
     .attr("class", "workflow");
 
   workflow.selectAll("g")
-    .data(this.graph.chains)
+    .data(self.graph.chains)
   .enter()
     .insert('g').attr("class", "workflow-chain")
     .selectAll('path')
-      .data(function(d) { return d.id; })  // eslint-disable-line brace-style
+      .data(function(d) { return d; })
     .enter()
       .append("path")
         .attr("class", function(d) {
@@ -224,7 +218,6 @@ Xdsm.prototype._createWorkflow = function() {
 
 Xdsm.prototype._createDataflow = function() {
   var self = this;
-
   self.svg.selectAll(".dataflow")
     .data([self])
   .enter()
@@ -232,8 +225,8 @@ Xdsm.prototype._createDataflow = function() {
     .attr("class", "dataflow");
 
   var selection =
-    d3.select(".dataflow").selectAll("path")
-      .data(this.graph.edges, function(d) {
+    self.svg.select(".dataflow").selectAll("path")
+      .data(self.graph.edges, function(d) {
         return d.id;
       });
 
@@ -276,20 +269,26 @@ Xdsm.prototype._createDataflow = function() {
 
 Xdsm.prototype._customRect = function(node, d, i, offset) {
   var grid = this.grid;
-  node.insert("rect", ":first-child").attr("x", function() {
+  node.insert("rect", ":first-child")
+  .attr("x", function() {
     return grid[i][i].x + offset - PADDING;
-  }).attr("y", function() {
+  })
+  .attr("y", function() {
     return -grid[i][i].height * 2 / 3 - PADDING - offset;
-  }).attr("width", function() {
+  })
+  .attr("width", function() {
     return grid[i][i].width + (PADDING * 2);
-  }).attr("height", function() {
+  })
+  .attr("height", function() {
     return grid[i][i].height + (PADDING * 2);
-  }).attr("rx", function() {
+  })
+  .attr("rx", function() {
     var rounded = d.type === 'optimization' ||
                   d.type === 'mda' ||
                   d.type === 'doe';
     return rounded ? (grid[i][i].height + (PADDING * 2)) / 2 : 0;
-  }).attr("ry", function() {
+  })
+  .attr("ry", function() {
     var rounded = d.type === 'optimization' ||
                   d.type === 'mda' ||
                   d.type === 'doe';
@@ -328,10 +327,10 @@ Xdsm.prototype._createTitle = function() {
   var bbox = ref.nodes()[0].getBBox();
 
   ref.insert("rect", "text")
-      .attr('x', bbox.x)
-      .attr('y', bbox.y)
-      .attr('width', bbox.width)
-      .attr('height', bbox.height);
+    .attr('x', bbox.x)
+    .attr('y', bbox.y)
+    .attr('width', bbox.width)
+    .attr('height', bbox.height);
 
   ref.attr('transform',
            'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
