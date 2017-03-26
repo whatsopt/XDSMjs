@@ -4,6 +4,22 @@ var Animation = require('./animation');
 function Controls(animation) {
   this.animation = animation;
 
+  var buttonGroup = d3.select(".toolbar")
+                       .append("div")
+                       .classed("button_group", true);
+  buttonGroup.append("button")
+    .attr("id", "start")
+    .append("i").attr("class", "icon-start");
+  buttonGroup.append("button")
+    .attr("id", "stop")
+    .append("i").attr("class", "icon-stop");
+  buttonGroup.append("button")
+    .attr("id", "step-prev")
+    .append("i").attr("class", "icon-step-prev");
+  buttonGroup.append("button")
+    .attr("id", "step-next")
+    .append("i").attr("class", "icon-step-next");
+
   this.startButton = d3.select('button#start');
   this.stopButton = d3.select('button#stop');
   this.stepPrevButton = d3.select('button#step-prev');
