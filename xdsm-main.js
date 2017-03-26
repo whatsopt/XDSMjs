@@ -24,7 +24,6 @@ d3.json("xdsm.json", function(error, mdo) {
   var scenarioKeys = Object.keys(mdo).sort();
 
   // Optimization problem display setup
-  /* eslint-disable brace-style */
   d3.select("body").selectAll("optpb")
                 .data(scenarioKeys)
               .enter()
@@ -37,7 +36,6 @@ d3.json("xdsm.json", function(error, mdo) {
                       .style("opacity", 0)
                       .style("pointer-events", "none");
                   }).append("pre").text(function(d) { return mdo[d].optpb; });
-  /* eslint-enable brace-style */
 
   var xdsms = {};
 
@@ -64,7 +62,9 @@ d3.json("xdsm.json", function(error, mdo) {
     }, this);
   }
 
-  var ctrls = new Controls(new Animation(xdsms)); // eslint-disable-line no-unused-vars
+  if (mdo.workflow && mdo.workflow.length !== 0) {  // workflow is optional
+    var ctrls = new Controls(new Animation(xdsms)); // eslint-disable-line no-unused-vars
+  }
 
   var addButton = d3.select('button#add');
   addButton.on('click', function() {
