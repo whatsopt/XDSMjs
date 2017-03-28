@@ -16671,6 +16671,22 @@ var Animation = require('./animation');
 function Controls(animation) {
   this.animation = animation;
 
+  var buttonGroup = d3.select(".toolbar")
+                       .append("div")
+                       .classed("button_group", true);
+  buttonGroup.append("button")
+    .attr("id", "start")
+    .append("i").attr("class", "icon-start");
+  buttonGroup.append("button")
+    .attr("id", "stop")
+    .append("i").attr("class", "icon-stop");
+  buttonGroup.append("button")
+    .attr("id", "step-prev")
+    .append("i").attr("class", "icon-step-prev");
+  buttonGroup.append("button")
+    .attr("id", "step-next")
+    .append("i").attr("class", "icon-step-next");
+
   this.startButton = d3.select('button#start');
   this.stopButton = d3.select('button#stop');
   this.stepPrevButton = d3.select('button#step-prev');
@@ -16803,14 +16819,23 @@ function Graph(mdo, refname) {
       item.type));
   }, this);
 
-  mdo.edges.forEach(function(item) {
-    var idA = this.idxOf(item.from);
-    var idB = this.idxOf(item.to);
-    var isMulti = this.nodes[idA].isMulti || this.nodes[idB].isMulti;
-    this.edges.push(new Edge(item.from, item.to, item.name, idA, idB, isMulti));
-  }, this);
+  if (mdo.edges) {
+    mdo.edges.forEach(function(item) {
+      var idA = this.idxOf(item.from);
+      var idB = this.idxOf(item.to);
+      var isMulti = this.nodes[idA].isMulti || this.nodes[idB].isMulti;
+      this.edges.push(new Edge(item.from, item.to,
+                               item.name, idA, idB, isMulti));
+    }, this);
+  }
 
-  var echain = Graph.expand(mdo.workflow);
+  if (mdo.workflow) {
+    this._makeChaining(mdo.workflow);
+  }
+}
+
+Graph.prototype._makeChaining = function(workflow) {
+  var echain = Graph.expand(workflow);
   echain.forEach(function(leafChain) {
     if (leafChain.length < 2) {
       throw new Error("Bad process chain (" + leafChain.length + "elt)");
@@ -16838,7 +16863,7 @@ function Graph(mdo, refname) {
       }, this);
     }
   }, this);
-}
+};
 
 Graph.prototype.idxOf = function(nodeId) {
   return this.nodes.map(function(elt) {
@@ -16849,7 +16874,9 @@ Graph.prototype.idxOf = function(nodeId) {
 Graph.prototype.getNode = function(nodeId) {
   var theNode;
   this.nodes.forEach(function(node) {
-    if (node.id === nodeId) { theNode = node; }
+    if (node.id === nodeId) {
+      theNode = node;
+    }
   }, this);
   return theNode;
 };
@@ -17250,6 +17277,10 @@ Xdsm.prototype.removeNode = function() {
   this.draw();
 };
 
+Xdsm.prototype.hasWorkflow = function() {
+  return this.graph.chains.length !== 0;
+};
+
 Xdsm.prototype._initialize = function() {
   var self = this;
 
@@ -17290,8 +17321,8 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
   var selection =
     group.selectAll("." + kind)
       .data(this.graph[kind + "s"],        // DATA JOIN
-            function(d) { return d.id; }); // eslint-disable-line brace-style
-  
+            function(d) { return d.id; });
+
   var textGroups = selection
     .enter() // ENTER
       .append("g").attr("class", function(d) {
@@ -17320,8 +17351,6 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
   });
 
   self._layoutText(textGroups, decorate, selection.empty() ? 0 : ANIM_DURATION);
-
-  return textGroups;
 };
 
 Xdsm.prototype._layoutText = function(items, decorate, delay) {
@@ -17339,7 +17368,8 @@ Xdsm.prototype._layoutText = function(items, decorate, delay) {
       var n = (data.col === undefined) ? i : data.col;
       var bbox = that.nodes()[j].getBBox();
       grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
-      that.attr("width", function() { return grid[m][n].width; })
+      that
+        .attr("width", function() { return grid[m][n].width; })
         .attr("height", function() { return grid[m][n].height; })
         .attr("x", function() { return grid[m][n].x; })
         .attr("y", function() { return grid[m][n].y; });
@@ -17371,7 +17401,7 @@ Xdsm.prototype._createWorkflow = function() {
   .enter()
     .insert("g", ":first-child")
     .attr("class", "workflow");
-  
+
   workflow.selectAll("g")
     .data(self.graph.chains)
   .enter()
@@ -17474,7 +17504,6 @@ Xdsm.prototype._createDataflow = function() {
 };
 
 Xdsm.prototype._customRect = function(node, d, i, offset) {
-  console.log(node, d, i, offset);
   var grid = this.grid;
   node.insert("rect", ":first-child")
   .attr("x", function() {
@@ -17587,7 +17616,6 @@ d3.json("xdsm.json", function(error, mdo) {
   var scenarioKeys = Object.keys(mdo).sort();
 
   // Optimization problem display setup
-  /* eslint-disable brace-style */
   d3.select("body").selectAll("optpb")
                 .data(scenarioKeys)
               .enter()
@@ -17600,7 +17628,6 @@ d3.json("xdsm.json", function(error, mdo) {
                       .style("opacity", 0)
                       .style("pointer-events", "none");
                   }).append("pre").text(function(d) { return mdo[d].optpb; });
-  /* eslint-enable brace-style */
 
   var xdsms = {};
 
@@ -17627,7 +17654,9 @@ d3.json("xdsm.json", function(error, mdo) {
     }, this);
   }
 
-  var ctrls = new Controls(new Animation(xdsms)); // eslint-disable-line no-unused-vars
+  if (xdsms.root.hasWorkflow()) {  // workflow is optional
+    var ctrls = new Controls(new Animation(xdsms)); // eslint-disable-line no-unused-vars
+  }
 
   var addButton = d3.select('button#add');
   addButton.on('click', function() {

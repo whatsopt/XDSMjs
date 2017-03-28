@@ -62,7 +62,7 @@ d3.json("xdsm.json", function(error, mdo) {
     }, this);
   }
 
-  if (mdo.workflow && mdo.workflow.length !== 0) {  // workflow is optional
+  if (xdsms.root.hasWorkflow()) {  // workflow is optional
     var ctrls = new Controls(new Animation(xdsms)); // eslint-disable-line no-unused-vars
   }
 

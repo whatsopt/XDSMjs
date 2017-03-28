@@ -45,6 +45,10 @@ Xdsm.prototype.removeNode = function() {
   this.draw();
 };
 
+Xdsm.prototype.hasWorkflow = function() {
+  return this.graph.chains.length !== 0;
+};
+
 Xdsm.prototype._initialize = function() {
   var self = this;
 

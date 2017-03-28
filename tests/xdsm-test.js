@@ -238,12 +238,12 @@ test("Graph.number([['Opt', ['mda', ['d1'], 's1']]]) returns {'Opt': '0,5-1', 'm
 });
 
 function makeGraph() {
-  var mdo = {'nodes':[{'id':'A'}, {'id':'B'}, {'id':'C'}, {'id':'D'}, {'id':'E'}], 
+  var mdo = {'nodes':[{'id':'A'}, {'id':'B'}, {'id':'C'}, {'id':'D'}, {'id':'E'}],
       'edges':[{'from':'A', 'to':'B', 'name':'AB'},
                {'from':'C', 'to':'A', 'name':'CA'},
                {'from':'C', 'to':'B', 'name':'CB'},
                {'from':'C', 'to':'D', 'name':'CD'},
-               {'from':'E', 'to':'A', 'name':'EA'}], 
+               {'from':'E', 'to':'A', 'name':'EA'}],
       'workflow':[]};
   return new Graph(mdo);
 };
@@ -261,25 +261,34 @@ test("Graph.addNode()", function(t) {
   var g = makeGraph();
   t.equal(g.nodes.length, 6);
   g.addNode();
-  t.equal(g.nodes.length, 7);     
+  t.equal(g.nodes.length, 7);
   t.end();
 });
 test("Graph.removeNode()", function(t) {
   var g = makeGraph();
   t.equal(g.nodes.length, 6);
   g.removeNode(4);
-  t.equal(g.nodes.length, 5);        
+  t.equal(g.nodes.length, 5);
   t.end();
 });
 test("Graph.getNode()", function(t) {
   var g = makeGraph();
   t.equal(g.getNode("A"), g.nodes[1]);
-  t.equal(g.getNode("E"), g.nodes[5]);   
+  t.equal(g.getNode("E"), g.nodes[5]);
   t.end();
 });
 test("Graph.idxOf()", function(t) {
   var g = makeGraph();
   t.equal(g.idxOf("B"), 2);
-  t.equal(g.idxOf("E"), 5);   
+  t.equal(g.idxOf("E"), 5);
   t.end();
 });
+
+test("Graph constructor should create a graph without edges or workflow input data)", function(t) {
+  var mdo = {'nodes':[{'id':'A'}, {'id':'B'}]};
+  var g = new Graph(mdo);
+  t.deepEqual(g.edges, []);
+  t.deepEqual(g.chains, []);
+  t.end();
+});
+

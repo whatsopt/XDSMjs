@@ -67,14 +67,23 @@ function Graph(mdo, refname) {
       item.type));
   }, this);
 
-  mdo.edges.forEach(function(item) {
-    var idA = this.idxOf(item.from);
-    var idB = this.idxOf(item.to);
-    var isMulti = this.nodes[idA].isMulti || this.nodes[idB].isMulti;
-    this.edges.push(new Edge(item.from, item.to, item.name, idA, idB, isMulti));
-  }, this);
+  if (mdo.edges) {
+    mdo.edges.forEach(function(item) {
+      var idA = this.idxOf(item.from);
+      var idB = this.idxOf(item.to);
+      var isMulti = this.nodes[idA].isMulti || this.nodes[idB].isMulti;
+      this.edges.push(new Edge(item.from, item.to,
+                               item.name, idA, idB, isMulti));
+    }, this);
+  }
 
-  var echain = Graph.expand(mdo.workflow);
+  if (mdo.workflow) {
+    this._makeChaining(mdo.workflow);
+  }
+}
+
+Graph.prototype._makeChaining = function(workflow) {
+  var echain = Graph.expand(workflow);
   echain.forEach(function(leafChain) {
     if (leafChain.length < 2) {
       throw new Error("Bad process chain (" + leafChain.length + "elt)");
@@ -102,7 +111,7 @@ function Graph(mdo, refname) {
       }, this);
     }
   }, this);
-}
+};
 
 Graph.prototype.idxOf = function(nodeId) {
   return this.nodes.map(function(elt) {
