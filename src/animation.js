@@ -1,4 +1,5 @@
 var d3 = require('d3');
+var Graph = require('./graph');
 
 var PULSE_DURATION = 700;
 var SUB_ANIM_DELAY = 200;
@@ -22,7 +23,8 @@ Animation.STATUS = {READY: "ready",
                     RUNNING_STEP: "running_step",
                     RUNNING_AUTO: "running_auto",
                     STOPPED: "stopped",
-                    DONE: "done"};
+                    DONE: "done",
+                    DISABLED: "disabled"};
 
 Animation.prototype.reset = function() {
   this.curStep = 0;
@@ -128,6 +130,29 @@ Animation.prototype.addObserver = function(observer) {
   if (observer) {
     this._observers.push(observer);
   }
+};
+
+Animation.prototype.render_node_statuses = function() {
+  var self = this;
+  var graph = self.xdsms[self.rootId].graph;
+  graph.nodes.forEach(function(node) {
+    var gnode = "g." + node.id;
+    switch (node.status) {
+      case Graph.NODE_STATUS.RUNNING:
+        self._pulse(0, gnode + " > rect", "in");
+        break;
+      case Graph.NODE_STATUS.DONE:
+        self._pulse(0, gnode + " > rect", "out");
+        break;
+      default:
+        // nothing to do
+    };
+    if (self._isSubScenario(node.id)) {
+      var scnId = graph.getNode(node.id).getScenarioId();
+      var anim = new Animation(self.xdsms, scnId);
+      anim.render_node_statuses();
+    }
+  });
 };
 
 Animation.prototype._updateStatus = function(status) {

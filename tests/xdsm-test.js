@@ -291,4 +291,26 @@ test("Graph constructor should create a graph without edges or workflow input da
   t.deepEqual(g.chains, []);
   t.end();
 });
-
+test("Graph nodes have a status UNKNOWN by default", function(t) {
+  var g = new Graph({'nodes':[{'id':'A'}, {'id':'B'}]});
+  t.deepEqual(g.getNode("A").status, Graph.NODE_STATUS.UNKNOWN);
+  t.end();
+});
+test("Graph nodes can be to a given status PENDING, RUNNING, DONE or FAILED", function(t) {
+  var g = new Graph({'nodes':[{'id':'A', status:'PENDING'},
+                              {'id':'B', status:'RUNNING'},
+                              {'id':'C', status:'DONE'},
+                              {'id':'D', status:'FAILED'}
+                              ]});
+  t.deepEqual(g.getNode("A").status, Graph.NODE_STATUS.PENDING);
+  t.deepEqual(g.getNode("B").status, Graph.NODE_STATUS.RUNNING);
+  t.deepEqual(g.getNode("C").status, Graph.NODE_STATUS.DONE);
+  t.deepEqual(g.getNode("D").status, Graph.NODE_STATUS.FAILED);
+  t.end();
+});
+test("Graph throws an error if a node status string not known", function(t) {
+  t.throws(function() {
+    var g = new Graph({'nodes':[{'id':'A', status:'BADSTATUS'}]});
+  }, "should throw an error");
+  t.end();
+});

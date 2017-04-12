@@ -1,18 +1,31 @@
 var UID = "_U_";
 var MULTI_TYPE = "_multi";
 
-function Node(id, name, type) {
+var STATUS = { UNKNOWN: 'UNKNOWN',
+               PENDING: 'PENDING',
+               RUNNING: 'RUNNING',
+               DONE: 'DONE',
+               FAILED: 'FAILED'};
+
+function Node(id, name, type, status) {
   if (typeof (name) === 'undefined') {
     name = id;
   }
   if (typeof (type) === 'undefined') {
     type = 'analysis';
   }
+  if (typeof (status) === 'undefined') {
+    status = STATUS.UNKNOWN;
+  }
+  if (typeof STATUS[status] === 'undefined') {
+    throw Error("Unknown status '"+status+"' for node "+name+"(id="+id+")");
+  }
   this.id = id;
   this.name = name;
   this.isMulti = (type.search(/_multi$/) >= 0);
   this.type = this.isMulti ?
     type.substr(0, type.length - MULTI_TYPE.length) : type;
+  this.status = status;
 }
 
 Node.prototype.isMdo = function() {
@@ -64,7 +77,7 @@ function Graph(mdo, refname) {
     var num = numPrefixes[item.id];
     this.nodes.push(new Node(item.id,
       num ? num + ":" + item.name : item.name,
-      item.type));
+      item.type, item.status));
   }, this);
 
   if (mdo.edges) {
@@ -81,6 +94,8 @@ function Graph(mdo, refname) {
     this._makeChaining(mdo.workflow);
   }
 }
+
+Graph.NODE_STATUS = STATUS;
 
 Graph.prototype._makeChaining = function(workflow) {
   var echain = Graph.expand(workflow);

@@ -62,9 +62,11 @@ d3.json("xdsm.json", function(error, mdo) {
     }, this);
   }
 
+  var anim = new Animation(xdsms);
   if (xdsms.root.hasWorkflow()) {  // workflow is optional
-    var ctrls = new Controls(new Animation(xdsms)); // eslint-disable-line no-unused-vars
+    var ctrls = new Controls(anim); // eslint-disable-line no-unused-vars
   }
+  anim.render_node_statuses();
 
   var addButton = d3.select('button#add');
   addButton.on('click', function() {

@@ -16385,6 +16385,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 },{}],2:[function(require,module,exports){
 var d3 = require('d3');
+var Graph = require('./graph');
 
 var PULSE_DURATION = 700;
 var SUB_ANIM_DELAY = 200;
@@ -16408,7 +16409,8 @@ Animation.STATUS = {READY: "ready",
                     RUNNING_STEP: "running_step",
                     RUNNING_AUTO: "running_auto",
                     STOPPED: "stopped",
-                    DONE: "done"};
+                    DONE: "done",
+                    DISABLED: "disabled"};
 
 Animation.prototype.reset = function() {
   this.curStep = 0;
@@ -16514,6 +16516,29 @@ Animation.prototype.addObserver = function(observer) {
   if (observer) {
     this._observers.push(observer);
   }
+};
+
+Animation.prototype.render_node_statuses = function() {
+  var self = this;
+  var graph = self.xdsms[self.rootId].graph;
+  graph.nodes.forEach(function(node) {
+    var gnode = "g." + node.id;
+    switch (node.status) {
+      case Graph.NODE_STATUS.RUNNING:
+        self._pulse(0, gnode + " > rect", "in");
+        break;
+      case Graph.NODE_STATUS.DONE:
+        self._pulse(0, gnode + " > rect", "out");
+        break;
+      default:
+        // nothing to do
+    };
+    if (self._isSubScenario(node.id)) {
+      var scnId = graph.getNode(node.id).getScenarioId();
+      var anim = new Animation(self.xdsms, scnId);
+      anim.render_node_statuses();
+    }
+  });
 };
 
 Animation.prototype._updateStatus = function(status) {
@@ -16664,7 +16689,7 @@ Animation.prototype._subAnimationInProgress = function() {
 
 module.exports = Animation;
 
-},{"d3":1}],3:[function(require,module,exports){
+},{"./graph":4,"d3":1}],3:[function(require,module,exports){
 var d3 = require('d3');
 var Animation = require('./animation');
 
@@ -16753,18 +16778,31 @@ module.exports = Controls;
 var UID = "_U_";
 var MULTI_TYPE = "_multi";
 
-function Node(id, name, type) {
+var STATUS = { UNKNOWN: 'UNKNOWN',
+               PENDING: 'PENDING',
+               RUNNING: 'RUNNING',
+               DONE: 'DONE',
+               FAILED: 'FAILED'};
+
+function Node(id, name, type, status) {
   if (typeof (name) === 'undefined') {
     name = id;
   }
   if (typeof (type) === 'undefined') {
     type = 'analysis';
   }
+  if (typeof (status) === 'undefined') {
+    status = STATUS.UNKNOWN;
+  }
+  if (typeof STATUS[status] === 'undefined') {
+    throw Error("Unknown status '"+status+"' for node "+name+"(id="+id+")");
+  }
   this.id = id;
   this.name = name;
   this.isMulti = (type.search(/_multi$/) >= 0);
   this.type = this.isMulti ?
     type.substr(0, type.length - MULTI_TYPE.length) : type;
+  this.status = status;
 }
 
 Node.prototype.isMdo = function() {
@@ -16816,7 +16854,7 @@ function Graph(mdo, refname) {
     var num = numPrefixes[item.id];
     this.nodes.push(new Node(item.id,
       num ? num + ":" + item.name : item.name,
-      item.type));
+      item.type, item.status));
   }, this);
 
   if (mdo.edges) {
@@ -16833,6 +16871,8 @@ function Graph(mdo, refname) {
     this._makeChaining(mdo.workflow);
   }
 }
+
+Graph.NODE_STATUS = STATUS;
 
 Graph.prototype._makeChaining = function(workflow) {
   var echain = Graph.expand(workflow);
@@ -17654,9 +17694,11 @@ d3.json("xdsm.json", function(error, mdo) {
     }, this);
   }
 
+  var anim = new Animation(xdsms);
   if (xdsms.root.hasWorkflow()) {  // workflow is optional
-    var ctrls = new Controls(new Animation(xdsms)); // eslint-disable-line no-unused-vars
+    var ctrls = new Controls(anim); // eslint-disable-line no-unused-vars
   }
+  anim.render_node_statuses();
 
   var addButton = d3.select('button#add');
   addButton.on('click', function() {
