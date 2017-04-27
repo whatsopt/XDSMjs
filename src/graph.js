@@ -1,11 +1,11 @@
 var UID = "_U_";
 var MULTI_TYPE = "_multi";
 
-var STATUS = { UNKNOWN: 'UNKNOWN',
-               PENDING: 'PENDING',
-               RUNNING: 'RUNNING',
-               DONE: 'DONE',
-               FAILED: 'FAILED'};
+var STATUS = {UNKNOWN: 'UNKNOWN',
+              PENDING: 'PENDING',
+              RUNNING: 'RUNNING',
+              DONE: 'DONE',
+              FAILED: 'FAILED'};
 
 function Node(id, name, type, status) {
   if (typeof (name) === 'undefined') {
@@ -18,7 +18,8 @@ function Node(id, name, type, status) {
     status = STATUS.UNKNOWN;
   }
   if (typeof STATUS[status] === 'undefined') {
-    throw Error("Unknown status '"+status+"' for node "+name+"(id="+id+")");
+    throw Error("Unknown status '" + status +
+                "' for node " + name + "(id=" + id + ")");
   }
   this.id = id;
   this.name = name;

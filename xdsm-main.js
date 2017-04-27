@@ -66,7 +66,7 @@ d3.json("xdsm.json", function(error, mdo) {
   if (xdsms.root.hasWorkflow()) {  // workflow is optional
     var ctrls = new Controls(anim); // eslint-disable-line no-unused-vars
   }
-  anim.render_node_statuses();
+  anim.renderNodeStatuses();
 
   var addButton = d3.select('button#add');
   addButton.on('click', function() {

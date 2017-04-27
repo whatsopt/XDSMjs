@@ -16389,7 +16389,10 @@ var Graph = require('./graph');
 
 var PULSE_DURATION = 700;
 var SUB_ANIM_DELAY = 200;
-var ACTIVE_COLOR = d3.rgb("seagreen");
+var RUNNING_COLOR = d3.rgb("seagreen");
+var FAILED_COLOR = d3.rgb("firebrick");
+var PENDING_COLOR = d3.rgb("lightseagreen");
+var DONE_COLOR = d3.rgb("darkseagreen");
 
 function Animation(xdsms, rootId, delay) {
   this.rootId = rootId;
@@ -16518,25 +16521,31 @@ Animation.prototype.addObserver = function(observer) {
   }
 };
 
-Animation.prototype.render_node_statuses = function() {
+Animation.prototype.renderNodeStatuses = function() {
   var self = this;
   var graph = self.xdsms[self.rootId].graph;
   graph.nodes.forEach(function(node) {
     var gnode = "g." + node.id;
     switch (node.status) {
       case Graph.NODE_STATUS.RUNNING:
-        self._pulse(0, gnode + " > rect", "in");
+        self._pulse(0, gnode + " > rect", "in", RUNNING_COLOR);
+        break;
+      case Graph.NODE_STATUS.FAILED:
+        self._pulse(0, gnode + " > rect", "in", FAILED_COLOR);
+        break;
+      case Graph.NODE_STATUS.PENDING:
+        self._pulse(0, gnode + " > rect", "in", PENDING_COLOR);
         break;
       case Graph.NODE_STATUS.DONE:
-        self._pulse(0, gnode + " > rect", "out");
+        self._pulse(0, gnode + " > rect", "in", DONE_COLOR);
         break;
       default:
         // nothing to do
-    };
+    }
     if (self._isSubScenario(node.id)) {
       var scnId = graph.getNode(node.id).getScenarioId();
       var anim = new Animation(self.xdsms, scnId);
-      anim.render_node_statuses();
+      anim.renderNodeStatuses();
     }
   });
 };
@@ -16552,20 +16561,23 @@ Animation.prototype._notifyObservers = function() {
   }).bind(this));
 };
 
-Animation.prototype._pulse = function(delay, toBeSelected, option) {
+Animation.prototype._pulse = function(delay, toBeSelected, easeInOut, color) {
+  if (color === undefined) {
+    color = RUNNING_COLOR;
+  }
   var sel = d3.select("svg." + this.rootId)
               .selectAll(toBeSelected)
               .transition().delay(delay);
-  if (option !== "out") {
+  if (easeInOut !== "out") {
     sel = sel.transition().duration(200)
             .style('stroke-width', '8px')
-            .style('stroke', ACTIVE_COLOR)
+            .style('stroke', color)
             .style('fill', function(d) {
               if (d.id) {
-                return ACTIVE_COLOR.brighter();
+                return color.brighter();
               }});
   }
-  if (option !== "in") {
+  if (easeInOut !== "in") {
     sel.transition().duration(3 * PULSE_DURATION)
             .style('stroke-width', null)
             .style('stroke', null)
@@ -16582,7 +16594,7 @@ Animation.prototype._pulseLink = function(delay, fromId, toId) {
 
 Animation.prototype._onAnimationStart = function(delay) {
   var title = d3.select("svg." + this.rootId).select("g.title");
-  title.select("text").transition().delay(delay).style("fill", ACTIVE_COLOR);
+  title.select("text").transition().delay(delay).style("fill", RUNNING_COLOR);
   d3.select("svg." + this.rootId).select("rect.border")
     .transition().delay(delay)
       .style("stroke-width", '5px').duration(200)
@@ -16778,11 +16790,11 @@ module.exports = Controls;
 var UID = "_U_";
 var MULTI_TYPE = "_multi";
 
-var STATUS = { UNKNOWN: 'UNKNOWN',
-               PENDING: 'PENDING',
-               RUNNING: 'RUNNING',
-               DONE: 'DONE',
-               FAILED: 'FAILED'};
+var STATUS = {UNKNOWN: 'UNKNOWN',
+              PENDING: 'PENDING',
+              RUNNING: 'RUNNING',
+              DONE: 'DONE',
+              FAILED: 'FAILED'};
 
 function Node(id, name, type, status) {
   if (typeof (name) === 'undefined') {
@@ -16795,7 +16807,8 @@ function Node(id, name, type, status) {
     status = STATUS.UNKNOWN;
   }
   if (typeof STATUS[status] === 'undefined') {
-    throw Error("Unknown status '"+status+"' for node "+name+"(id="+id+")");
+    throw Error("Unknown status '" + status +
+                "' for node " + name + "(id=" + id + ")");
   }
   this.id = id;
   this.name = name;
@@ -17698,7 +17711,7 @@ d3.json("xdsm.json", function(error, mdo) {
   if (xdsms.root.hasWorkflow()) {  // workflow is optional
     var ctrls = new Controls(anim); // eslint-disable-line no-unused-vars
   }
-  anim.render_node_statuses();
+  anim.renderNodeStatuses();
 
   var addButton = d3.select('button#add');
   addButton.on('click', function() {
