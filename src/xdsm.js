@@ -32,6 +32,14 @@ function Xdsm(graph, svgid, tooltip) {
   this.nodes = [];
   this.edges = [];
 
+  this.config = {
+    labelizer: {
+      ellipsis: 5,
+      subSupScript: false,
+      showLinkNbOnly: true,
+    },
+  };
+
   this._initialize();
 }
 
@@ -100,7 +108,11 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
         }
         return d.id + " " + kind + " " + klass;
       }).each(function() {
-        var labelize = Labelizer.labelize().ellipsis(5);
+        var labelize = Labelizer.labelize()
+                        .labelKind(kind)
+                        .ellipsis(self.config.labelizer.ellipsis)
+                        .subSupScript(self.config.labelizer.subSupScript)
+                        .linkNbOnly(self.config.labelizer.showLinkNbOnly);
         d3.select(this).call(labelize);
       })
     .merge(selection);  // UPDATE + ENTER
@@ -109,7 +121,9 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
 
   d3.selectAll(".ellipsized").on("mouseover", function(d) {
     self.tooltip.transition().duration(200).style("opacity", 0.9);
-    var tooltipize = Labelizer.tooltipize().text(d.name);
+    var tooltipize = Labelizer.tooltipize()
+                        .subSupScript(self.config.labelizer.subSupScript)
+                        .text(d.name);
     self.tooltip.call(tooltipize)
       .style("width", "200px")
       .style("left", (d3.event.pageX) + "px")
