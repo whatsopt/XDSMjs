@@ -1,6 +1,6 @@
 {
   "name": "xdsmjs",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "XDSM diagram generator",
   "main": "xdsm.js",
   "directories": {
@@ -29,9 +29,9 @@
   },
   "homepage": "https://github.com/OneraHub/XDSMjs#readme",
   "devDependencies": {
-    "browserify": "^13.0.1",
-    "eslint": "^2.10.2",
-    "eslint-config-google": "^0.5.0",
+    "browserify": "^14.3.0",
+    "eslint": "^3.19.0",
+    "eslint-config-google": "^0.7.1",
     "faucet": "0.0.1",
     "tape": "^4.5.1",
     "testling": "^1.7.1",
@@ -41,12 +41,16 @@
     "d3": "^4"
   },
   "eslintConfig": {
-    "extends": "google",
+    "extends": ["google"],
     "env": {
+      "es6": false,
       "browser": true,
       "node": true
     },
     "rules": {
+      "max-len":["error", 120],
+      "quotes": "off",
+      "no-var": "off",
       "linebreak-style": "off",
       "require-jsdoc": "off",
       "brace-style": "off"

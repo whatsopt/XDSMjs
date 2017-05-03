@@ -1,6 +1,6 @@
 /*
  * XDSMjs
- * Copyright 2016 Rémi Lafage
+ * Copyright 2016-2017 Rémi Lafage
  */
 "use strict";
 
@@ -32,7 +32,7 @@ d3.json("xdsm.json", function(error, mdo) {
                   .attr("class", function(d) { return "optpb " + d; })
                   .style("opacity", 0)
                   .on("click", function() {
-                    d3.select(this).transition().duration(500)
+                    d3.select(this).transition().duration(500)  // eslint-disable-line no-invalid-this
                       .style("opacity", 0)
                       .style("pointer-events", "none");
                   }).append("pre").text(function(d) { return mdo[d].optpb; });
@@ -59,7 +59,7 @@ d3.json("xdsm.json", function(error, mdo) {
           info.style("pointer-events", "auto");
         });
       }
-    }, this);
+    }, this); // eslint-disable-line no-invalid-this
   }
 
   var anim = new Animation(xdsms);
