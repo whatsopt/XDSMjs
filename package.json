@@ -10,6 +10,7 @@
     "lint": "eslint xdsm-main.js ./src/* || true",
     "build": "browserify ./xdsm-main.js -o ./build/xdsm.js",
     "postbuild": "uglifyjs ./build/xdsm.js > ./build/xdsm.min.js",
+    "dist": "webpack",
     "test": "node tests/xdsm-test.js | faucet || true",
     "testbrowser": "browserify tests/xdsm-test.js -o ./build/xdsm-test-bundle.js | firefox ./tests/index.html || true",
     "testfront": "browserify tests/xdsm-test.js | testling -x firefox || true"
@@ -35,20 +36,26 @@
     "faucet": "0.0.1",
     "tape": "^4.5.1",
     "testling": "^1.7.1",
-    "uglify-js": "^2.7.5"
+    "uglify-js": "^2.7.5",
+    "webpack": "^2.4.1"
   },
   "dependencies": {
     "d3": "^4"
   },
   "eslintConfig": {
-    "extends": ["google"],
+    "extends": [
+      "google"
+    ],
     "env": {
       "es6": false,
       "browser": true,
       "node": true
     },
     "rules": {
-      "max-len":["error", 120],
+      "max-len": [
+        "error",
+        120
+      ],
       "quotes": "off",
       "no-var": "off",
       "linebreak-style": "off",
