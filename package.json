@@ -15,10 +15,7 @@
     "testbrowser": "browserify tests/xdsm-test.js -o ./build/xdsm-test-bundle.js | firefox ./tests/index.html || true",
     "testfront": "browserify tests/xdsm-test.js | testling -x firefox || true"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/OneraHub/XDSMjs.git"
-  },
+  "repository": "git+https://github.com/OneraHub/XDSMjs.git",
   "keywords": [
     "XDSM",
     "MDO"
