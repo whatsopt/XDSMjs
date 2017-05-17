@@ -63,21 +63,1354 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 32);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ 12:
 /***/ (function(module, exports, __webpack_require__) {
 
-// https://d3js.org Version 4.8.0. Copyright 2017 Mike Bostock.
+"use strict";
+
+
+function Labelizer() {}
+
+Labelizer.strParse = function (str) {
+  if (str === "") {
+    return [{ base: '', sub: undefined, sup: undefined }];
+  }
+
+  var lstr = str.split(',');
+  var underscores = /_/g;
+  var rg = /([0-9\-]+:)?([A-Za-z0-9\-\.]+)(_[A-Za-z0-9\-\._]+)?(\^.+)?/;
+
+  var res = lstr.map(function (s) {
+    var base;
+    var sub;
+    var sup;
+
+    if ((s.match(underscores) || []).length > 1) {
+      var mu = s.match(/(.+)\^(.+)/);
+      if (mu) {
+        return { base: mu[1], sub: undefined, sup: mu[2] };
+      }
+      return { base: s, sub: undefined, sup: undefined };
+    }
+    var m = s.match(rg);
+    if (m) {
+      base = (m[1] ? m[1] : "") + m[2];
+      if (m[3]) {
+        sub = m[3].substring(1);
+      }
+      if (m[4]) {
+        sup = m[4].substring(1);
+      }
+    } else {
+      throw new Error("Labelizer.strParse: Can not parse '" + s + "'");
+    }
+    return { base: base, sub: sub, sup: sup };
+  }, this);
+
+  return res;
+};
+
+Labelizer._createVarListLabel = function (selection, name, text, ellipsis) {
+  var tokens = Labelizer.strParse(name);
+  tokens.every(function (token, i, ary) {
+    var offsetSub = 0;
+    var offsetSup = 0;
+    if (ellipsis < 1 || i < 5 && text.nodes()[0].getBBox().width < 100) {
+      text.append("tspan").text(token.base);
+      if (token.sub) {
+        offsetSub = 10;
+        text.append("tspan").attr("class", "sub").attr("dy", offsetSub).text(token.sub);
+      }
+      if (token.sup) {
+        offsetSup = -10;
+        text.append("tspan").attr("class", "sup").attr("dx", -5).attr("dy", -offsetSub + offsetSup).text(token.sup);
+        offsetSub = 0;
+      }
+    } else {
+      text.append("tspan").attr("dy", -offsetSub - offsetSup).text("...");
+      selection.classed("ellipsized", true);
+      return false;
+    }
+    if (i < ary.length - 1) {
+      text.append("tspan").attr("dy", -offsetSub - offsetSup).text(", ");
+    }
+    return true;
+  }, this);
+};
+
+Labelizer._createLinkNbLabel = function (selection, name, text) {
+  var lstr = name.split(',');
+  var str = lstr.length + " link";
+  if (lstr.length > 1) {
+    str += 's';
+  }
+  text.append("tspan").text(str);
+  selection.classed("ellipsized", true); // activate tooltip
+};
+
+Labelizer.labelize = function () {
+  var ellipsis = 0;
+  var subSupScript = true;
+  var linkNbOnly = false;
+  var labelKind = 'node';
+
+  function createLabel(selection) {
+    selection.each(function (d) {
+      var text = selection.append("text");
+      if (linkNbOnly && labelKind != "node") {
+        // show connexion nb
+        Labelizer._createLinkNbLabel(selection, d.name, text);
+      } else {
+        Labelizer._createVarListLabel(selection, d.name, text, ellipsis);
+      }
+    });
+  }
+
+  createLabel.ellipsis = function (value) {
+    if (!arguments.length) {
+      return ellipsis;
+    }
+    ellipsis = value;
+    return createLabel;
+  };
+
+  createLabel.subSupScript = function (value) {
+    if (!arguments.length) {
+      return subSupScript;
+    }
+    subSupScript = value;
+    return createLabel;
+  };
+
+  createLabel.linkNbOnly = function (value) {
+    if (!arguments.length) {
+      return linkNbOnly;
+    }
+    linkNbOnly = value;
+    return createLabel;
+  };
+
+  createLabel.labelKind = function (value) {
+    if (!arguments.length) {
+      return labelKind;
+    }
+    labelKind = value;
+    return createLabel;
+  };
+
+  return createLabel;
+};
+
+Labelizer.tooltipize = function () {
+  var text = "";
+  var subSupScript = false;
+
+  function createTooltip(selection) {
+    var html = [];
+    if (!subSupScript) {
+      html = text.split(',');
+    } else {
+      var tokens = Labelizer.strParse(text);
+      tokens.forEach(function (token) {
+        var item = token.base;
+        if (token.sub) {
+          item += "<sub>" + token.sub + "</sub>";
+        }
+        if (token.sup) {
+          item += "<sup>" + token.sup + "</sup>";
+        }
+        html.push(item);
+      }, this);
+    }
+    selection.html(html.join(", "));
+  }
+
+  createTooltip.text = function (value) {
+    if (!arguments.length) {
+      return text;
+    }
+    text = value;
+    return createTooltip;
+  };
+
+  createTooltip.subSupScript = function (value) {
+    if (!arguments.length) {
+      return subSupScript;
+    }
+    subSupScript = value;
+    return createTooltip;
+  };
+
+  return createTooltip;
+};
+
+module.exports = Labelizer;
+
+/***/ }),
+
+/***/ 17:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var d3 = __webpack_require__(9);
+var Graph = __webpack_require__(4);
+
+var PULSE_DURATION = 700;
+var SUB_ANIM_DELAY = 200;
+var RUNNING_COLOR = d3.rgb("seagreen");
+var FAILED_COLOR = d3.rgb("firebrick");
+var PENDING_COLOR = d3.rgb("dimgray");
+var DONE_COLOR = d3.rgb("darkseagreen");
+
+function Animation(xdsms, rootId, delay) {
+  this.rootId = rootId;
+  if (typeof rootId === 'undefined') {
+    this.rootId = 'root';
+  }
+  this.root = xdsms[this.rootId];
+  this.xdsms = xdsms;
+  this.duration = PULSE_DURATION;
+  this.initialDelay = delay || 0;
+
+  this._observers = [];
+  this.reset();
+}
+
+Animation.STATUS = { READY: "ready",
+  RUNNING_STEP: "running_step",
+  RUNNING_AUTO: "running_auto",
+  STOPPED: "stopped",
+  DONE: "done",
+  DISABLED: "disabled" };
+
+Animation.prototype.reset = function () {
+  this.curStep = 0;
+  this.subAnimations = {};
+  this._updateStatus(Animation.STATUS.READY);
+};
+
+Animation.prototype.start = function () {
+  this._scheduleAnimation();
+  this._updateStatus(Animation.STATUS.RUNNING_AUTO);
+};
+
+Animation.prototype.stop = function () {
+  this._reset("all");
+  this._updateStatus(Animation.STATUS.STOPPED);
+};
+
+Animation.prototype.stepPrev = function () {
+  this._step("prev");
+};
+
+Animation.prototype.stepNext = function () {
+  this._step("next");
+};
+
+Animation.prototype._step = function (dir) {
+  var backward = dir === "prev";
+  var self = this;
+  var graph = self.xdsms[self.rootId].graph;
+  var nodesByStep = graph.nodesByStep;
+  var incr = backward ? -1 : 1;
+
+  // console.log("*************************************** STEP "+self.rootId);
+
+  if (!backward && self.done() || backward && self.ready()) {
+    return;
+  }
+
+  if (!self._subAnimationInProgress()) {
+    self.curStep += incr;
+    self._reset();
+
+    var nodesAtStep = nodesByStep[self.curStep];
+    nodesAtStep.forEach(function (nodeId) {
+      if (self.running()) {
+        nodesByStep[self.curStep - incr].forEach(function (prevNodeId) {
+          // eslint-disable-line space-infix-ops
+          if (backward) {
+            self._pulseLink(0, nodeId, prevNodeId);
+          } else {
+            self._pulseLink(0, prevNodeId, nodeId);
+          }
+          var gnode = "g." + prevNodeId;
+          self._pulse(0, gnode + " > rect", "out");
+        });
+      }
+      var gnode = "g." + nodeId;
+      self._pulse(0, gnode + " > rect", "in");
+    });
+  }
+
+  // console.log(self.rootId+" -> nodesByStep = "+JSON.stringify(nodesByStep));
+  // console.log(self.rootId+" -> nodesAtStep = "+JSON.stringify(nodesAtStep));
+  // console.log(self.rootId+" -> self.curStep = "+self.curStep);
+
+  if (nodesByStep[self.curStep].some(self._isSubScenario, this)) {
+    nodesByStep[self.curStep].forEach(function (nodeId) {
+      if (self._isSubScenario(nodeId)) {
+        var scnId = graph.getNode(nodeId).getScenarioId();
+        var anim;
+        if (self.subAnimations[scnId]) {
+          anim = self.subAnimations[scnId];
+        } else {
+          anim = self.subAnimations[scnId] = new Animation(self.xdsms, scnId);
+        }
+        anim._step(dir);
+      }
+    }, this);
+  }
+  if (this.done()) {
+    this._updateStatus(Animation.STATUS.DONE);
+  } else if (this.ready()) {
+    this._updateStatus(Animation.STATUS.READY);
+  } else {
+    this._updateStatus(Animation.STATUS.RUNNING_STEP);
+  }
+};
+
+Animation.prototype.running = function () {
+  return !this.ready() && !this.done();
+};
+Animation.prototype.ready = function () {
+  return this.curStep === 0;
+};
+Animation.prototype.done = function () {
+  return this.curStep === this.root.graph.nodesByStep.length - 1;
+};
+Animation.prototype.isStatus = function (status) {
+  return this.status === status;
+};
+
+Animation.prototype.addObserver = function (observer) {
+  if (observer) {
+    this._observers.push(observer);
+  }
+};
+
+Animation.prototype.renderNodeStatuses = function () {
+  var self = this;
+  var graph = self.xdsms[self.rootId].graph;
+  graph.nodes.forEach(function (node) {
+    var gnode = "g." + node.id;
+    switch (node.status) {
+      case Graph.NODE_STATUS.RUNNING:
+        self._pulse(0, gnode + " > rect", "in", RUNNING_COLOR);
+        break;
+      case Graph.NODE_STATUS.FAILED:
+        self._pulse(0, gnode + " > rect", "in", FAILED_COLOR);
+        break;
+      case Graph.NODE_STATUS.PENDING:
+        self._pulse(0, gnode + " > rect", "in", PENDING_COLOR);
+        break;
+      case Graph.NODE_STATUS.DONE:
+        self._pulse(0, gnode + " > rect", "in", DONE_COLOR);
+        break;
+      default:
+      // nothing to do
+    }
+    if (self._isSubScenario(node.id)) {
+      var scnId = graph.getNode(node.id).getScenarioId();
+      var anim = new Animation(self.xdsms, scnId);
+      anim.renderNodeStatuses();
+    }
+  });
+};
+
+Animation.prototype._updateStatus = function (status) {
+  this.status = status;
+  this._notifyObservers(status);
+};
+
+Animation.prototype._notifyObservers = function () {
+  this._observers.map(function (obs) {
+    obs.update(this.status);
+  }.bind(this));
+};
+
+Animation.prototype._pulse = function (delay, toBeSelected, easeInOut, color) {
+  if (color === undefined) {
+    color = RUNNING_COLOR;
+  }
+  var sel = d3.select("svg." + this.rootId).selectAll(toBeSelected).transition().delay(delay);
+  if (easeInOut !== "out") {
+    sel = sel.transition().duration(200).style('stroke-width', '8px').style('stroke', color).style('fill', function (d) {
+      if (d.id) {
+        return color.brighter();
+      }
+    });
+  }
+  if (easeInOut !== "in") {
+    sel.transition().duration(3 * PULSE_DURATION).style('stroke-width', null).style('stroke', null).style('fill', null);
+  }
+};
+
+Animation.prototype._pulseLink = function (delay, fromId, toId) {
+  var graph = this.xdsms[this.rootId].graph;
+  var from = graph.idxOf(fromId);
+  var to = graph.idxOf(toId);
+  this._pulse(delay, "path.link_" + from + "_" + to);
+};
+
+Animation.prototype._onAnimationStart = function (delay) {
+  var title = d3.select("svg." + this.rootId).select("g.title");
+  title.select("text").transition().delay(delay).style("fill", RUNNING_COLOR);
+  d3.select("svg." + this.rootId).select("rect.border").transition().delay(delay).style("stroke-width", '5px').duration(200).transition().duration(1000).style("stroke", 'black').style("stroke-width", '0px');
+};
+
+Animation.prototype._onAnimationDone = function (delay) {
+  var self = this;
+  var title = d3.select("svg." + this.rootId).select("g.title");
+  title.select("text").transition().delay(delay).style("fill", null).on("end", function () {
+    self._updateStatus(Animation.STATUS.DONE);
+  });
+};
+
+Animation.prototype._isSubScenario = function (nodeId) {
+  var gnode = "g." + nodeId;
+  var nodeSel = d3.select("svg." + this.rootId).select(gnode);
+  return nodeSel.classed("mdo");
+};
+
+Animation.prototype._scheduleAnimation = function () {
+  var self = this;
+  var delay = this.initialDelay;
+  var animDelay = SUB_ANIM_DELAY;
+  var graph = self.xdsms[self.rootId].graph;
+
+  self._onAnimationStart(delay);
+
+  graph.nodesByStep.forEach(function (nodesAtStep, n, nodesByStep) {
+    var offsets = [];
+    nodesAtStep.forEach(function (nodeId) {
+      var elapsed = delay + n * PULSE_DURATION;
+
+      if (n > 0) {
+        nodesByStep[n - 1].forEach(function (prevNodeId) {
+          // eslint-disable-line space-infix-ops
+          self._pulseLink(elapsed, prevNodeId, nodeId);
+        });
+
+        var gnode = "g." + nodeId;
+        if (self._isSubScenario(nodeId)) {
+          self._pulse(elapsed, gnode + " > rect", "in");
+          var scnId = graph.getNode(nodeId).getScenarioId();
+          var anim = new Animation(self.xdsms, scnId, elapsed + animDelay);
+          var offset = anim._scheduleAnimation();
+          offsets.push(offset);
+          self._pulse(offset + elapsed + animDelay, gnode + " > rect", "out");
+        } else {
+          self._pulse(elapsed, gnode + " > rect");
+        }
+      }
+    }, this);
+
+    if (offsets.length > 0) {
+      delay += Math.max.apply(null, offsets);
+    }
+    delay += animDelay;
+  }, this);
+
+  self._onAnimationDone(graph.nodesByStep.length * PULSE_DURATION + delay);
+
+  return graph.nodesByStep.length * PULSE_DURATION;
+};
+
+Animation.prototype._reset = function (all) {
+  var svg = d3.select("svg." + this.rootId);
+  if (all) {
+    svg = d3.selectAll("svg");
+  }
+  svg.selectAll('rect').transition().duration(0).style('stroke-width', null).style('stroke', null);
+  svg.selectAll('.title > text').transition().duration(0).style('fill', null);
+
+  svg.selectAll('.node > rect').transition().duration(0).style('stroke-width', null).style('stroke', null).style('fill', null);
+  svg.selectAll('path').transition().duration(0).style('stroke-width', null).style('stroke', null).style('fill', null);
+};
+
+Animation.prototype._resetPreviousStep = function () {
+  this.root.graph.nodesByStep[this.curStep - 1].forEach(function (nodeId) {
+    var gnode = "g." + nodeId;
+    this._pulse(0, gnode + " > rect", "out");
+  }, this);
+};
+
+Animation.prototype._subAnimationInProgress = function () {
+  var running = false;
+  for (var k in this.subAnimations) {
+    if (this.subAnimations.hasOwnProperty(k)) {
+      running = running || this.subAnimations[k].running();
+    }
+  }
+  return running;
+};
+
+module.exports = Animation;
+
+/***/ }),
+
+/***/ 28:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var d3 = __webpack_require__(9);
+var Animation = __webpack_require__(17);
+
+function Controls(animation) {
+  this.animation = animation;
+
+  var buttonGroup = d3.select(".toolbar").append("div").classed("button_group", true);
+  buttonGroup.append("button").attr("id", "start").append("i").attr("class", "icon-start");
+  buttonGroup.append("button").attr("id", "stop").append("i").attr("class", "icon-stop");
+  buttonGroup.append("button").attr("id", "step-prev").append("i").attr("class", "icon-step-prev");
+  buttonGroup.append("button").attr("id", "step-next").append("i").attr("class", "icon-step-next");
+
+  this.startButton = d3.select('button#start');
+  this.stopButton = d3.select('button#stop');
+  this.stepPrevButton = d3.select('button#step-prev');
+  this.stepNextButton = d3.select('button#step-next');
+
+  this.startButton.on('click', function () {
+    this.animation.start();
+  }.bind(this));
+  this.stopButton.on('click', function () {
+    this.animation.stop();
+  }.bind(this));
+  this.stepPrevButton.on('click', function () {
+    this.animation.stepPrev();
+  }.bind(this));
+  this.stepNextButton.on('click', function () {
+    this.animation.stepNext();
+  }.bind(this));
+
+  this.animation.addObserver(this);
+  this.update(this.animation.status);
+}
+
+Controls.prototype.update = function (status) {
+  // console.log("Controls receives: "+status);
+  switch (status) {
+    case Animation.STATUS.STOPPED:
+    case Animation.STATUS.DONE:
+      this.animation.reset(); // trigger READY status
+    case Animation.STATUS.READY:
+      // eslint-disable-line no-fallthrough
+      this._enable(this.startButton);
+      this._disable(this.stopButton);
+      this._enable(this.stepNextButton);
+      this._enable(this.stepPrevButton);
+      break;
+    case Animation.STATUS.RUNNING_AUTO:
+      this._disable(this.startButton);
+      this._enable(this.stopButton);
+      this._disable(this.stepNextButton);
+      this._disable(this.stepPrevButton);
+      break;
+    case Animation.STATUS.RUNNING_STEP:
+      this._disable(this.startButton);
+      this._enable(this.stopButton);
+      this._enable(this.stepNextButton);
+      this._enable(this.stepPrevButton);
+      break;
+    default:
+      console.log("Unexpected Event: " + status);
+      break;
+  }
+};
+
+Controls.prototype._enable = function (button) {
+  button.attr("disabled", null);
+};
+
+Controls.prototype._disable = function (button) {
+  button.attr("disabled", true);
+};
+
+module.exports = Controls;
+
+/***/ }),
+
+/***/ 29:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _d = __webpack_require__(9);
+
+var d3 = _interopRequireWildcard(_d);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+var Labelizer = __webpack_require__(12); // var d3 = require('d3');
+
+
+var WIDTH = 1000;
+var HEIGHT = 500;
+var X_ORIG = 100;
+var Y_ORIG = 20;
+var PADDING = 20;
+var CELL_W = 250;
+var CELL_H = 75;
+var MULTI_OFFSET = 3;
+var BORDER_PADDING = 4;
+var ANIM_DURATION = 1000; // ms
+
+function Cell(x, y, width, height) {
+  this.x = x;
+  this.y = y;
+  this.width = width;
+  this.height = height;
+}
+
+function Xdsm(graph, svgid, tooltip) {
+  this.graph = graph;
+  this.tooltip = tooltip;
+  var container = d3.select(".xdsm");
+  this.svg = container.append("svg").attr("width", WIDTH).attr("height", HEIGHT).attr("class", svgid);
+
+  this.grid = [];
+  this.nodes = [];
+  this.edges = [];
+
+  this.config = {
+    labelizer: {
+      ellipsis: 5,
+      subSupScript: false,
+      showLinkNbOnly: true
+    }
+  };
+
+  this._initialize();
+}
+
+Xdsm.prototype.addNode = function (nodeName) {
+  this.graph.addNode(nodeName);
+  this.draw();
+};
+
+Xdsm.prototype.removeNode = function () {
+  this.graph.removeNode(2);
+  this.draw();
+};
+
+Xdsm.prototype.hasWorkflow = function () {
+  return this.graph.chains.length !== 0;
+};
+
+Xdsm.prototype._initialize = function () {
+  var self = this;
+
+  if (self.graph.refname) {
+    self._createTitle();
+  }
+  self.nodeGroup = self.svg.append('g').attr("class", "nodes");
+  self.edgeGroup = self.svg.append('g').attr("class", "edges");
+};
+
+Xdsm.prototype.draw = function () {
+  var self = this;
+
+  self.nodes = self._createTextGroup("node", self.nodeGroup, self._customRect);
+  self.edges = self._createTextGroup("edge", self.edgeGroup, self._customTrapz);
+
+  // Workflow
+  self._createWorkflow();
+
+  // Dataflow
+  self._createDataflow();
+
+  // Border (used by animation)
+  self._createBorder();
+
+  // update size
+  var w = CELL_W * (self.graph.nodes.length + 1);
+  var h = CELL_H * (self.graph.nodes.length + 1);
+  self.svg.attr("width", w).attr("height", h);
+  self.svg.selectAll(".border").attr("height", h - BORDER_PADDING).attr("width", w - BORDER_PADDING);
+};
+
+Xdsm.prototype._createTextGroup = function (kind, group, decorate) {
+  var self = this;
+
+  var selection = group.selectAll("." + kind).data(this.graph[kind + "s"], // DATA JOIN
+  function (d) {
+    return d.id;
+  });
+
+  var textGroups = selection.enter() // ENTER
+  .append("g").attr("class", function (d) {
+    var klass = kind === "node" ? d.type : "dataInter";
+    if (klass === "dataInter" && d.isIO()) {
+      klass = "dataIO";
+    }
+    return d.id + " " + kind + " " + klass;
+  }).each(function () {
+    var labelize = Labelizer.labelize().labelKind(kind).ellipsis(self.config.labelizer.ellipsis).subSupScript(self.config.labelizer.subSupScript).linkNbOnly(self.config.labelizer.showLinkNbOnly);
+    d3.select(this).call(labelize);
+  }).merge(selection); // UPDATE + ENTER
+
+  selection.exit().remove(); // EXIT
+
+  d3.selectAll(".ellipsized").on("mouseover", function (d) {
+    self.tooltip.transition().duration(200).style("opacity", 0.9);
+    var tooltipize = Labelizer.tooltipize().subSupScript(self.config.labelizer.subSupScript).text(d.name);
+    self.tooltip.call(tooltipize).style("width", "200px").style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
+  }).on("mouseout", function () {
+    self.tooltip.transition().duration(500).style("opacity", 0);
+  });
+
+  self._layoutText(textGroups, decorate, selection.empty() ? 0 : ANIM_DURATION);
+};
+
+Xdsm.prototype._layoutText = function (items, decorate, delay) {
+  var self = this;
+  var grid = self.grid;
+  items.each(function (d, i) {
+    var item = d3.select(this);
+    if (grid[i] === undefined) {
+      grid[i] = new Array(items.length);
+    }
+    item.select("text").each(function (d, j) {
+      var that = d3.select(this);
+      var data = item.data()[0];
+      var m = data.row === undefined ? i : data.row;
+      var n = data.col === undefined ? i : data.col;
+      var bbox = that.nodes()[j].getBBox();
+      grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
+      that.attr("width", function () {
+        return grid[m][n].width;
+      }).attr("height", function () {
+        return grid[m][n].height;
+      }).attr("x", function () {
+        return grid[m][n].x;
+      }).attr("y", function () {
+        return grid[m][n].y;
+      });
+    });
+  });
+
+  items.transition().duration(delay).attr("transform", function (d, i) {
+    var m = d.col === undefined ? i : d.col;
+    var n = d.row === undefined ? i : d.row;
+    var w = CELL_W * m + X_ORIG;
+    var h = CELL_H * n + Y_ORIG;
+    return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+  });
+
+  items.each(function (d, i) {
+    var that = d3.select(this);
+    that.call(decorate.bind(self), d, i, 0);
+    if (d.isMulti) {
+      that.call(decorate.bind(self), d, i, 1 * Number(MULTI_OFFSET));
+      that.call(decorate.bind(self), d, i, 2 * Number(MULTI_OFFSET));
+    }
+  });
+};
+
+Xdsm.prototype._createWorkflow = function () {
+  var self = this;
+  var workflow = this.svg.selectAll(".workflow").data([self.graph]).enter().insert("g", ":first-child").attr("class", "workflow");
+
+  workflow.selectAll("g").data(self.graph.chains).enter().insert('g').attr("class", "workflow-chain").selectAll('path').data(function (d) {
+    return d;
+  }).enter().append("path").attr("class", function (d) {
+    return "link_" + d[0] + "_" + d[1];
+  }).attr("transform", function (d) {
+    var max = Math.max(d[0], d[1]);
+    var min = Math.min(d[0], d[1]);
+    var w;
+    var h;
+    if (d[0] < d[1]) {
+      w = CELL_W * max + X_ORIG;
+      h = CELL_H * min + Y_ORIG;
+    } else {
+      w = CELL_W * min + X_ORIG;
+      h = CELL_H * max + Y_ORIG;
+    }
+    return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+  }).attr("d", function (d) {
+    var w = CELL_W * Math.abs(d[0] - d[1]);
+    var h = CELL_H * Math.abs(d[0] - d[1]);
+    var points = [];
+    if (d[0] < d[1]) {
+      if (d[0] !== 0) {
+        points.push(-w + ",0");
+      }
+      points.push("0,0");
+      if (d[1] !== 0) {
+        points.push("0," + h);
+      }
+    } else {
+      if (d[0] !== 0) {
+        points.push(w + ",0");
+      }
+      points.push("0,0");
+      if (d[1] !== 0) {
+        points.push("0," + -h);
+      }
+    }
+    return "M" + points.join(" ");
+  });
+};
+
+Xdsm.prototype._createDataflow = function () {
+  var self = this;
+  self.svg.selectAll(".dataflow").data([self]).enter().insert("g", ":first-child").attr("class", "dataflow");
+
+  var selection = self.svg.select(".dataflow").selectAll("path").data(self.graph.edges, function (d) {
+    return d.id;
+  });
+
+  selection.enter().append("path").merge(selection).transition().duration(selection.empty() ? 0 : ANIM_DURATION).attr("transform", function (d, i) {
+    var m = d.col === undefined ? i : d.col;
+    var n = d.row === undefined ? i : d.row;
+    var w = CELL_W * m + X_ORIG;
+    var h = CELL_H * n + Y_ORIG;
+    return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+  }).attr("d", function (d) {
+    var w = CELL_W * Math.abs(d.col - d.row);
+    var h = CELL_H * Math.abs(d.col - d.row);
+    var points = [];
+    if (d.iotype === "in") {
+      if (!d.io.fromU) {
+        points.push(-w + ",0");
+      }
+      points.push("0,0");
+      if (!d.io.toU) {
+        points.push("0," + h);
+      }
+    } else {
+      if (!d.io.fromU) {
+        points.push(w + ",0");
+      }
+      points.push("0,0");
+      if (!d.io.toU) {
+        points.push("0," + -h);
+      }
+    }
+    return "M" + points.join(" ");
+  });
+  selection.exit().remove();
+};
+
+Xdsm.prototype._customRect = function (node, d, i, offset) {
+  var grid = this.grid;
+  node.insert("rect", ":first-child").attr("x", function () {
+    return grid[i][i].x + offset - PADDING;
+  }).attr("y", function () {
+    return -grid[i][i].height * 2 / 3 - PADDING - offset;
+  }).attr("width", function () {
+    return grid[i][i].width + PADDING * 2;
+  }).attr("height", function () {
+    return grid[i][i].height + PADDING * 2;
+  }).attr("rx", function () {
+    var rounded = d.type === 'optimization' || d.type === 'mda' || d.type === 'doe';
+    return rounded ? (grid[i][i].height + PADDING * 2) / 2 : 0;
+  }).attr("ry", function () {
+    var rounded = d.type === 'optimization' || d.type === 'mda' || d.type === 'doe';
+    return rounded ? (grid[i][i].height + PADDING * 2) / 2 : 0;
+  });
+};
+
+Xdsm.prototype._customTrapz = function (edge, d, i, offset) {
+  var grid = this.grid;
+  edge.insert("polygon", ":first-child").attr("points", function (d) {
+    var pad = 5;
+    var w = grid[d.row][d.col].width;
+    var h = grid[d.row][d.col].height;
+    var topleft = -pad - w / 2 + offset + ", " + (-pad - h * 2 / 3 - offset);
+    var topright = w / 2 + pad + offset + 5 + ", " + (-pad - h * 2 / 3 - offset);
+    var botright = w / 2 + pad + offset - 5 + 5 + ", " + (pad + h / 3 - offset);
+    var botleft = -pad - w / 2 + offset - 5 + ", " + (pad + h / 3 - offset);
+    var tpz = [topleft, topright, botright, botleft].join(" ");
+    return tpz;
+  });
+};
+
+Xdsm.prototype._createTitle = function () {
+  var self = this;
+  var ref = self.svg.selectAll(".title").data([self.graph.refname]).enter().append('g').classed('title', true).append("text").text(self.graph.refname);
+
+  var bbox = ref.nodes()[0].getBBox();
+
+  ref.insert("rect", "text").attr('x', bbox.x).attr('y', bbox.y).attr('width', bbox.width).attr('height', bbox.height);
+
+  ref.attr('transform', 'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
+};
+
+Xdsm.prototype._createBorder = function () {
+  var self = this;
+  var bordercolor = 'black';
+  self.svg.selectAll(".border").data([self]).enter().append("rect").classed("border", true).attr("x", BORDER_PADDING).attr("y", BORDER_PADDING).style("stroke", bordercolor).style("fill", "none").style("stroke-width", 0);
+};
+
+module.exports = Xdsm;
+
+/***/ }),
+
+/***/ 32:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+ * XDSMjs
+ * Copyright 2016-2017 Rémi Lafage
+ */
+
+
+var d3 = __webpack_require__(9);
+var Graph = __webpack_require__(4);
+var Xdsm = __webpack_require__(29);
+var Animation = __webpack_require__(17);
+var Controls = __webpack_require__(28);
+
+d3.json("xdsm.json", function (error, mdo) {
+  if (error) {
+    throw error;
+  }
+
+  // Tooltip for variable connexions
+  var tooltip = d3.select("body").selectAll(".tooltip").data(['tooltip']).enter().append("div").attr("class", "tooltip").style("opacity", 0);
+
+  var scenarioKeys = Object.keys(mdo).sort();
+
+  // Optimization problem display setup
+  d3.select("body").selectAll("optpb").data(scenarioKeys).enter().append("div").filter(function (d) {
+    return mdo[d].optpb;
+  }).attr("class", function (d) {
+    return "optpb " + d;
+  }).style("opacity", 0).on("click", function () {
+    d3.select(this).transition().duration(500) // eslint-disable-line no-invalid-this
+    .style("opacity", 0).style("pointer-events", "none");
+  }).append("pre").text(function (d) {
+    return mdo[d].optpb;
+  });
+
+  var xdsms = {};
+
+  if (scenarioKeys.indexOf('root') === -1) {
+    // old format: mono xdsm
+    var graph = new Graph(mdo);
+    xdsms.root = new Xdsm(graph, 'root', tooltip);
+    xdsms.root.draw();
+  } else {
+    // new format managing several XDSM
+    scenarioKeys.forEach(function (k) {
+      if (mdo.hasOwnProperty(k)) {
+        var graph = new Graph(mdo[k], k);
+        xdsms[k] = new Xdsm(graph, k, tooltip);
+        xdsms[k].draw();
+        xdsms[k].svg.select(".optimization").on("click", function () {
+          var info = d3.select(".optpb." + k);
+          info.style("opacity", 0.9);
+          info.style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
+          info.style("pointer-events", "auto");
+        });
+      }
+    }, this); // eslint-disable-line no-invalid-this
+  }
+
+  var anim = new Animation(xdsms);
+  if (xdsms.root.hasWorkflow()) {
+    // workflow is optional
+    var ctrls = new Controls(anim); // eslint-disable-line no-unused-vars
+  }
+  anim.renderNodeStatuses();
+
+  var addButton = d3.select('button#add');
+  addButton.on('click', function () {
+    xdsms.root.addNode("Discipline");
+  });
+  var delButton = d3.select('button#del');
+  delButton.on('click', function () {
+    xdsms.root.removeNode();
+  });
+});
+
+/***/ }),
+
+/***/ 4:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var UID = "_U_";
+var MULTI_TYPE = "_multi";
+
+var STATUS = { UNKNOWN: 'UNKNOWN',
+  PENDING: 'PENDING',
+  RUNNING: 'RUNNING',
+  DONE: 'DONE',
+  FAILED: 'FAILED' };
+
+function Node(id, name, type, status) {
+  if (typeof name === 'undefined') {
+    name = id;
+  }
+  if (typeof type === 'undefined') {
+    type = 'analysis';
+  }
+  if (typeof status === 'undefined') {
+    status = STATUS.UNKNOWN;
+  }
+  if (typeof STATUS[status] === 'undefined') {
+    throw Error("Unknown status '" + status + "' for node " + name + "(id=" + id + ")");
+  }
+  this.id = id;
+  this.name = name;
+  this.isMulti = type.search(/_multi$/) >= 0;
+  this.type = this.isMulti ? type.substr(0, type.length - MULTI_TYPE.length) : type;
+  this.status = status;
+}
+
+Node.prototype.isMdo = function () {
+  return this.type === "mdo";
+};
+
+Node.prototype.getScenarioId = function () {
+  if (this.isMdo()) {
+    var idxscn = this.name.indexOf("_scn-");
+    if (idxscn === -1) {
+      console.log("Warning: MDO Scenario not found. " + "Bad type or name for node: " + JSON.stringify(this));
+      return null;
+    }
+    return this.name.substr(idxscn + 1);
+  }
+  return null;
+};
+
+function Edge(from, to, name, row, col, isMulti) {
+  this.id = "link_" + from + "_" + to;
+  this.name = name;
+  this.row = row;
+  this.col = col;
+  this.iotype = row < col ? "in" : "out";
+  this.io = {
+    fromU: from === UID,
+    toU: to === UID
+  };
+  this.isMulti = isMulti;
+}
+
+Edge.prototype.isIO = function () {
+  return this.io.fromU || this.io.toU;
+};
+
+function Graph(mdo, refname) {
+  this.nodes = [new Node(UID, UID, "user")];
+  this.edges = [];
+  this.chains = [];
+  this.refname = refname || "";
+  this._newNodeCount = 0;
+
+  var numbering = Graph.number(mdo.workflow);
+  var numPrefixes = numbering.toNum;
+  this.nodesByStep = numbering.toNode;
+
+  mdo.nodes.forEach(function (item) {
+    var num = numPrefixes[item.id];
+    this.nodes.push(new Node(item.id, num ? num + ":" + item.name : item.name, item.type, item.status));
+  }, this);
+
+  if (mdo.edges) {
+    mdo.edges.forEach(function (item) {
+      var idA = this.idxOf(item.from);
+      var idB = this.idxOf(item.to);
+      var isMulti = this.nodes[idA].isMulti || this.nodes[idB].isMulti;
+      this.edges.push(new Edge(item.from, item.to, item.name, idA, idB, isMulti));
+    }, this);
+  }
+
+  if (mdo.workflow) {
+    this._makeChaining(mdo.workflow);
+  }
+}
+
+Graph.NODE_STATUS = STATUS;
+
+Graph.prototype._makeChaining = function (workflow) {
+  var echain = Graph.expand(workflow);
+  echain.forEach(function (leafChain) {
+    if (leafChain.length < 2) {
+      throw new Error("Bad process chain (" + leafChain.length + "elt)");
+    } else {
+      this.chains.push([]);
+      var ids = this.nodes.map(function (elt) {
+        return elt.id;
+      });
+      leafChain.forEach(function (item, j) {
+        if (j !== 0) {
+          var idA = ids.indexOf(leafChain[j - 1]);
+          if (idA < 0) {
+            throw new Error("Process chain element (" + leafChain[j - 1] + ") not found");
+          }
+          var idB = ids.indexOf(leafChain[j]);
+          if (idB < 0) {
+            throw new Error("Process chain element (" + leafChain[j] + ") not found");
+          }
+          if (idA !== idB) {
+            this.chains[this.chains.length - 1].push([idA, idB]);
+          }
+        }
+      }, this);
+    }
+  }, this);
+};
+
+Graph.prototype.idxOf = function (nodeId) {
+  return this.nodes.map(function (elt) {
+    return elt.id;
+  }).indexOf(nodeId);
+};
+
+Graph.prototype.getNode = function (nodeId) {
+  var theNode;
+  this.nodes.forEach(function (node) {
+    if (node.id === nodeId) {
+      theNode = node;
+    }
+  }, this);
+  return theNode;
+};
+
+Graph.prototype.addNode = function (nodeName) {
+  this._newNodeCount += 1;
+  this.nodes.push(new Node("NewNode" + this._newNodeCount, nodeName, "analysis"));
+};
+
+Graph.prototype.removeNode = function (index) {
+  var self = this;
+
+  // Update edges
+  var edges = this.findEdgesOf(index);
+  edges.toRemove.forEach(function (edge) {
+    var idx = self.edges.indexOf(edge);
+    if (idx > -1) {
+      self.edges.splice(idx, 1);
+    }
+  }, this);
+  edges.toShift.forEach(function (edge) {
+    if (edge.row > 1) {
+      edge.row -= 1;
+    }
+    if (edge.col > 1) {
+      edge.col -= 1;
+    }
+  }, this);
+
+  // Update nodes
+  this.nodes.splice(index, 1);
+};
+
+Graph.prototype.findEdgesOf = function (nodeIdx) {
+  var toRemove = [];
+  var toShift = [];
+  this.edges.forEach(function (edge) {
+    if (edge.row === nodeIdx || edge.col === nodeIdx) {
+      toRemove.push(edge);
+    } else if (edge.row > nodeIdx || edge.col > nodeIdx) {
+      toShift.push(edge);
+    }
+  }, this);
+  return { toRemove: toRemove, toShift: toShift };
+};
+
+function _expand(workflow) {
+  var ret = [];
+  var prev;
+  workflow.forEach(function (item) {
+    if (item instanceof Array) {
+      if (item[0].hasOwnProperty('parallel')) {
+        if (prev) {
+          ret = ret.slice(0, ret.length - 1).concat(item[0].parallel.map(function (elt) {
+            return [prev].concat(_expand([elt]), prev);
+          }));
+        } else {
+          throw new Error("Bad workflow structure : " + "cannot parallel loop without previous starting point.");
+        }
+      } else if (prev) {
+        ret = ret.concat(_expand(item), prev);
+      } else {
+        ret = ret.concat(_expand(item));
+      }
+      prev = ret[ret.length - 1];
+    } else if (item.hasOwnProperty('parallel')) {
+      if (prev) {
+        ret = ret.slice(0, ret.length - 1).concat(item.parallel.map(function (elt) {
+          return [prev].concat(_expand([elt]));
+        }));
+      } else {
+        ret = ret.concat(item.parallel.map(function (elt) {
+          return _expand([elt]);
+        }));
+      }
+      prev = undefined;
+    } else {
+      var i = ret.length - 1;
+      var flagParallel = false;
+      while (i >= 0 && ret[i] instanceof Array) {
+        ret[i] = ret[i].concat(item);
+        i -= 1;
+        flagParallel = true;
+      }
+      if (!flagParallel) {
+        ret.push(item);
+      }
+      prev = item;
+    }
+  }, workflow);
+  return ret;
+}
+
+Graph._isPatchNeeded = function (toBePatched) {
+  var lastElts = toBePatched.map(function (arr) {
+    return arr[arr.length - 1];
+  });
+  var lastElt = lastElts[0];
+  for (var i = 0; i < lastElts.length; i++) {
+    if (lastElts[i] !== lastElt) {
+      return true;
+    }
+  }
+  return false;
+};
+
+Graph._patchParallel = function (expanded) {
+  var toBePatched = [];
+  expanded.forEach(function (elt) {
+    if (elt instanceof Array) {
+      toBePatched.push(elt);
+    } else if (Graph._isPatchNeeded(toBePatched)) {
+      toBePatched.forEach(function (arr) {
+        arr.push(elt);
+      }, this);
+    }
+  }, this);
+};
+
+Graph.expand = function (item) {
+  var expanded = _expand(item);
+  var result = [];
+  var current = [];
+  // first pass to add missing 'end link' in case of parallel branches at the end of a loop
+  // [a, [b, d], [b, c], a] -> [a, [b, d, a], [b, c, a], a]
+  Graph._patchParallel(expanded);
+  // [a, aa, [b, c], d] -> [[a, aa, b], [b,c], [c, d]]
+  expanded.forEach(function (elt) {
+    if (elt instanceof Array) {
+      if (current.length > 0) {
+        current.push(elt[0]);
+        result.push(current);
+        current = [];
+      }
+      result.push(elt);
+    } else {
+      if (result.length > 0 && current.length === 0) {
+        var lastChain = result[result.length - 1];
+        var lastElt = lastChain[lastChain.length - 1];
+        current.push(lastElt);
+      }
+      current.push(elt);
+    }
+  }, this);
+  if (current.length > 0) {
+    result.push(current);
+  }
+  return result;
+};
+
+Graph.number = function (workflow, num) {
+  num = typeof num === 'undefined' ? 0 : num;
+  var toNum = {};
+  var toNode = [];
+
+  function setStep(step, nodeId) {
+    if (step in toNode) {
+      toNode[step].push(nodeId);
+    } else {
+      toNode[step] = [nodeId];
+    }
+  }
+
+  function setNum(nodeId, beg, end) {
+    if (end === undefined) {
+      num = String(beg);
+      setStep(beg, nodeId);
+    } else {
+      num = end + "-" + beg;
+      setStep(end, nodeId);
+    }
+    if (nodeId in toNum) {
+      toNum[nodeId] += "," + num;
+    } else {
+      toNum[nodeId] = num;
+    }
+  }
+
+  function _number(wks, num) {
+    var ret = 0;
+    if (wks instanceof Array) {
+      if (wks.length === 0) {
+        ret = num;
+      } else if (wks.length === 1) {
+        ret = _number(wks[0], num);
+      } else {
+        var head = wks[0];
+        var tail = wks.slice(1);
+        var beg = _number(head, num);
+        if (tail[0] instanceof Array) {
+          var end = _number(tail[0], beg);
+          setNum(head, beg, end);
+          beg = end + 1;
+          tail.shift();
+        }
+        ret = _number(tail, beg);
+      }
+    } else if (wks instanceof Object && 'parallel' in wks) {
+      var nums = wks.parallel.map(function (branch) {
+        return _number(branch, num);
+      });
+      ret = Math.max.apply(null, nums);
+    } else {
+      setNum(wks, num);
+      ret = num + 1;
+    }
+    return ret;
+  }
+
+  _number(workflow, num);
+  // console.log('toNodes=', JSON.stringify(toNode));
+  // console.log('toNum=',JSON.stringify(toNum));
+  return { toNum: toNum, toNode: toNode };
+};
+
+module.exports = Graph;
+
+/***/ }),
+
+/***/ 9:
+/***/ (function(module, exports, __webpack_require__) {
+
+// https://d3js.org Version 4.9.1. Copyright 2017 Mike Bostock.
 (function (global, factory) {
 	 true ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
 	(factory((global.d3 = global.d3 || {})));
 }(this, (function (exports) { 'use strict';
 
-var version = "4.8.0";
+var version = "4.9.1";
 
 var ascending = function(a, b) {
   return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
@@ -639,15 +1972,15 @@ var left = 4;
 var epsilon = 1e-6;
 
 function translateX(x) {
-  return "translate(" + x + ",0)";
+  return "translate(" + (x + 0.5) + ",0)";
 }
 
 function translateY(y) {
-  return "translate(0," + y + ")";
+  return "translate(0," + (y + 0.5) + ")";
 }
 
 function center(scale) {
-  var offset = scale.bandwidth() / 2;
+  var offset = Math.max(0, scale.bandwidth() - 1) / 2; // Adjust for 0.5px offset.
   if (scale.round()) offset = Math.round(offset);
   return function(d) {
     return scale(d) + offset;
@@ -666,7 +1999,7 @@ function axis(orient, scale) {
       tickSizeOuter = 6,
       tickPadding = 3,
       k = orient === top || orient === left ? -1 : 1,
-      x, y = orient === left || orient === right ? (x = "x", "y") : (x = "y", "x"),
+      x = orient === left || orient === right ? "x" : "y",
       transform = orient === top || orient === bottom ? translateX : translateY;
 
   function axis(context) {
@@ -693,14 +2026,11 @@ function axis(orient, scale) {
 
     line = line.merge(tickEnter.append("line")
         .attr("stroke", "#000")
-        .attr(x + "2", k * tickSizeInner)
-        .attr(y + "1", 0.5)
-        .attr(y + "2", 0.5));
+        .attr(x + "2", k * tickSizeInner));
 
     text = text.merge(tickEnter.append("text")
         .attr("fill", "#000")
         .attr(x, k * spacing)
-        .attr(y, 0.5)
         .attr("dy", orient === top ? "0em" : orient === bottom ? "0.71em" : "0.32em"));
 
     if (context !== selection) {
@@ -1475,7 +2805,7 @@ var selection_attr = function(name, value) {
       : (fullname.local ? attrConstantNS : attrConstant)))(fullname, value));
 };
 
-var window = function(node) {
+var defaultView = function(node) {
   return (node.ownerDocument && node.ownerDocument.defaultView) // node is a Node
       || (node.document && node) // node is a Window
       || node.defaultView; // node is a Document
@@ -1502,16 +2832,18 @@ function styleFunction(name, value, priority) {
 }
 
 var selection_style = function(name, value, priority) {
-  var node;
   return arguments.length > 1
       ? this.each((value == null
             ? styleRemove : typeof value === "function"
             ? styleFunction
             : styleConstant)(name, value, priority == null ? "" : priority))
-      : window(node = this.node())
-          .getComputedStyle(node, null)
-          .getPropertyValue(name);
+      : styleValue(this.node(), name);
 };
+
+function styleValue(node, name) {
+  return node.style.getPropertyValue(name)
+      || defaultView(node).getComputedStyle(node, null).getPropertyValue(name);
+}
 
 function propertyRemove(name) {
   return function() {
@@ -1721,13 +3053,13 @@ var selection_datum = function(value) {
 };
 
 function dispatchEvent(node, type, params) {
-  var window$$1 = window(node),
-      event = window$$1.CustomEvent;
+  var window = defaultView(node),
+      event = window.CustomEvent;
 
-  if (event) {
+  if (typeof event === "function") {
     event = new event(type, params);
   } else {
-    event = window$$1.document.createEvent("Event");
+    event = window.document.createEvent("Event");
     if (params) event.initEvent(type, params.bubbles, params.cancelable), event.detail = params.detail;
     else event.initEvent(type, false, false);
   }
@@ -1910,8 +3242,11 @@ var drag = function() {
       gestures = {},
       listeners = dispatch("start", "drag", "end"),
       active = 0,
+      mousedownx,
+      mousedowny,
       mousemoving,
-      touchending;
+      touchending,
+      clickDistance2 = 0;
 
   function drag(selection$$1) {
     selection$$1
@@ -1930,12 +3265,17 @@ var drag = function() {
     dragDisable(exports.event.view);
     nopropagation();
     mousemoving = false;
+    mousedownx = exports.event.clientX;
+    mousedowny = exports.event.clientY;
     gesture("start");
   }
 
   function mousemoved() {
     noevent();
-    mousemoving = true;
+    if (!mousemoving) {
+      var dx = exports.event.clientX - mousedownx, dy = exports.event.clientY - mousedowny;
+      mousemoving = dx * dx + dy * dy > clickDistance2;
+    }
     gestures.mouse("drag");
   }
 
@@ -2023,6 +3363,10 @@ var drag = function() {
   drag.on = function() {
     var value = listeners.on.apply(listeners, arguments);
     return value === listeners ? drag : value;
+  };
+
+  drag.clickDistance = function(_) {
+    return arguments.length ? (clickDistance2 = (_ = +_) * _, drag) : Math.sqrt(clickDistance2);
   };
 
   return drag;
@@ -2773,7 +4117,7 @@ var interpolateValue = function(a, b) {
       : b instanceof color ? interpolateRgb
       : b instanceof Date ? date
       : Array.isArray(b) ? array$1
-      : isNaN(b) ? object
+      : typeof b.valueOf !== "function" && typeof b.toString !== "function" || isNaN(b) ? object
       : reinterpolate)(a, b);
 };
 
@@ -3736,9 +5080,8 @@ function styleRemove$1(name, interpolate$$2) {
       value10,
       interpolate0;
   return function() {
-    var style = window(this).getComputedStyle(this, null),
-        value0 = style.getPropertyValue(name),
-        value1 = (this.style.removeProperty(name), style.getPropertyValue(name));
+    var value0 = styleValue(this, name),
+        value1 = (this.style.removeProperty(name), styleValue(this, name));
     return value0 === value1 ? null
         : value0 === value00 && value1 === value10 ? interpolate0
         : interpolate0 = interpolate$$2(value00 = value0, value10 = value1);
@@ -3755,7 +5098,7 @@ function styleConstant$1(name, interpolate$$2, value1) {
   var value00,
       interpolate0;
   return function() {
-    var value0 = window(this).getComputedStyle(this, null).getPropertyValue(name);
+    var value0 = styleValue(this, name);
     return value0 === value1 ? null
         : value0 === value00 ? interpolate0
         : interpolate0 = interpolate$$2(value00 = value0, value1);
@@ -3767,10 +5110,9 @@ function styleFunction$1(name, interpolate$$2, value) {
       value10,
       interpolate0;
   return function() {
-    var style = window(this).getComputedStyle(this, null),
-        value0 = style.getPropertyValue(name),
+    var value0 = styleValue(this, name),
         value1 = value(this);
-    if (value1 == null) value1 = (this.style.removeProperty(name), style.getPropertyValue(name));
+    if (value1 == null) value1 = (this.style.removeProperty(name), styleValue(this, name));
     return value0 === value1 ? null
         : value0 === value00 && value1 === value10 ? interpolate0
         : interpolate0 = interpolate$$2(value00 = value0, value10 = value1);
@@ -8438,9 +9780,11 @@ function PathString() {
 }
 
 PathString.prototype = {
+  _radius: 4.5,
   _circle: circle$1(4.5),
   pointRadius: function(_) {
-    return this._circle = circle$1(_), this;
+    if ((_ = +_) !== this._radius) this._radius = _, this._circle = null;
+    return this;
   },
   polygonStart: function() {
     this._line = 0;
@@ -8467,6 +9811,7 @@ PathString.prototype = {
         break;
       }
       default: {
+        if (this._circle == null) this._circle = circle$1(this._radius);
         this._string.push("M", x, ",", y, this._circle);
         break;
       }
@@ -8477,6 +9822,8 @@ PathString.prototype = {
       var result = this._string.join("");
       this._string = [];
       return result;
+    } else {
+      return null;
     }
   }
 };
@@ -8801,7 +10148,7 @@ var clipCircle = function(radius, delta) {
         // TODO ignore if not clipping polygons.
         if (v !== v0) {
           point2 = intersect(point0, point1);
-          if (pointEqual(point0, point2) || pointEqual(point1, point2)) {
+          if (!point2 || pointEqual(point0, point2) || pointEqual(point1, point2)) {
             point1[0] += epsilon$2;
             point1[1] += epsilon$2;
             v = visible(point1[0], point1[1]);
@@ -11038,7 +12385,6 @@ var slice$3 = [].slice;
 var noabort = {};
 
 function Queue(size) {
-  if (!(size >= 1)) throw new Error;
   this._size = size;
   this._call =
   this._error = null;
@@ -11053,7 +12399,8 @@ function Queue(size) {
 Queue.prototype = queue.prototype = {
   constructor: Queue,
   defer: function(callback) {
-    if (typeof callback !== "function" || this._call) throw new Error;
+    if (typeof callback !== "function") throw new Error("invalid callback");
+    if (this._call) throw new Error("defer after await");
     if (this._error != null) return this;
     var t = slice$3.call(arguments, 1);
     t.push(callback);
@@ -11066,13 +12413,15 @@ Queue.prototype = queue.prototype = {
     return this;
   },
   await: function(callback) {
-    if (typeof callback !== "function" || this._call) throw new Error;
+    if (typeof callback !== "function") throw new Error("invalid callback");
+    if (this._call) throw new Error("multiple await");
     this._call = function(error, results) { callback.apply(null, [error].concat(results)); };
     maybeNotify(this);
     return this;
   },
   awaitAll: function(callback) {
-    if (typeof callback !== "function" || this._call) throw new Error;
+    if (typeof callback !== "function") throw new Error("invalid callback");
+    if (this._call) throw new Error("multiple await");
     this._call = callback;
     maybeNotify(this);
     return this;
@@ -11148,66 +12497,108 @@ function maybeNotify(q) {
 }
 
 function queue(concurrency) {
-  return new Queue(arguments.length ? +concurrency : Infinity);
+  if (concurrency == null) concurrency = Infinity;
+  else if (!((concurrency = +concurrency) >= 1)) throw new Error("invalid concurrency");
+  return new Queue(concurrency);
 }
 
-var uniform = function(min, max) {
-  min = min == null ? 0 : +min;
-  max = max == null ? 1 : +max;
-  if (arguments.length === 1) max = min, min = 0;
-  else max -= min;
-  return function() {
-    return Math.random() * max + min;
-  };
+var defaultSource$1 = function() {
+  return Math.random();
 };
 
-var normal = function(mu, sigma) {
-  var x, r;
-  mu = mu == null ? 0 : +mu;
-  sigma = sigma == null ? 1 : +sigma;
-  return function() {
-    var y;
+var uniform = ((function sourceRandomUniform(source) {
+  function randomUniform(min, max) {
+    min = min == null ? 0 : +min;
+    max = max == null ? 1 : +max;
+    if (arguments.length === 1) max = min, min = 0;
+    else max -= min;
+    return function() {
+      return source() * max + min;
+    };
+  }
 
-    // If available, use the second previously-generated uniform random.
-    if (x != null) y = x, x = null;
+  randomUniform.source = sourceRandomUniform;
 
-    // Otherwise, generate a new x and y.
-    else do {
-      x = Math.random() * 2 - 1;
-      y = Math.random() * 2 - 1;
-      r = x * x + y * y;
-    } while (!r || r > 1);
+  return randomUniform;
+}))(defaultSource$1);
 
-    return mu + sigma * y * Math.sqrt(-2 * Math.log(r) / r);
-  };
-};
+var normal = ((function sourceRandomNormal(source) {
+  function randomNormal(mu, sigma) {
+    var x, r;
+    mu = mu == null ? 0 : +mu;
+    sigma = sigma == null ? 1 : +sigma;
+    return function() {
+      var y;
 
-var logNormal = function() {
-  var randomNormal = normal.apply(this, arguments);
-  return function() {
-    return Math.exp(randomNormal());
-  };
-};
+      // If available, use the second previously-generated uniform random.
+      if (x != null) y = x, x = null;
 
-var irwinHall = function(n) {
-  return function() {
-    for (var sum = 0, i = 0; i < n; ++i) sum += Math.random();
-    return sum;
-  };
-};
+      // Otherwise, generate a new x and y.
+      else do {
+        x = source() * 2 - 1;
+        y = source() * 2 - 1;
+        r = x * x + y * y;
+      } while (!r || r > 1);
 
-var bates = function(n) {
-  var randomIrwinHall = irwinHall(n);
-  return function() {
-    return randomIrwinHall() / n;
-  };
-};
+      return mu + sigma * y * Math.sqrt(-2 * Math.log(r) / r);
+    };
+  }
 
-var exponential$1 = function(lambda) {
-  return function() {
-    return -Math.log(1 - Math.random()) / lambda;
-  };
-};
+  randomNormal.source = sourceRandomNormal;
+
+  return randomNormal;
+}))(defaultSource$1);
+
+var logNormal = ((function sourceRandomLogNormal(source) {
+  function randomLogNormal() {
+    var randomNormal = normal.source(source).apply(this, arguments);
+    return function() {
+      return Math.exp(randomNormal());
+    };
+  }
+
+  randomLogNormal.source = sourceRandomLogNormal;
+
+  return randomLogNormal;
+}))(defaultSource$1);
+
+var irwinHall = ((function sourceRandomIrwinHall(source) {
+  function randomIrwinHall(n) {
+    return function() {
+      for (var sum = 0, i = 0; i < n; ++i) sum += source();
+      return sum;
+    };
+  }
+
+  randomIrwinHall.source = sourceRandomIrwinHall;
+
+  return randomIrwinHall;
+}))(defaultSource$1);
+
+var bates = ((function sourceRandomBates(source) {
+  function randomBates(n) {
+    var randomIrwinHall = irwinHall.source(source)(n);
+    return function() {
+      return randomIrwinHall() / n;
+    };
+  }
+
+  randomBates.source = sourceRandomBates;
+
+  return randomBates;
+}))(defaultSource$1);
+
+var exponential$1 = ((function sourceRandomExponential(source) {
+  function randomExponential(lambda) {
+    return function() {
+      return -Math.log(1 - source()) / lambda;
+    };
+  }
+
+  randomExponential.source = sourceRandomExponential;
+
+  return randomExponential;
+}))(defaultSource$1);
 
 var request = function(url, callback) {
   var request,
@@ -11715,17 +13106,39 @@ function linearish(scale) {
   };
 
   scale.nice = function(count) {
-    var d = domain(),
-        i = d.length - 1,
-        n = count == null ? 10 : count,
-        start = d[0],
-        stop = d[i],
-        step = tickStep(start, stop, n);
+    if (count == null) count = 10;
 
-    if (step) {
-      step = tickStep(Math.floor(start / step) * step, Math.ceil(stop / step) * step, n);
-      d[0] = Math.floor(start / step) * step;
-      d[i] = Math.ceil(stop / step) * step;
+    var d = domain(),
+        i0 = 0,
+        i1 = d.length - 1,
+        start = d[i0],
+        stop = d[i1],
+        step;
+
+    if (stop < start) {
+      step = start, start = stop, stop = step;
+      step = i0, i0 = i1, i1 = step;
+    }
+
+    step = tickIncrement(start, stop, count);
+
+    if (step > 0) {
+      start = Math.floor(start / step) * step;
+      stop = Math.ceil(stop / step) * step;
+      step = tickIncrement(start, stop, count);
+    } else if (step < 0) {
+      start = Math.ceil(start * step) / step;
+      stop = Math.floor(stop * step) / step;
+      step = tickIncrement(start, stop, count);
+    }
+
+    if (step > 0) {
+      d[i0] = Math.floor(start / step) * step;
+      d[i1] = Math.ceil(stop / step) * step;
+      domain(d);
+    } else if (step < 0) {
+      d[i0] = Math.ceil(start * step) / step;
+      d[i1] = Math.floor(stop * step) / step;
       domain(d);
     }
 
@@ -13790,6 +15203,91 @@ var radialArea = function() {
   return a;
 };
 
+var slice$5 = Array.prototype.slice;
+
+var radialPoint = function(x, y) {
+  return [(y = +y) * Math.cos(x -= Math.PI / 2), y * Math.sin(x)];
+};
+
+function linkSource(d) {
+  return d.source;
+}
+
+function linkTarget(d) {
+  return d.target;
+}
+
+function link$2(curve) {
+  var source = linkSource,
+      target = linkTarget,
+      x$$1 = x$3,
+      y$$1 = y$3,
+      context = null;
+
+  function link() {
+    var buffer, argv = slice$5.call(arguments), s = source.apply(this, argv), t = target.apply(this, argv);
+    if (!context) context = buffer = path();
+    curve(context, +x$$1.apply(this, (argv[0] = s, argv)), +y$$1.apply(this, argv), +x$$1.apply(this, (argv[0] = t, argv)), +y$$1.apply(this, argv));
+    if (buffer) return context = null, buffer + "" || null;
+  }
+
+  link.source = function(_) {
+    return arguments.length ? (source = _, link) : source;
+  };
+
+  link.target = function(_) {
+    return arguments.length ? (target = _, link) : target;
+  };
+
+  link.x = function(_) {
+    return arguments.length ? (x$$1 = typeof _ === "function" ? _ : constant$10(+_), link) : x$$1;
+  };
+
+  link.y = function(_) {
+    return arguments.length ? (y$$1 = typeof _ === "function" ? _ : constant$10(+_), link) : y$$1;
+  };
+
+  link.context = function(_) {
+    return arguments.length ? ((context = _ == null ? null : _), link) : context;
+  };
+
+  return link;
+}
+
+function curveHorizontal(context, x0, y0, x1, y1) {
+  context.moveTo(x0, y0);
+  context.bezierCurveTo(x0 = (x0 + x1) / 2, y0, x0, y1, x1, y1);
+}
+
+function curveVertical(context, x0, y0, x1, y1) {
+  context.moveTo(x0, y0);
+  context.bezierCurveTo(x0, y0 = (y0 + y1) / 2, x1, y0, x1, y1);
+}
+
+function curveRadial$1(context, x0, y0, x1, y1) {
+  var p0 = radialPoint(x0, y0),
+      p1 = radialPoint(x0, y0 = (y0 + y1) / 2),
+      p2 = radialPoint(x1, y0),
+      p3 = radialPoint(x1, y1);
+  context.moveTo(p0[0], p0[1]);
+  context.bezierCurveTo(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1]);
+}
+
+function linkHorizontal() {
+  return link$2(curveHorizontal);
+}
+
+function linkVertical() {
+  return link$2(curveVertical);
+}
+
+function linkRadial() {
+  var l = link$2(curveRadial$1);
+  l.angle = l.x, delete l.x;
+  l.radius = l.y, delete l.y;
+  return l;
+}
+
 var circle$2 = {
   draw: function(context, size) {
     var r = Math.sqrt(size / pi$4);
@@ -14771,13 +16269,11 @@ function stepAfter(context) {
   return new Step(context, 1);
 }
 
-var slice$5 = Array.prototype.slice;
-
 var none$1 = function(series, order) {
   if (!((n = series.length) > 1)) return;
-  for (var i = 1, s0, s1 = series[order[0]], n, m = s1.length; i < n; ++i) {
+  for (var i = 1, j, s0, s1 = series[order[0]], n, m = s1.length; i < n; ++i) {
     s0 = s1, s1 = series[order[i]];
-    for (var j = 0; j < m; ++j) {
+    for (j = 0; j < m; ++j) {
       s1[j][1] += s1[j][0] = isNaN(s0[j][1]) ? s0[j][0] : s0[j][1];
     }
   }
@@ -14849,6 +16345,21 @@ var expand = function(series, order) {
     if (y) for (i = 0; i < n; ++i) series[i][j][1] /= y;
   }
   none$1(series, order);
+};
+
+var diverging = function(series, order) {
+  if (!((n = series.length) > 1)) return;
+  for (var i, j = 0, d, dy, yp, yn, n, m = series[order[0]].length; j < m; ++j) {
+    for (yp = yn = 0, i = 0; i < n; ++i) {
+      if ((dy = (d = series[order[i]][j])[1] - d[0]) >= 0) {
+        d[0] = yp, d[1] = yp += dy;
+      } else if (dy < 0) {
+        d[1] = yn, d[0] = yn += dy;
+      } else {
+        d[0] = yp;
+      }
+    }
+  }
 };
 
 var silhouette = function(series, order) {
@@ -16024,7 +17535,8 @@ var zoom = function() {
       touchstarting,
       touchending,
       touchDelay = 500,
-      wheelDelay = 150;
+      wheelDelay = 150,
+      clickDistance2 = 0;
 
   function zoom(selection$$1) {
     selection$$1
@@ -16214,7 +17726,9 @@ var zoom = function() {
     if (touchending || !filter.apply(this, arguments)) return;
     var g = gesture(this, arguments),
         v = select(exports.event.view).on("mousemove.zoom", mousemoved, true).on("mouseup.zoom", mouseupped, true),
-        p = mouse(this);
+        p = mouse(this),
+        x0 = exports.event.clientX,
+        y0 = exports.event.clientY;
 
     dragDisable(exports.event.view);
     nopropagation$2();
@@ -16224,7 +17738,10 @@ var zoom = function() {
 
     function mousemoved() {
       noevent$2();
-      g.moved = true;
+      if (!g.moved) {
+        var dx = exports.event.clientX - x0, dy = exports.event.clientY - y0;
+        g.moved = dx * dx + dy * dy > clickDistance2;
+      }
       g.zoom("mouse", constrain(translate(g.that.__zoom, g.mouse[0] = mouse(g.that), g.mouse[1]), g.extent));
     }
 
@@ -16356,6 +17873,10 @@ var zoom = function() {
     return value === listeners ? zoom : value;
   };
 
+  zoom.clickDistance = function(_) {
+    return arguments.length ? (clickDistance2 = (_ = +_) * _, zoom) : Math.sqrt(clickDistance2);
+  };
+    
   return zoom;
 };
 
@@ -16615,9 +18136,10 @@ exports.selectAll = selectAll;
 exports.selection = selection;
 exports.selector = selector;
 exports.selectorAll = selectorAll;
+exports.style = styleValue;
 exports.touch = touch;
 exports.touches = touches;
-exports.window = window;
+exports.window = defaultView;
 exports.customEvent = customEvent;
 exports.arc = arc;
 exports.area = area$2;
@@ -16625,6 +18147,9 @@ exports.line = line;
 exports.pie = pie;
 exports.radialArea = radialArea;
 exports.radialLine = radialLine$1;
+exports.linkHorizontal = linkHorizontal;
+exports.linkVertical = linkVertical;
+exports.linkRadial = linkRadial;
 exports.symbol = symbol;
 exports.symbols = symbols;
 exports.symbolCircle = circle$2;
@@ -16654,6 +18179,7 @@ exports.curveStepAfter = stepAfter;
 exports.curveStepBefore = stepBefore;
 exports.stack = stack;
 exports.stackOffsetExpand = expand;
+exports.stackOffsetDiverging = diverging;
 exports.stackOffsetNone = none$1;
 exports.stackOffsetSilhouette = silhouette;
 exports.stackOffsetWiggle = wiggle;
@@ -16745,1443 +18271,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 })));
 
 
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var d3 = __webpack_require__(0);
-var Graph = __webpack_require__(2);
-
-var PULSE_DURATION = 700;
-var SUB_ANIM_DELAY = 200;
-var RUNNING_COLOR = d3.rgb("seagreen");
-var FAILED_COLOR = d3.rgb("firebrick");
-var PENDING_COLOR = d3.rgb("dimgray");
-var DONE_COLOR = d3.rgb("darkseagreen");
-
-function Animation(xdsms, rootId, delay) {
-  this.rootId = rootId;
-  if (typeof (rootId) === 'undefined') {
-    this.rootId = 'root';
-  }
-  this.root = xdsms[this.rootId];
-  this.xdsms = xdsms;
-  this.duration = PULSE_DURATION;
-  this.initialDelay = delay || 0;
-
-  this._observers = [];
-  this.reset();
-}
-
-Animation.STATUS = {READY: "ready",
-                    RUNNING_STEP: "running_step",
-                    RUNNING_AUTO: "running_auto",
-                    STOPPED: "stopped",
-                    DONE: "done",
-                    DISABLED: "disabled"};
-
-Animation.prototype.reset = function() {
-  this.curStep = 0;
-  this.subAnimations = {};
-  this._updateStatus(Animation.STATUS.READY);
-};
-
-Animation.prototype.start = function() {
-  this._scheduleAnimation();
-  this._updateStatus(Animation.STATUS.RUNNING_AUTO);
-};
-
-Animation.prototype.stop = function() {
-  this._reset("all");
-  this._updateStatus(Animation.STATUS.STOPPED);
-};
-
-Animation.prototype.stepPrev = function() {
-  this._step("prev");
-};
-
-Animation.prototype.stepNext = function() {
-  this._step("next");
-};
-
-Animation.prototype._step = function(dir) {
-  var backward = (dir === "prev");
-  var self = this;
-  var graph = self.xdsms[self.rootId].graph;
-  var nodesByStep = graph.nodesByStep;
-  var incr = backward ? -1 : 1;
-
-  // console.log("*************************************** STEP "+self.rootId);
-
-  if ((!backward && self.done()) ||
-      (backward && self.ready())) {
-    return;
-  }
-
-  if (!self._subAnimationInProgress()) {
-    self.curStep += incr;
-    self._reset();
-
-    var nodesAtStep = nodesByStep[self.curStep];
-    nodesAtStep.forEach(function(nodeId) {
-      if (self.running()) {
-        nodesByStep[self.curStep - incr].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
-          if (backward) {
-            self._pulseLink(0, nodeId, prevNodeId);
-          } else {
-            self._pulseLink(0, prevNodeId, nodeId);
-          }
-          var gnode = "g." + prevNodeId;
-          self._pulse(0, gnode + " > rect", "out");
-        });
-      }
-      var gnode = "g." + nodeId;
-      self._pulse(0, gnode + " > rect", "in");
-    });
-  }
-
-  // console.log(self.rootId+" -> nodesByStep = "+JSON.stringify(nodesByStep));
-  // console.log(self.rootId+" -> nodesAtStep = "+JSON.stringify(nodesAtStep));
-  // console.log(self.rootId+" -> self.curStep = "+self.curStep);
-
-  if (nodesByStep[self.curStep].some(self._isSubScenario, this)) {
-    nodesByStep[self.curStep].forEach(function(nodeId) {
-      if (self._isSubScenario(nodeId)) {
-        var scnId = graph.getNode(nodeId).getScenarioId();
-        var anim;
-        if (self.subAnimations[scnId]) {
-          anim = self.subAnimations[scnId];
-        } else {
-          anim = self.subAnimations[scnId] = new Animation(self.xdsms, scnId);
-        }
-        anim._step(dir);
-      }
-    }, this);
-  }
-  if (this.done()) {
-    this._updateStatus(Animation.STATUS.DONE);
-  } else if (this.ready()) {
-    this._updateStatus(Animation.STATUS.READY);
-  } else {
-    this._updateStatus(Animation.STATUS.RUNNING_STEP);
-  }
-};
-
-Animation.prototype.running = function() {
-  return !this.ready() && !this.done();
-};
-Animation.prototype.ready = function() {
-  return this.curStep === 0;
-};
-Animation.prototype.done = function() {
-  return this.curStep === this.root.graph.nodesByStep.length - 1;
-};
-Animation.prototype.isStatus = function(status) {
-  return this.status === status;
-};
-
-Animation.prototype.addObserver = function(observer) {
-  if (observer) {
-    this._observers.push(observer);
-  }
-};
-
-Animation.prototype.renderNodeStatuses = function() {
-  var self = this;
-  var graph = self.xdsms[self.rootId].graph;
-  graph.nodes.forEach(function(node) {
-    var gnode = "g." + node.id;
-    switch (node.status) {
-      case Graph.NODE_STATUS.RUNNING:
-        self._pulse(0, gnode + " > rect", "in", RUNNING_COLOR);
-        break;
-      case Graph.NODE_STATUS.FAILED:
-        self._pulse(0, gnode + " > rect", "in", FAILED_COLOR);
-        break;
-      case Graph.NODE_STATUS.PENDING:
-        self._pulse(0, gnode + " > rect", "in", PENDING_COLOR);
-        break;
-      case Graph.NODE_STATUS.DONE:
-        self._pulse(0, gnode + " > rect", "in", DONE_COLOR);
-        break;
-      default:
-        // nothing to do
-    }
-    if (self._isSubScenario(node.id)) {
-      var scnId = graph.getNode(node.id).getScenarioId();
-      var anim = new Animation(self.xdsms, scnId);
-      anim.renderNodeStatuses();
-    }
-  });
-};
-
-Animation.prototype._updateStatus = function(status) {
-  this.status = status;
-  this._notifyObservers(status);
-};
-
-Animation.prototype._notifyObservers = function() {
-  this._observers.map((function(obs) {
-    obs.update(this.status);
-  }).bind(this));
-};
-
-Animation.prototype._pulse = function(delay, toBeSelected, easeInOut, color) {
-  if (color === undefined) {
-    color = RUNNING_COLOR;
-  }
-  var sel = d3.select("svg." + this.rootId)
-              .selectAll(toBeSelected)
-              .transition().delay(delay);
-  if (easeInOut !== "out") {
-    sel = sel.transition().duration(200)
-            .style('stroke-width', '8px')
-            .style('stroke', color)
-            .style('fill', function(d) {
-              if (d.id) {
-                return color.brighter();
-              }});
-  }
-  if (easeInOut !== "in") {
-    sel.transition().duration(3 * PULSE_DURATION)
-            .style('stroke-width', null)
-            .style('stroke', null)
-            .style('fill', null);
-  }
-};
-
-Animation.prototype._pulseLink = function(delay, fromId, toId) {
-  var graph = this.xdsms[this.rootId].graph;
-  var from = graph.idxOf(fromId);
-  var to = graph.idxOf(toId);
-  this._pulse(delay, "path.link_" + from + "_" + to);
-};
-
-Animation.prototype._onAnimationStart = function(delay) {
-  var title = d3.select("svg." + this.rootId).select("g.title");
-  title.select("text").transition().delay(delay).style("fill", RUNNING_COLOR);
-  d3.select("svg." + this.rootId).select("rect.border")
-    .transition().delay(delay)
-      .style("stroke-width", '5px').duration(200)
-    .transition().duration(1000)
-      .style("stroke", 'black').style("stroke-width", '0px');
-};
-
-Animation.prototype._onAnimationDone = function(delay) {
-  var self = this;
-  var title = d3.select("svg." + this.rootId).select("g.title");
-  title.select("text").transition()
-    .delay(delay)
-    .style("fill", null).on("end", function() {
-      self._updateStatus(Animation.STATUS.DONE);
-    });
-};
-
-Animation.prototype._isSubScenario = function(nodeId) {
-  var gnode = "g." + nodeId;
-  var nodeSel = d3.select("svg." + this.rootId).select(gnode);
-  return nodeSel.classed("mdo");
-};
-
-Animation.prototype._scheduleAnimation = function() {
-  var self = this;
-  var delay = this.initialDelay;
-  var animDelay = SUB_ANIM_DELAY;
-  var graph = self.xdsms[self.rootId].graph;
-
-  self._onAnimationStart(delay);
-
-  graph.nodesByStep.forEach(function(nodesAtStep, n, nodesByStep) {
-    var offsets = [];
-    nodesAtStep.forEach(function(nodeId) {
-      var elapsed = delay + n * PULSE_DURATION;
-
-      if (n > 0) {
-        nodesByStep[n-1].forEach(function(prevNodeId) { // eslint-disable-line space-infix-ops
-          self._pulseLink(elapsed, prevNodeId, nodeId);
-        });
-
-        var gnode = "g." + nodeId;
-        if (self._isSubScenario(nodeId)) {
-          self._pulse(elapsed, gnode + " > rect", "in");
-          var scnId = graph.getNode(nodeId).getScenarioId();
-          var anim = new Animation(self.xdsms, scnId, elapsed + animDelay);
-          var offset = anim._scheduleAnimation();
-          offsets.push(offset);
-          self._pulse(offset + elapsed + animDelay, gnode + " > rect", "out");
-        } else {
-          self._pulse(elapsed, gnode + " > rect");
-        }
-      }
-    }, this);
-
-    if (offsets.length > 0) {
-      delay += Math.max.apply(null, offsets);
-    }
-    delay += animDelay;
-  }, this);
-
-  self._onAnimationDone(graph.nodesByStep.length * PULSE_DURATION + delay);
-
-  return graph.nodesByStep.length * PULSE_DURATION;
-};
-
-Animation.prototype._reset = function(all) {
-  var svg = d3.select("svg." + this.rootId);
-  if (all) {
-    svg = d3.selectAll("svg");
-  }
-  svg.selectAll('rect').transition().duration(0)
-            .style('stroke-width', null)
-            .style('stroke', null);
-  svg.selectAll('.title > text').transition().duration(0)
-            .style('fill', null);
-
-  svg.selectAll('.node > rect').transition().duration(0)
-            .style('stroke-width', null)
-            .style('stroke', null)
-            .style('fill', null);
-  svg.selectAll('path').transition().duration(0)
-            .style('stroke-width', null)
-            .style('stroke', null)
-            .style('fill', null);
-};
-
-Animation.prototype._resetPreviousStep = function() {
-  this.root.graph.nodesByStep[this.curStep - 1].forEach(function(nodeId) {
-    var gnode = "g." + nodeId;
-    this._pulse(0, gnode + " > rect", "out");
-  }, this);
-};
-
-Animation.prototype._subAnimationInProgress = function() {
-  var running = false;
-  for (var k in this.subAnimations) {
-    if (this.subAnimations.hasOwnProperty(k)) {
-      running = running || this.subAnimations[k].running();
-    }
-  }
-  return running;
-};
-
-module.exports = Animation;
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports) {
-
-var UID = "_U_";
-var MULTI_TYPE = "_multi";
-
-var STATUS = {UNKNOWN: 'UNKNOWN',
-              PENDING: 'PENDING',
-              RUNNING: 'RUNNING',
-              DONE: 'DONE',
-              FAILED: 'FAILED'};
-
-function Node(id, name, type, status) {
-  if (typeof (name) === 'undefined') {
-    name = id;
-  }
-  if (typeof (type) === 'undefined') {
-    type = 'analysis';
-  }
-  if (typeof (status) === 'undefined') {
-    status = STATUS.UNKNOWN;
-  }
-  if (typeof STATUS[status] === 'undefined') {
-    throw Error("Unknown status '" + status +
-                "' for node " + name + "(id=" + id + ")");
-  }
-  this.id = id;
-  this.name = name;
-  this.isMulti = (type.search(/_multi$/) >= 0);
-  this.type = this.isMulti ?
-    type.substr(0, type.length - MULTI_TYPE.length) : type;
-  this.status = status;
-}
-
-Node.prototype.isMdo = function() {
-  return this.type === "mdo";
-};
-
-Node.prototype.getScenarioId = function() {
-  if (this.isMdo()) {
-    var idxscn = this.name.indexOf("_scn-");
-    if (idxscn === -1) {
-      console.log("Warning: MDO Scenario not found. " +
-                  "Bad type or name for node: " + JSON.stringify(this));
-      return null;
-    }
-    return this.name.substr(idxscn + 1);
-  }
-  return null;
-};
-
-function Edge(from, to, name, row, col, isMulti) {
-  this.id = "link_" + from + "_" + to;
-  this.name = name;
-  this.row = row;
-  this.col = col;
-  this.iotype = row < col ? "in" : "out";
-  this.io = {
-    fromU: (from === UID),
-    toU: (to === UID),
-  };
-  this.isMulti = isMulti;
-}
-
-Edge.prototype.isIO = function() {
-  return this.io.fromU || this.io.toU;
-};
-
-function Graph(mdo, refname) {
-  this.nodes = [new Node(UID, UID, "user")];
-  this.edges = [];
-  this.chains = [];
-  this.refname = refname || "";
-  this._newNodeCount = 0;
-
-  var numbering = Graph.number(mdo.workflow);
-  var numPrefixes = numbering.toNum;
-  this.nodesByStep = numbering.toNode;
-
-  mdo.nodes.forEach(function(item) {
-    var num = numPrefixes[item.id];
-    this.nodes.push(new Node(item.id,
-      num ? num + ":" + item.name : item.name,
-      item.type, item.status));
-  }, this);
-
-  if (mdo.edges) {
-    mdo.edges.forEach(function(item) {
-      var idA = this.idxOf(item.from);
-      var idB = this.idxOf(item.to);
-      var isMulti = this.nodes[idA].isMulti || this.nodes[idB].isMulti;
-      this.edges.push(new Edge(item.from, item.to,
-                               item.name, idA, idB, isMulti));
-    }, this);
-  }
-
-  if (mdo.workflow) {
-    this._makeChaining(mdo.workflow);
-  }
-}
-
-Graph.NODE_STATUS = STATUS;
-
-Graph.prototype._makeChaining = function(workflow) {
-  var echain = Graph.expand(workflow);
-  echain.forEach(function(leafChain) {
-    if (leafChain.length < 2) {
-      throw new Error("Bad process chain (" + leafChain.length + "elt)");
-    } else {
-      this.chains.push([]);
-      var ids = this.nodes.map(function(elt) {
-        return elt.id;
-      });
-      leafChain.forEach(function(item, j) {
-        if (j !== 0) {
-          var idA = ids.indexOf(leafChain[j - 1]);
-          if (idA < 0) {
-            throw new Error("Process chain element (" +
-                            leafChain[j - 1] + ") not found");
-          }
-          var idB = ids.indexOf(leafChain[j]);
-          if (idB < 0) {
-            throw new Error("Process chain element (" +
-                            leafChain[j] + ") not found");
-          }
-          if (idA !== idB) {
-            this.chains[this.chains.length - 1].push([idA, idB]);
-          }
-        }
-      }, this);
-    }
-  }, this);
-};
-
-Graph.prototype.idxOf = function(nodeId) {
-  return this.nodes.map(function(elt) {
-    return elt.id;
-  }).indexOf(nodeId);
-};
-
-Graph.prototype.getNode = function(nodeId) {
-  var theNode;
-  this.nodes.forEach(function(node) {
-    if (node.id === nodeId) {
-      theNode = node;
-    }
-  }, this);
-  return theNode;
-};
-
-Graph.prototype.addNode = function(nodeName) {
-  this._newNodeCount += 1;
-  this.nodes.push(
-      new Node("NewNode" + this._newNodeCount, nodeName, "analysis"));
-};
-
-Graph.prototype.removeNode = function(index) {
-  var self = this;
-
-  // Update edges
-  var edges = this.findEdgesOf(index);
-  edges.toRemove.forEach(function(edge) {
-    var idx = self.edges.indexOf(edge);
-    if (idx > -1) {
-      self.edges.splice(idx, 1);
-    }
-  }, this);
-  edges.toShift.forEach(function(edge) {
-    if (edge.row > 1) {
-      edge.row -= 1;
-    }
-    if (edge.col > 1) {
-      edge.col -= 1;
-    }
-  }, this);
-
-  // Update nodes
-  this.nodes.splice(index, 1);
-};
-
-Graph.prototype.findEdgesOf = function(nodeIdx) {
-  var toRemove = [];
-  var toShift = [];
-  this.edges.forEach(function(edge) {
-    if ((edge.row === nodeIdx) || (edge.col === nodeIdx)) {
-      toRemove.push(edge);
-    } else if ((edge.row > nodeIdx) || (edge.col > nodeIdx)) {
-      toShift.push(edge);
-    }
-  }, this);
-  return {toRemove: toRemove, toShift: toShift};
-};
-
-function _expand(workflow) {
-  var ret = [];
-  var prev;
-  workflow.forEach(function(item) {
-    if (item instanceof Array) {
-      if (item[0].hasOwnProperty('parallel')) {
-        if (prev) {
-          ret = ret.slice(0, ret.length - 1).concat(item[0].parallel.map(
-              function(elt) {
-                return [prev].concat(_expand([elt]), prev);
-              }));
-        } else {
-          throw new Error("Bad workflow structure : " +
-              "cannot parallel loop without previous starting point.");
-        }
-      } else if (prev) {
-        ret = ret.concat(_expand(item), prev);
-      } else {
-        ret = ret.concat(_expand(item));
-      }
-      prev = ret[ret.length - 1];
-    } else if (item.hasOwnProperty('parallel')) {
-      if (prev) {
-        ret = ret.slice(0, ret.length - 1).concat(
-            item.parallel.map(function(elt) {
-              return [prev].concat(_expand([elt]));
-            }));
-      } else {
-        ret = ret.concat(item.parallel.map(
-            function(elt) {
-              return _expand([elt]);
-            }));
-      }
-      prev = undefined;
-    } else {
-      var i = ret.length - 1;
-      var flagParallel = false;
-      while (i >= 0 && (ret[i] instanceof Array)) {
-        ret[i] = ret[i].concat(item);
-        i -= 1;
-        flagParallel = true;
-      }
-      if (!flagParallel) {
-        ret.push(item);
-      }
-      prev = item;
-    }
-  }, this);
-  return ret;
-}
-
-Graph._isPatchNeeded = function(toBePatched) {
-  var lastElts = toBePatched.map(function(arr) {
-    return arr[arr.length - 1];
-  });
-  var lastElt = lastElts[0];
-  for (var i = 0; i < lastElts.length; i++) {
-    if (lastElts[i] !== lastElt) {
-      return true;
-    }
-  }
-  return false;
-};
-
-Graph._patchParallel = function(expanded) {
-  var toBePatched = [];
-  expanded.forEach(function(elt) {
-    if (elt instanceof Array) {
-      toBePatched.push(elt);
-    } else if (Graph._isPatchNeeded(toBePatched)) {
-      toBePatched.forEach(function(arr) {
-        arr.push(elt);
-      }, this);
-    }
-  }, this);
-};
-
-Graph.expand = function(item) {
-  var expanded = _expand(item);
-  var result = [];
-  var current = [];
-  // first pass to add missing 'end link' in case of parallel branches at the end of a loop
-  // [a, [b, d], [b, c], a] -> [a, [b, d, a], [b, c, a], a]
-  Graph._patchParallel(expanded);
-  // [a, aa, [b, c], d] -> [[a, aa, b], [b,c], [c, d]]
-  expanded.forEach(function(elt) {
-    if (elt instanceof Array) {
-      if (current.length > 0) {
-        current.push(elt[0]);
-        result.push(current);
-        current = [];
-      }
-      result.push(elt);
-    } else {
-      if (result.length > 0 && current.length === 0) {
-        var lastChain = result[result.length - 1];
-        var lastElt = lastChain[lastChain.length - 1];
-        current.push(lastElt);
-      }
-      current.push(elt);
-    }
-  }, this);
-  if (current.length > 0) {
-    result.push(current);
-  }
-  return result;
-};
-
-Graph.number = function(workflow, num) {
-  num = (typeof num === 'undefined') ? 0 : num;
-  var toNum = {};
-  var toNode = [];
-
-  function setStep(step, nodeId) {
-    if (step in toNode) {
-      toNode[step].push(nodeId);
-    } else {
-      toNode[step] = [nodeId];
-    }
-  }
-
-  function setNum(nodeId, beg, end) {
-    if (end === undefined) {
-      num = String(beg);
-      setStep(beg, nodeId);
-    } else {
-      num = end + "-" + beg;
-      setStep(end, nodeId);
-    }
-    if (nodeId in toNum) {
-      toNum[nodeId] += "," + num;
-    } else {
-      toNum[nodeId] = num;
-    }
-  }
-
-  function _number(wks, num) {
-    var ret = 0;
-    if (wks instanceof Array) {
-      if (wks.length === 0) {
-        ret = num;
-      } else if (wks.length === 1) {
-        ret = _number(wks[0], num);
-      } else {
-        var head = wks[0];
-        var tail = wks.slice(1);
-        var beg = _number(head, num);
-        if (tail[0] instanceof Array) {
-          var end = _number(tail[0], beg);
-          setNum(head, beg, end);
-          beg = end + 1;
-          tail.shift();
-        }
-        ret = _number(tail, beg);
-      }
-    } else if ((wks instanceof Object) && 'parallel' in wks) {
-      var nums = wks.parallel.map(function(branch) {
-        return _number(branch, num);
-      });
-      ret = Math.max.apply(null, nums);
-    } else {
-      setNum(wks, num);
-      ret = num + 1;
-    }
-    return ret;
-  }
-
-  _number(workflow, num);
-  // console.log('toNodes=', JSON.stringify(toNode));
-  // console.log('toNum=',JSON.stringify(toNum));
-  return {toNum: toNum, toNode: toNode};
-};
-
-module.exports = Graph;
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var d3 = __webpack_require__(0);
-var Animation = __webpack_require__(1);
-
-function Controls(animation) {
-  this.animation = animation;
-
-  var buttonGroup = d3.select(".toolbar")
-                       .append("div")
-                       .classed("button_group", true);
-  buttonGroup.append("button")
-    .attr("id", "start")
-    .append("i").attr("class", "icon-start");
-  buttonGroup.append("button")
-    .attr("id", "stop")
-    .append("i").attr("class", "icon-stop");
-  buttonGroup.append("button")
-    .attr("id", "step-prev")
-    .append("i").attr("class", "icon-step-prev");
-  buttonGroup.append("button")
-    .attr("id", "step-next")
-    .append("i").attr("class", "icon-step-next");
-
-  this.startButton = d3.select('button#start');
-  this.stopButton = d3.select('button#stop');
-  this.stepPrevButton = d3.select('button#step-prev');
-  this.stepNextButton = d3.select('button#step-next');
-
-  this.startButton.on('click', (function() {
-    this.animation.start();
-  }).bind(this));
-  this.stopButton.on('click', (function() {
-    this.animation.stop();
-  }).bind(this));
-  this.stepPrevButton.on('click', (function() {
-    this.animation.stepPrev();
-  }).bind(this));
-  this.stepNextButton.on('click', (function() {
-    this.animation.stepNext();
-  }).bind(this));
-
-  this.animation.addObserver(this);
-  this.update(this.animation.status);
-}
-
-Controls.prototype.update = function(status) {
-  // console.log("Controls receives: "+status);
-  switch (status) {
-    case Animation.STATUS.STOPPED:
-    case Animation.STATUS.DONE:
-      this.animation.reset();  // trigger READY status
-    case Animation.STATUS.READY: // eslint-disable-line no-fallthrough
-      this._enable(this.startButton);
-      this._disable(this.stopButton);
-      this._enable(this.stepNextButton);
-      this._enable(this.stepPrevButton);
-      break;
-    case Animation.STATUS.RUNNING_AUTO:
-      this._disable(this.startButton);
-      this._enable(this.stopButton);
-      this._disable(this.stepNextButton);
-      this._disable(this.stepPrevButton);
-      break;
-    case Animation.STATUS.RUNNING_STEP:
-      this._disable(this.startButton);
-      this._enable(this.stopButton);
-      this._enable(this.stepNextButton);
-      this._enable(this.stepPrevButton);
-      break;
-    default:
-      console.log("Unexpected Event: " + status);
-      break;
-  }
-};
-
-Controls.prototype._enable = function(button) {
-  button.attr("disabled", null);
-};
-
-Controls.prototype._disable = function(button) {
-  button.attr("disabled", true);
-};
-
-module.exports = Controls;
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var d3 = __webpack_require__(0);
-var Labelizer = __webpack_require__(5);
-
-var WIDTH = 1000;
-var HEIGHT = 500;
-var X_ORIG = 100;
-var Y_ORIG = 20;
-var PADDING = 20;
-var CELL_W = 250;
-var CELL_H = 75;
-var MULTI_OFFSET = 3;
-var BORDER_PADDING = 4;
-var ANIM_DURATION = 1000; // ms
-
-function Cell(x, y, width, height) {
-  this.x = x;
-  this.y = y;
-  this.width = width;
-  this.height = height;
-}
-
-function Xdsm(graph, svgid, tooltip) {
-  this.graph = graph;
-  this.tooltip = tooltip;
-  var container = d3.select(".xdsm");
-  this.svg = container.append("svg")
-                 .attr("width", WIDTH)
-                 .attr("height", HEIGHT)
-                 .attr("class", svgid);
-
-  this.grid = [];
-  this.nodes = [];
-  this.edges = [];
-
-  this.config = {
-    labelizer: {
-      ellipsis: 5,
-      subSupScript: false,
-      showLinkNbOnly: true,
-    },
-  };
-
-  this._initialize();
-}
-
-Xdsm.prototype.addNode = function(nodeName) {
-  this.graph.addNode(nodeName);
-  this.draw();
-};
-
-Xdsm.prototype.removeNode = function() {
-  this.graph.removeNode(2);
-  this.draw();
-};
-
-Xdsm.prototype.hasWorkflow = function() {
-  return this.graph.chains.length !== 0;
-};
-
-Xdsm.prototype._initialize = function() {
-  var self = this;
-
-  if (self.graph.refname) {
-    self._createTitle();
-  }
-  self.nodeGroup = self.svg.append('g').attr("class", "nodes");
-  self.edgeGroup = self.svg.append('g').attr("class", "edges");
-};
-
-Xdsm.prototype.draw = function() {
-  var self = this;
-
-  self.nodes = self._createTextGroup("node", self.nodeGroup, self._customRect);
-  self.edges = self._createTextGroup("edge", self.edgeGroup, self._customTrapz);
-
-  // Workflow
-  self._createWorkflow();
-
-  // Dataflow
-  self._createDataflow();
-
-  // Border (used by animation)
-  self._createBorder();
-
-  // update size
-  var w = CELL_W * (self.graph.nodes.length + 1);
-  var h = CELL_H * (self.graph.nodes.length + 1);
-  self.svg.attr("width", w).attr("height", h);
-  self.svg.selectAll(".border")
-    .attr("height", h - BORDER_PADDING)
-    .attr("width", w - BORDER_PADDING);
-};
-
-Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
-  var self = this;
-
-  var selection =
-    group.selectAll("." + kind)
-      .data(this.graph[kind + "s"],        // DATA JOIN
-            function(d) { return d.id; });
-
-  var textGroups = selection
-    .enter() // ENTER
-      .append("g").attr("class", function(d) {
-        var klass = kind === "node" ? d.type : "dataInter";
-        if (klass === "dataInter" && d.isIO()) {
-          klass = "dataIO";
-        }
-        return d.id + " " + kind + " " + klass;
-      }).each(function() {
-        var labelize = Labelizer.labelize()
-                        .labelKind(kind)
-                        .ellipsis(self.config.labelizer.ellipsis)
-                        .subSupScript(self.config.labelizer.subSupScript)
-                        .linkNbOnly(self.config.labelizer.showLinkNbOnly);
-        d3.select(this).call(labelize);
-      })
-    .merge(selection);  // UPDATE + ENTER
-
-  selection.exit().remove();  // EXIT
-
-  d3.selectAll(".ellipsized").on("mouseover", function(d) {
-    self.tooltip.transition().duration(200).style("opacity", 0.9);
-    var tooltipize = Labelizer.tooltipize()
-                        .subSupScript(self.config.labelizer.subSupScript)
-                        .text(d.name);
-    self.tooltip.call(tooltipize)
-      .style("width", "200px")
-      .style("left", (d3.event.pageX) + "px")
-      .style("top", (d3.event.pageY - 28) + "px");
-  }).on("mouseout", function() {
-    self.tooltip.transition().duration(500).style("opacity", 0);
-  });
-
-  self._layoutText(textGroups, decorate, selection.empty() ? 0 : ANIM_DURATION);
-};
-
-Xdsm.prototype._layoutText = function(items, decorate, delay) {
-  var self = this;
-  var grid = self.grid;
-  items.each(function(d, i) {
-    var item = d3.select(this);
-    if (grid[i] === undefined) {
-      grid[i] = new Array(items.length);
-    }
-    item.select("text").each(function(d, j) {
-      var that = d3.select(this);
-      var data = item.data()[0];
-      var m = (data.row === undefined) ? i : data.row;
-      var n = (data.col === undefined) ? i : data.col;
-      var bbox = that.nodes()[j].getBBox();
-      grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
-      that
-        .attr("width", function() { return grid[m][n].width; })
-        .attr("height", function() { return grid[m][n].height; })
-        .attr("x", function() { return grid[m][n].x; })
-        .attr("y", function() { return grid[m][n].y; });
-    });
-  });
-
-  items.transition().duration(delay).attr("transform", function(d, i) {
-    var m = (d.col === undefined) ? i : d.col;
-    var n = (d.row === undefined) ? i : d.row;
-    var w = CELL_W * m + X_ORIG;
-    var h = CELL_H * n + Y_ORIG;
-    return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
-  });
-
-  items.each(function(d, i) {
-    var that = d3.select(this);
-    that.call(decorate.bind(self), d, i, 0);
-    if (d.isMulti) {
-      that.call(decorate.bind(self), d, i, 1 * Number(MULTI_OFFSET));
-      that.call(decorate.bind(self), d, i, 2 * Number(MULTI_OFFSET));
-    }
-  });
-};
-
-Xdsm.prototype._createWorkflow = function() {
-  var self = this;
-  var workflow = this.svg.selectAll(".workflow")
-    .data([self.graph])
-  .enter()
-    .insert("g", ":first-child")
-    .attr("class", "workflow");
-
-  workflow.selectAll("g")
-    .data(self.graph.chains)
-  .enter()
-    .insert('g').attr("class", "workflow-chain")
-    .selectAll('path')
-      .data(function(d) { return d; })
-    .enter()
-      .append("path")
-        .attr("class", function(d) {
-          return "link_" + d[0] + "_" + d[1];
-        })
-        .attr("transform", function(d) {
-          var max = Math.max(d[0], d[1]);
-          var min = Math.min(d[0], d[1]);
-          var w;
-          var h;
-          if (d[0] < d[1]) {
-            w = CELL_W * max + X_ORIG;
-            h = CELL_H * min + Y_ORIG;
-          } else {
-            w = CELL_W * min + X_ORIG;
-            h = CELL_H * max + Y_ORIG;
-          }
-          return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
-        })
-        .attr("d", function(d) {
-          var w = CELL_W * Math.abs(d[0] - d[1]);
-          var h = CELL_H * Math.abs(d[0] - d[1]);
-          var points = [];
-          if (d[0] < d[1]) {
-            if (d[0] !== 0) {
-              points.push((-w) + ",0");
-            }
-            points.push("0,0");
-            if (d[1] !== 0) {
-              points.push("0," + h);
-            }
-          } else {
-            if (d[0] !== 0) {
-              points.push(w + ",0");
-            }
-            points.push("0,0");
-            if (d[1] !== 0) {
-              points.push("0," + (-h));
-            }
-          }
-          return "M" + points.join(" ");
-        });
-};
-
-Xdsm.prototype._createDataflow = function() {
-  var self = this;
-  self.svg.selectAll(".dataflow")
-    .data([self])
-  .enter()
-    .insert("g", ":first-child")
-    .attr("class", "dataflow");
-
-  var selection =
-    self.svg.select(".dataflow").selectAll("path")
-      .data(self.graph.edges, function(d) {
-        return d.id;
-      });
-
-  selection.enter()
-      .append("path")
-    .merge(selection)
-      .transition().duration(selection.empty() ? 0 : ANIM_DURATION)
-      .attr("transform", function(d, i) {
-        var m = (d.col === undefined) ? i : d.col;
-        var n = (d.row === undefined) ? i : d.row;
-        var w = CELL_W * m + X_ORIG;
-        var h = CELL_H * n + Y_ORIG;
-        return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
-      })
-      .attr("d", function(d) {
-        var w = CELL_W * Math.abs(d.col - d.row);
-        var h = CELL_H * Math.abs(d.col - d.row);
-        var points = [];
-        if (d.iotype === "in") {
-          if (!d.io.fromU) {
-            points.push((-w) + ",0");
-          }
-          points.push("0,0");
-          if (!d.io.toU) {
-            points.push("0," + h);
-          }
-        } else {
-          if (!d.io.fromU) {
-            points.push(w + ",0");
-          }
-          points.push("0,0");
-          if (!d.io.toU) {
-            points.push("0," + (-h));
-          }
-        }
-        return "M" + points.join(" ");
-      });
-  selection.exit().remove();
-};
-
-Xdsm.prototype._customRect = function(node, d, i, offset) {
-  var grid = this.grid;
-  node.insert("rect", ":first-child")
-  .attr("x", function() {
-    return grid[i][i].x + offset - PADDING;
-  })
-  .attr("y", function() {
-    return -grid[i][i].height * 2 / 3 - PADDING - offset;
-  })
-  .attr("width", function() {
-    return grid[i][i].width + (PADDING * 2);
-  })
-  .attr("height", function() {
-    return grid[i][i].height + (PADDING * 2);
-  })
-  .attr("rx", function() {
-    var rounded = d.type === 'optimization' ||
-                  d.type === 'mda' ||
-                  d.type === 'doe';
-    return rounded ? (grid[i][i].height + (PADDING * 2)) / 2 : 0;
-  })
-  .attr("ry", function() {
-    var rounded = d.type === 'optimization' ||
-                  d.type === 'mda' ||
-                  d.type === 'doe';
-    return rounded ? (grid[i][i].height + (PADDING * 2)) / 2 : 0;
-  });
-};
-
-Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
-  var grid = this.grid;
-  edge.insert("polygon", ":first-child").attr("points", function(d) {
-    var pad = 5;
-    var w = grid[d.row][d.col].width;
-    var h = grid[d.row][d.col].height;
-    var topleft = (-pad - w / 2 + offset) + ", " +
-                  (-pad - h * 2 / 3 - offset);
-    var topright = (w / 2 + pad + offset + 5) + ", " +
-                   (-pad - h * 2 / 3 - offset);
-    var botright = (w / 2 + pad + offset - 5 + 5) + ", " +
-                   (pad + h / 3 - offset);
-    var botleft = (-pad - w / 2 + offset - 5) + ", " +
-                  (pad + h / 3 - offset);
-    var tpz = [topleft, topright, botright, botleft].join(" ");
-    return tpz;
-  });
-};
-
-Xdsm.prototype._createTitle = function() {
-  var self = this;
-  var ref = self.svg.selectAll(".title")
-    .data([self.graph.refname])
-  .enter()
-    .append('g')
-    .classed('title', true)
-    .append("text").text(self.graph.refname);
-
-  var bbox = ref.nodes()[0].getBBox();
-
-  ref.insert("rect", "text")
-    .attr('x', bbox.x)
-    .attr('y', bbox.y)
-    .attr('width', bbox.width)
-    .attr('height', bbox.height);
-
-  ref.attr('transform',
-           'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
-};
-
-Xdsm.prototype._createBorder = function() {
-  var self = this;
-  var bordercolor = 'black';
-  self.svg.selectAll(".border")
-    .data([self])
-  .enter()
-    .append("rect")
-    .classed("border", true)
-    .attr("x", BORDER_PADDING)
-    .attr("y", BORDER_PADDING)
-    .style("stroke", bordercolor)
-    .style("fill", "none")
-    .style("stroke-width", 0);
-};
-
-module.exports = Xdsm;
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-function Labelizer() {}
-
-Labelizer.strParse = function(str) {
-  if (str === "") {
-    return [{base: '', sub: undefined, sup: undefined}];
-  }
-
-  var lstr = str.split(',');
-  var underscores = /_/g;
-  var rg = /([0-9\-]+:)?([A-Za-z0-9\-\.]+)(_[A-Za-z0-9\-\._]+)?(\^.+)?/;
-
-  var res = lstr.map(function(s) {
-    var base;
-    var sub;
-    var sup;
-
-    if ((s.match(underscores) || []).length > 1) {
-      var mu = s.match(/(.+)\^(.+)/);
-      if (mu) {
-        return {base: mu[1], sub: undefined, sup: mu[2]};
-      }
-      return {base: s, sub: undefined, sup: undefined};
-    }
-    var m = s.match(rg);
-    if (m) {
-      base = (m[1] ? m[1] : "") + m[2];
-      if (m[3]) {
-        sub = m[3].substring(1);
-      }
-      if (m[4]) {
-        sup = m[4].substring(1);
-      }
-    } else {
-      throw new Error("Labelizer.strParse: Can not parse '" + s + "'");
-    }
-    return {base: base, sub: sub, sup: sup};
-  }, this);
-
-  return res;
-};
-
-Labelizer._createVarListLabel = function(selection, name, text, ellipsis) {
-  var tokens = Labelizer.strParse(name);
-  tokens.every(function(token, i, ary) {
-    var offsetSub = 0;
-    var offsetSup = 0;
-    if (ellipsis < 1 || (i < 5 && text.nodes()[0].getBBox().width < 100)) {
-      text.append("tspan").text(token.base);
-      if (token.sub) {
-        offsetSub = 10;
-        text.append("tspan")
-          .attr("class", "sub")
-          .attr("dy", offsetSub)
-          .text(token.sub);
-      }
-      if (token.sup) {
-        offsetSup = -10;
-        text.append("tspan")
-          .attr("class", "sup")
-          .attr("dx", -5)
-          .attr("dy", -offsetSub + offsetSup)
-          .text(token.sup);
-        offsetSub = 0;
-      }
-    } else {
-      text.append("tspan")
-        .attr("dy", -offsetSub - offsetSup)
-        .text("...");
-      selection.classed("ellipsized", true);
-      return false;
-    }
-    if (i < ary.length - 1) {
-      text.append("tspan")
-        .attr("dy", -offsetSub - offsetSup)
-        .text(", ");
-    }
-    return true;
-  }, this);
-};
-
-Labelizer._createLinkNbLabel = function(selection, name, text) {
-  var lstr = name.split(',');
-  var str = lstr.length + " link";
-  if (lstr.length > 1) {
-    str += 's';
-  }
-  text.append("tspan").text(str);
-  selection.classed("ellipsized", true);  // activate tooltip
-};
-
-Labelizer.labelize = function() {
-  var ellipsis = 0;
-  var subSupScript = true;
-  var linkNbOnly = false;
-  var labelKind = 'node';
-
-  function createLabel(selection) {
-    selection.each(function(d) {
-      var text = selection.append("text");
-      if (linkNbOnly && labelKind != "node") {  // show connexion nb
-        Labelizer._createLinkNbLabel(selection, d.name, text);
-      } else {
-        Labelizer._createVarListLabel(selection, d.name, text, ellipsis);
-      }
-    });
-  }
-
-  createLabel.ellipsis = function(value) {
-    if (!arguments.length) {
-      return ellipsis;
-    }
-    ellipsis = value;
-    return createLabel;
-  };
-
-  createLabel.subSupScript = function(value) {
-    if (!arguments.length) {
-      return subSupScript;
-    }
-    subSupScript = value;
-    return createLabel;
-  };
-
-  createLabel.linkNbOnly = function(value) {
-    if (!arguments.length) {
-      return linkNbOnly;
-    }
-    linkNbOnly = value;
-    return createLabel;
-  };
-
-  createLabel.labelKind = function(value) {
-    if (!arguments.length) {
-      return labelKind;
-    }
-    labelKind = value;
-    return createLabel;
-  };
-
-  return createLabel;
-};
-
-Labelizer.tooltipize = function() {
-  var text = "";
-  var subSupScript = false;
-
-  function createTooltip(selection) {
-    var html = [];
-    if (!subSupScript) {
-      html = text.split(',');
-    } else {
-      var tokens = Labelizer.strParse(text);
-      tokens.forEach(function(token) {
-        var item = token.base;
-        if (token.sub) {
-          item += "<sub>" + token.sub + "</sub>";
-        }
-        if (token.sup) {
-          item += "<sup>" + token.sup + "</sup>";
-        }
-        html.push(item);
-      }, this);
-    }
-    selection.html(html.join(", "));
-  }
-
-  createTooltip.text = function(value) {
-    if (!arguments.length) {
-      return text;
-    }
-    text = value;
-    return createTooltip;
-  };
-
-  createTooltip.subSupScript = function(value) {
-    if (!arguments.length) {
-      return subSupScript;
-    }
-    subSupScript = value;
-    return createTooltip;
-  };
-
-  return createTooltip;
-};
-
-module.exports = Labelizer;
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*
- * XDSMjs
- * Copyright 2016-2017 Rémi Lafage
- */
-
-
-var d3 = __webpack_require__(0);
-var Graph = __webpack_require__(2);
-var Xdsm = __webpack_require__(4);
-var Animation = __webpack_require__(1);
-var Controls = __webpack_require__(3);
-
-d3.json("xdsm.json", function(error, mdo) {
-  if (error) {
-    throw error;
-  }
-
-  // Tooltip for variable connexions
-  var tooltip = d3.select("body").selectAll(".tooltip").data(['tooltip'])
-                  .enter().append("div")
-                .attr("class", "tooltip")
-                .style("opacity", 0);
-
-  var scenarioKeys = Object.keys(mdo).sort();
-
-  // Optimization problem display setup
-  d3.select("body").selectAll("optpb")
-                .data(scenarioKeys)
-              .enter()
-                .append("div")
-                .filter(function(d) { return mdo[d].optpb; })
-                  .attr("class", function(d) { return "optpb " + d; })
-                  .style("opacity", 0)
-                  .on("click", function() {
-                    d3.select(this).transition().duration(500)  // eslint-disable-line no-invalid-this
-                      .style("opacity", 0)
-                      .style("pointer-events", "none");
-                  }).append("pre").text(function(d) { return mdo[d].optpb; });
-
-  var xdsms = {};
-
-  if (scenarioKeys.indexOf('root') === -1) {
-    // old format: mono xdsm
-    var graph = new Graph(mdo);
-    xdsms.root = new Xdsm(graph, 'root', tooltip);
-    xdsms.root.draw();
-  } else {
-    // new format managing several XDSM
-    scenarioKeys.forEach(function(k) {
-      if (mdo.hasOwnProperty(k)) {
-        var graph = new Graph(mdo[k], k);
-        xdsms[k] = new Xdsm(graph, k, tooltip);
-        xdsms[k].draw();
-        xdsms[k].svg.select(".optimization").on("click", function() {
-          var info = d3.select(".optpb." + k);
-          info.style("opacity", 0.9);
-          info.style("left", (d3.event.pageX) + "px")
-            .style("top", (d3.event.pageY - 28) + "px");
-          info.style("pointer-events", "auto");
-        });
-      }
-    }, this); // eslint-disable-line no-invalid-this
-  }
-
-  var anim = new Animation(xdsms);
-  if (xdsms.root.hasWorkflow()) {  // workflow is optional
-    var ctrls = new Controls(anim); // eslint-disable-line no-unused-vars
-  }
-  anim.renderNodeStatuses();
-
-  var addButton = d3.select('button#add');
-  addButton.on('click', function() {
-    xdsms.root.addNode("Discipline");
-  });
-  var delButton = d3.select('button#del');
-  delButton.on('click', function() {
-    xdsms.root.removeNode();
-  });
-});
-
-
-
 /***/ })
-/******/ ]);
+
+/******/ });
+//# sourceMappingURL=xdsm.bundle.js.map

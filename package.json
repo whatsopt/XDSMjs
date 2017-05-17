@@ -2,18 +2,16 @@
   "name": "xdsmjs",
   "version": "0.4.3",
   "description": "XDSM diagram generator",
-  "main": "xdsm.js",
+  "main": "xdsm-main.js",
   "directories": {
     "example": "examples"
   },
   "scripts": {
     "lint": "eslint xdsm-main.js ./src/* || true",
-    "build": "browserify ./xdsm-main.js -o ./build/xdsm.js",
-    "postbuild": "uglifyjs ./build/xdsm.js > ./build/xdsm.min.js",
-    "dist": "webpack",
-    "test": "node tests/xdsm-test.js | faucet || true",
-    "testbrowser": "browserify tests/xdsm-test.js -o ./build/xdsm-test-bundle.js | firefox ./tests/index.html || true",
-    "testfront": "browserify tests/xdsm-test.js | testling -x firefox || true"
+    "build": "webpack --config webpack.config.js",
+    "postbuild": "uglifyjs ./build/xdsm.bundle.js > ./build/xdsm.bundle.min.js",
+    "test": "babel-tape-runner test/xdsm-test.js | faucet",
+    "testall": "testem || true"
   },
   "repository": "git+https://github.com/OneraHub/XDSMjs.git",
   "keywords": [
@@ -27,14 +25,17 @@
   },
   "homepage": "https://github.com/OneraHub/XDSMjs#readme",
   "devDependencies": {
-    "browserify": "^14.3.0",
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-env": "^1.4.0",
+    "babel-tape-runner": "^2.0.1",
     "eslint": "^3.19.0",
     "eslint-config-google": "^0.7.1",
     "faucet": "0.0.1",
     "tape": "^4.5.1",
-    "testling": "^1.7.1",
+    "testem": "^1.16.1",
     "uglify-js": "^2.7.5",
-    "webpack": "^2.4.1"
+    "webpack": "^2.5.1"
   },
   "dependencies": {
     "d3": "^4"
@@ -43,10 +44,13 @@
     "extends": [
       "google"
     ],
+    "parserOptions": {
+      "ecmaVersion": 6,
+      "sourceType": "module"
+    },
     "env": {
-      "es6": false,
-      "browser": true,
-      "node": true
+	  "commonjs":true,
+      "es6": true
     },
     "rules": {
       "max-len": [

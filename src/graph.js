@@ -235,7 +235,7 @@ function _expand(workflow) {
       }
       prev = item;
     }
-  }, this);
+  }, workflow);
   return ret;
 }
 

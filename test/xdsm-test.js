@@ -1,6 +1,7 @@
 var test = require('tape');
 var Labelizer = require('../src/labelizer');
-var Graph = require('../src/graph');
+//var Graph = require('../src/graph');
+import Graph from '../src/graph';
 
 test("Labelizer.strParse('') returns [{'base':'', 'sub':undefined, 'sup':undefined}]", function(t) {
   t.deepEqual(Labelizer.strParse(""), [{'base':'', 'sub':undefined, 'sup':undefined}]);
@@ -171,7 +172,7 @@ test("Graph.expand((['opt', ['d1', {parallel: ['sc1', 'sc2']}]]) returns [['opt'
 t.end();
 });
 test("Graph.chains should expand as list of index couples", function(t) {
-  g = new Graph({nodes:[{id:'Opt',name:'Opt'},
+  let g = new Graph({nodes:[{id:'Opt',name:'Opt'},
                         {id:'MDA',name:'MDA'},
                         {id:'DA1',name:'DA1'},
                         {id:'DA2',name:'DA2'},
@@ -182,7 +183,7 @@ test("Graph.chains should expand as list of index couples", function(t) {
   t.end();
 });
 test("Graph.chains should expand as list of index couples", function(t) {
-  g = new Graph({nodes:[{id:'Opt',name:'Opt'},
+  let g = new Graph({nodes:[{id:'Opt',name:'Opt'},
                         {id:'DA1',name:'DA1'},
                         {id:'DA2',name:'DA2'},
                         {id:'DA3',name:'DA3'},
