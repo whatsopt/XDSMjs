@@ -9,7 +9,6 @@
   "scripts": {
     "lint": "eslint xdsm-main.js ./src/* || true",
     "build": "webpack --config webpack.config.js",
-    "postbuild": "uglifyjs ./build/xdsm.bundle.js > ./build/xdsm.bundle.min.js",
     "test": "babel-tape-runner test/xdsm-test.js | faucet",
     "testall": "testem || true"
   },

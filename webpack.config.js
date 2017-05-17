@@ -27,5 +27,8 @@ module.exports = {
   },
   node: {
     fs: 'empty'
-  }
+  },
+  plugins: [
+    new UglifyJSPlugin({ sourceMap: true })
+  ]
 };
