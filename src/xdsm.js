@@ -114,7 +114,7 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
                         .ellipsis(self.config.labelizer.ellipsis)
                         .subSupScript(self.config.labelizer.subSupScript)
                         .linkNbOnly(self.config.labelizer.showLinkNbOnly);
-        d3.select(this).call(labelize);
+        d3.select(this).call(labelize);  // eslint-disable-line no-invalid-this
       })
     .merge(selection);  // UPDATE + ENTER
 
@@ -140,12 +140,12 @@ Xdsm.prototype._layoutText = function(items, decorate, delay) {
   var self = this;
   var grid = self.grid;
   items.each(function(d, i) {
-    var item = d3.select(this);
+    var item = d3.select(this); // eslint-disable-line no-invalid-this
     if (grid[i] === undefined) {
       grid[i] = new Array(items.length);
     }
     item.select("text").each(function(d, j) {
-      var that = d3.select(this);
+      var that = d3.select(this); // eslint-disable-line no-invalid-this
       var data = item.data()[0];
       var m = (data.row === undefined) ? i : data.row;
       var n = (data.col === undefined) ? i : data.col;
@@ -168,7 +168,7 @@ Xdsm.prototype._layoutText = function(items, decorate, delay) {
   });
 
   items.each(function(d, i) {
-    var that = d3.select(this);
+    var that = d3.select(this); // eslint-disable-line no-invalid-this
     that.call(decorate.bind(self), d, i, 0);
     if (d.isMulti) {
       that.call(decorate.bind(self), d, i, 1 * Number(MULTI_OFFSET));

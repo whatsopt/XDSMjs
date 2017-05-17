@@ -159,7 +159,7 @@ Labelizer.tooltipize = function() {
           item += "<sup>" + token.sup + "</sup>";
         }
         html.push(item);
-      }, this);
+      });
     }
     selection.html(html.join(", "));
   }
