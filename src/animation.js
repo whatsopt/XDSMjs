@@ -5,8 +5,8 @@ var PULSE_DURATION = 700;
 var SUB_ANIM_DELAY = 200;
 var RUNNING_COLOR = d3.rgb("seagreen");
 var FAILED_COLOR = d3.rgb("firebrick");
-var PENDING_COLOR = d3.rgb("dimgray");
-var DONE_COLOR = d3.rgb("darkseagreen");
+var PENDING_COLOR = d3.rgb("darkseagreen");
+var DONE_COLOR = d3.rgb("darkcyan");
 
 function Animation(xdsms, rootId, delay) {
   this.rootId = rootId;
