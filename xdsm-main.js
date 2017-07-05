@@ -15,6 +15,14 @@ d3.json("xdsm.json", function(error, mdo) {
     throw error;
   }
 
+  let config = {
+    labelizer: {
+      ellipsis: 5,
+      subSupScript: true,
+      showLinkNbOnly: false,
+    },
+  };
+
   // Tooltip for variable connexions
   var tooltip = d3.select("body").selectAll(".tooltip").data(['tooltip'])
                   .enter().append("div")
@@ -42,14 +50,14 @@ d3.json("xdsm.json", function(error, mdo) {
   if (scenarioKeys.indexOf('root') === -1) {
     // old format: mono xdsm
     var graph = new Graph(mdo);
-    xdsms.root = new Xdsm(graph, 'root', tooltip);
+    xdsms.root = new Xdsm(graph, 'root', tooltip, config);
     xdsms.root.draw();
   } else {
     // new format managing several XDSM
     scenarioKeys.forEach(function(k) {
       if (mdo.hasOwnProperty(k)) {
         var graph = new Graph(mdo[k], k);
-        xdsms[k] = new Xdsm(graph, k, tooltip);
+        xdsms[k] = new Xdsm(graph, k, tooltip, config);
         xdsms[k].draw();
         xdsms[k].svg.select(".optimization").on("click", function() {
           var info = d3.select(".optpb." + k);
