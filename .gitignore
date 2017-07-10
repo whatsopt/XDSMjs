@@ -11,3 +11,5 @@
 *.xml
 
 /xdsm-editor.html
+
+/build/*.map
