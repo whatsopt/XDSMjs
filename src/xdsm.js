@@ -4,11 +4,11 @@ var Labelizer = require('./labelizer.js');
 
 var WIDTH = 1000;
 var HEIGHT = 500;
-var X_ORIG = 50;
+var X_ORIG = 100;
 var Y_ORIG = 20;
-var PADDING = 10;
-var CELL_W = 200;
-var CELL_H = 50;
+var PADDING = 20;
+var CELL_W = 250;
+var CELL_H = 75;
 var MULTI_OFFSET = 3;
 var BORDER_PADDING = 4;
 var ANIM_DURATION = 1000; // ms
@@ -34,11 +34,17 @@ function Xdsm(graph, svgid, tooltip, config) {
   this.nodes = [];
   this.edges = [];
 
+  // TODO: Find better javascript  way to do configuration.
   this.default_config = {
     labelizer: {
       ellipsis: 5,
       subSupScript: true,
       showLinkNbOnly: false,
+    },
+    layout: {
+      orig: {x: X_ORIG, y: Y_ORIG},
+      cellsize: {w: CELL_W, h: CELL_H},
+      padding : PADDING
     },
   };
 
@@ -47,6 +53,13 @@ function Xdsm(graph, svgid, tooltip, config) {
     this.config.labelizer.ellipsis = config.labelizer.ellipsis 
     this.config.labelizer.subSupScript = config.labelizer.subSupScript 
     this.config.labelizer.showLinkNbOnly = config.labelizer.showLinkNbOnly 
+  }
+  if (config && config.layout) {
+    this.config.layout.orig.x = config.orig.x 
+    this.config.layout.orig.y = config.orig.y 
+    this.config.layout.cellsize.w = config.cellsize.w 
+    this.config.layout.cellsize.h = config.cellsize.h 
+    this.config.layout.padding = config.padding
   }
 
   this._initialize();
