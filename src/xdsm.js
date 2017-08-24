@@ -42,24 +42,24 @@ function Xdsm(graph, svgid, tooltip, config) {
       showLinkNbOnly: false,
     },
     layout: {
-      orig: {x: X_ORIG, y: Y_ORIG},
+      origin: {x: X_ORIG, y: Y_ORIG},
       cellsize: {w: CELL_W, h: CELL_H},
-      padding : PADDING
+      padding: PADDING,
     },
   };
 
-  this.config = this.default_config
+  this.config = this.default_config;
   if (config && config.labelizer) {
-    this.config.labelizer.ellipsis = config.labelizer.ellipsis 
-    this.config.labelizer.subSupScript = config.labelizer.subSupScript 
-    this.config.labelizer.showLinkNbOnly = config.labelizer.showLinkNbOnly 
+    this.config.labelizer.ellipsis = config.labelizer.ellipsis;
+    this.config.labelizer.subSupScript = config.labelizer.subSupScript;
+    this.config.labelizer.showLinkNbOnly = config.labelizer.showLinkNbOnly;
   }
-  if (config && config.layout) {
-    this.config.layout.orig.x = config.orig.x 
-    this.config.layout.orig.y = config.orig.y 
-    this.config.layout.cellsize.w = config.cellsize.w 
-    this.config.layout.cellsize.h = config.cellsize.h 
-    this.config.layout.padding = config.padding
+  if (config && config.layout) {  
+    this.config.layout.origin.x = config.layout.origin.x;
+    this.config.layout.origin.y = config.layout.origin.y;
+    this.config.layout.cellsize.w = config.layout.cellsize.w;
+    this.config.layout.cellsize.h = config.layout.cellsize.h;
+    this.config.layout.padding = config.layout.padding;
   }
 
   this._initialize();
@@ -105,8 +105,8 @@ Xdsm.prototype.draw = function() {
   self._createBorder();
 
   // update size
-  var w = CELL_W * (self.graph.nodes.length + 1);
-  var h = CELL_H * (self.graph.nodes.length + 1);
+  var w = self.config.layout.cellsize.w * (self.graph.nodes.length + 1);
+  var h = self.config.layout.cellsize.h * (self.graph.nodes.length + 1);
   self.svg.attr("width", w).attr("height", h);
   self.svg.selectAll(".border")
     .attr("height", h - BORDER_PADDING)
@@ -183,9 +183,9 @@ Xdsm.prototype._layoutText = function(items, decorate, delay) {
   items.transition().duration(delay).attr("transform", function(d, i) {
     var m = (d.col === undefined) ? i : d.col;
     var n = (d.row === undefined) ? i : d.row;
-    var w = CELL_W * m + X_ORIG;
-    var h = CELL_H * n + Y_ORIG;
-    return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+    var w = self.config.layout.cellsize.w * m + self.config.layout.origin.x;
+    var h = self.config.layout.cellsize.h * n + self.config.layout.origin.y;
+    return "translate(" + (self.config.layout.origin.x + w) + "," + (self.config.layout.origin.y + h) + ")";
   });
 
   items.each(function(d, i) {
@@ -223,17 +223,17 @@ Xdsm.prototype._createWorkflow = function() {
           var w;
           var h;
           if (d[0] < d[1]) {
-            w = CELL_W * max + X_ORIG;
-            h = CELL_H * min + Y_ORIG;
+            w = self.config.layout.cellsize.w * max + self.config.layout.origin.x;
+            h = self.config.layout.cellsize.h * min + self.config.layout.origin.y;
           } else {
-            w = CELL_W * min + X_ORIG;
-            h = CELL_H * max + Y_ORIG;
+            w = self.config.layout.cellsize.w * min + self.config.layout.origin.x;
+            h = self.config.layout.cellsize.h * max + self.config.layout.origin.y;
           }
-          return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+          return "translate(" + (self.config.layout.origin.x + w) + "," + (self.config.layout.origin.y + h) + ")";
         })
         .attr("d", function(d) {
-          var w = CELL_W * Math.abs(d[0] - d[1]);
-          var h = CELL_H * Math.abs(d[0] - d[1]);
+          var w = self.config.layout.cellsize.w * Math.abs(d[0] - d[1]);
+          var h = self.config.layout.cellsize.h * Math.abs(d[0] - d[1]);
           var points = [];
           if (d[0] < d[1]) {
             if (d[0] !== 0) {
@@ -277,13 +277,13 @@ Xdsm.prototype._createDataflow = function() {
       .attr("transform", function(d, i) {
         var m = (d.col === undefined) ? i : d.col;
         var n = (d.row === undefined) ? i : d.row;
-        var w = CELL_W * m + X_ORIG;
-        var h = CELL_H * n + Y_ORIG;
-        return "translate(" + (X_ORIG + w) + "," + (Y_ORIG + h) + ")";
+        var w = self.config.layout.cellsize.w * m + self.config.layout.origin.x;
+        var h = self.config.layout.cellsize.h * n + self.config.layout.origin.y;
+        return "translate(" + (self.config.layout.origin.x + w) + "," + (self.config.layout.origin.y + h) + ")";
       })
       .attr("d", function(d) {
-        var w = CELL_W * Math.abs(d.col - d.row);
-        var h = CELL_H * Math.abs(d.col - d.row);
+        var w = self.config.layout.cellsize.w * Math.abs(d.col - d.row);
+        var h = self.config.layout.cellsize.h * Math.abs(d.col - d.row);
         var points = [];
         if (d.iotype === "in") {
           if (!d.io.fromU) {
@@ -308,31 +308,32 @@ Xdsm.prototype._createDataflow = function() {
 };
 
 Xdsm.prototype._customRect = function(node, d, i, offset) {
-  var grid = this.grid;
+  var self = this;
+  var grid = self.grid;
   node.insert("rect", ":first-child")
   .attr("x", function() {
-    return grid[i][i].x + offset - PADDING;
+    return grid[i][i].x + offset - self.config.layout.padding;
   })
   .attr("y", function() {
-    return -grid[i][i].height * 2 / 3 - PADDING - offset;
+    return -grid[i][i].height * 2 / 3 - self.config.layout.padding - offset;
   })
   .attr("width", function() {
-    return grid[i][i].width + (PADDING * 2);
+    return grid[i][i].width + (self.config.layout.padding * 2);
   })
   .attr("height", function() {
-    return grid[i][i].height + (PADDING * 2);
+    return grid[i][i].height + (self.config.layout.padding * 2);
   })
   .attr("rx", function() {
     var rounded = d.type === 'optimization' ||
                   d.type === 'mda' ||
                   d.type === 'doe';
-    return rounded ? (grid[i][i].height + (PADDING * 2)) / 2 : 0;
+    return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
   })
   .attr("ry", function() {
     var rounded = d.type === 'optimization' ||
                   d.type === 'mda' ||
                   d.type === 'doe';
-    return rounded ? (grid[i][i].height + (PADDING * 2)) / 2 : 0;
+    return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
   });
 };
 
@@ -373,7 +374,7 @@ Xdsm.prototype._createTitle = function() {
     .attr('height', bbox.height);
 
   ref.attr('transform',
-           'translate(' + X_ORIG + ',' + (Y_ORIG + bbox.height) + ')');
+           'translate(' + self.config.layout.origin.x + ',' + (self.config.layout.origin.y + bbox.height) + ')');
 };
 
 Xdsm.prototype._createBorder = function() {
