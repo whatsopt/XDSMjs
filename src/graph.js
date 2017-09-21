@@ -145,6 +145,17 @@ Graph.prototype.getNode = function(nodeId) {
   return theNode;
 };
 
+Graph.prototype.getNodeFromIndex = function(idx) {
+  var node;
+  if (idx >= 0 && idx < this.nodes.length) {
+    node = this.nodes[idx];
+  } else {
+    throw "Index out of range : " + idx + 
+          " not in [0, " + (this.nodes.length - 1) +"]"
+  }
+  return node;
+}
+
 Graph.prototype.addNode = function(nodeName) {
   this._newNodeCount += 1;
   this.nodes.push(

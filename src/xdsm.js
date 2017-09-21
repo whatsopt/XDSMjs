@@ -34,7 +34,7 @@ function Xdsm(graph, svgid, tooltip, config) {
   this.nodes = [];
   this.edges = [];
 
-  // TODO: Find better javascript  way to do configuration.
+  // TODO: Find better javascript way to do configuration.
   this.default_config = {
     labelizer: {
       ellipsis: 5,
@@ -135,7 +135,8 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
                         .ellipsis(self.config.labelizer.ellipsis)
                         .subSupScript(self.config.labelizer.subSupScript)
                         .linkNbOnly(self.config.labelizer.showLinkNbOnly);
-        d3.select(this).call(labelize);  // eslint-disable-line no-invalid-this
+        d3.select(this).call(labelize);  // eslint-disable-line
+											// no-invalid-this
       })
     .merge(selection);  // UPDATE + ENTER
 
