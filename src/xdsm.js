@@ -21,9 +21,8 @@ function Cell(x, y, width, height) {
   this.height = height;
 }
 
-function Xdsm(graph, svgid, tooltip, config) {
+function Xdsm(graph, svgid, config) {
   this.graph = graph;
-  this.tooltip = tooltip;
   var container = d3.select(".xdsm");
   this.svg = container.append("svg")
                  .attr("width", WIDTH)
@@ -46,6 +45,7 @@ function Xdsm(graph, svgid, tooltip, config) {
       cellsize: {w: CELL_W, h: CELL_H},
       padding: PADDING,
     },
+    titleTooltip: false,  // allow to use external tooltip mechanism
   };
 
   this.config = this.default_config;
@@ -61,7 +61,13 @@ function Xdsm(graph, svgid, tooltip, config) {
     this.config.layout.cellsize.h = config.layout.cellsize.h;
     this.config.layout.padding = config.layout.padding;
   }
-
+  this.config.titleTooltip = config.titleTooltip
+  
+  // Xdsm built-in tooltip for variable connexions
+  if (!this.config.titleTooltip) {
+    this.tooltip = d3.select("body").append("div").attr("class", "xdsm-tooltip")
+        .style("opacity", 0);
+  }
   this._initialize();
 }
 
@@ -142,19 +148,23 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
 
   selection.exit().remove();  // EXIT
 
-  d3.selectAll(".ellipsized").on("mouseover", function(d) {
-    self.tooltip.transition().duration(200).style("opacity", 0.9);
-    var tooltipize = Labelizer.tooltipize()
-                        .subSupScript(self.config.labelizer.subSupScript)
-                        .text(d.name);
-    self.tooltip.call(tooltipize)
-      .style("width", TOOLTIP_WIDTH+"px")
-      .style("left", (d3.event.pageX) + "px")
-      .style("top", (d3.event.pageY - 28) + "px");
-  }).on("mouseout", function() {
-    self.tooltip.transition().duration(500).style("opacity", 0);
-  });
-
+  if (self.tooltip) {
+  	d3.selectAll(".ellipsized").on("mouseover", function(d) {
+      self.tooltip.transition().duration(200).style("opacity", 0.9);
+      var tooltipize = Labelizer.tooltipize()
+                          .subSupScript(self.config.labelizer.subSupScript)
+                          .text(d.name);
+      self.tooltip.call(tooltipize)
+        .style("width", TOOLTIP_WIDTH+"px")
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 28) + "px");
+  	}).on("mouseout", function() {
+  	  self.tooltip.transition().duration(500).style("opacity", 0);
+  	});
+  } else {
+	  d3.selectAll(".ellipsized")
+      .attr("title", function(d) {return d.name; })
+  }
   self._layoutText(textGroups, decorate, selection.empty() ? 0 : ANIM_DURATION);
 };
 

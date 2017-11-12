@@ -16,62 +16,58 @@ d3.json("xdsm.json", function(error, mdo) {
   }
 
   let config = {
-    labelizer: {
-      ellipsis: 5,
-      subSupScript: true,
-      showLinkNbOnly: false,
+    labelizer : {
+      ellipsis : 5,
+      subSupScript : true,
+      showLinkNbOnly : false,
     },
   };
-
-  // Tooltip for variable connexions
-  var tooltip = d3.select("body").selectAll(".tooltip").data(['tooltip'])
-                  .enter().append("div")
-                .attr("class", "tooltip")
-                .style("opacity", 0);
 
   var scenarioKeys = Object.keys(mdo).sort();
 
   // Optimization problem display setup
-  d3.select("body").selectAll("optpb")
-                .data(scenarioKeys)
-              .enter()
-                .append("div")
-                .filter(function(d) { return mdo[d].optpb; })
-                  .attr("class", function(d) { return "optpb " + d; })
-                  .style("opacity", 0)
-                  .on("click", function() {
-                    d3.select(this).transition().duration(500)  // eslint-disable-line no-invalid-this
-                      .style("opacity", 0)
-                      .style("pointer-events", "none");
-                  }).append("pre").text(function(d) { return mdo[d].optpb; });
+  d3.select("body").selectAll("optpb").data(scenarioKeys).enter().append("div")
+      .filter(function(d) {
+        return mdo[d].optpb;
+      }).attr("class", function(d) {
+        return "optpb " + d;
+      }).style("opacity", 0).on("click", function() {
+        d3.select(this).transition().duration(500) // eslint-disable-line
+        // no-invalid-this
+        .style("opacity", 0).style("pointer-events", "none");
+      }).append("pre").text(function(d) {
+        return mdo[d].optpb;
+      });
 
   var xdsms = {};
 
   if (scenarioKeys.indexOf('root') === -1) {
     // old format: mono xdsm
     var graph = new Graph(mdo);
-    xdsms.root = new Xdsm(graph, 'root', tooltip, config);
+    xdsms.root = new Xdsm(graph, 'root', config);
     xdsms.root.draw();
   } else {
     // new format managing several XDSM
     scenarioKeys.forEach(function(k) {
       if (mdo.hasOwnProperty(k)) {
         var graph = new Graph(mdo[k], k);
-        xdsms[k] = new Xdsm(graph, k, tooltip, config);
+        xdsms[k] = new Xdsm(graph, k, config);
         xdsms[k].draw();
-        xdsms[k].svg.select(".optimization").on("click", function() {
-          var info = d3.select(".optpb." + k);
-          info.style("opacity", 0.9);
-          info.style("left", (d3.event.pageX) + "px")
-            .style("top", (d3.event.pageY - 28) + "px");
-          info.style("pointer-events", "auto");
-        });
+        xdsms[k].svg.select(".optimization").on(
+            "click",
+            function() {
+              var info = d3.select(".optpb." + k);
+              info.style("opacity", 0.9);
+              info.style("left", (d3.event.pageX) + "px").style("top",
+                  (d3.event.pageY - 28) + "px");
+              info.style("pointer-events", "auto");
+            });
       }
     }, this); // eslint-disable-line no-invalid-this
   }
 
   var anim = new Animation(xdsms);
-  if (xdsms.root.hasWorkflow()) {  // workflow is optional
+  if (xdsms.root.hasWorkflow()) { // workflow is optional
     var ctrls = new Controls(anim); // eslint-disable-line no-unused-vars
   }
   anim.renderNodeStatuses();
@@ -85,4 +81,3 @@ d3.json("xdsm.json", function(error, mdo) {
     xdsms.root.removeNode();
   });
 });
-
