@@ -163,7 +163,7 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
   	});
   } else {
 	  d3.selectAll(".ellipsized")
-      .attr("title", function(d) {return d.name; })
+      .attr("title", function(d) {return d.name.split(',').join(', '); })
   }
   self._layoutText(textGroups, decorate, selection.empty() ? 0 : ANIM_DURATION);
 };
