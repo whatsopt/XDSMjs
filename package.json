@@ -10,6 +10,7 @@
     "lint": "eslint xdsm-main.js ./src/* || true",
     "build": "webpack --config webpack.config.js",
     "test": "babel-tape-runner test/xdsm-test.js | faucet",
+    "test2": "babel-tape-runner test/xdsm-test.js",
     "testall": "testem || true"
   },
   "repository": "git+https://github.com/OneraHub/XDSMjs.git",

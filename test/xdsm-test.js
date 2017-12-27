@@ -1,6 +1,6 @@
 var test = require('tape');
 var Labelizer = require('../src/labelizer');
-//var Graph = require('../src/graph');
+// var Graph = require('../src/graph');
 import Graph from '../src/graph';
 
 test("Labelizer.strParse('') returns [{'base':'', 'sub':undefined, 'sup':undefined}]", function(t) {
@@ -240,7 +240,7 @@ test("Graph.number([['Opt', ['mda', ['d1'], 's1']]]) returns {'Opt': '0,5-1', 'm
 
 function makeGraph() {
   var mdo = {'nodes':[{'id':'A'}, {'id':'B'}, {'id':'C'}, {'id':'D'}, {'id':'E'}],
-      'edges':[{'from':'A', 'to':'B', 'name':'AB'},
+      'edges':[{'from':'A', 'to':'B', 'name':'a, b'},
                {'from':'C', 'to':'A', 'name':'CA'},
                {'from':'C', 'to':'B', 'name':'CB'},
                {'from':'C', 'to':'D', 'name':'CD'},
@@ -313,5 +313,69 @@ test("Graph throws an error if a node status string not known", function(t) {
   t.throws(function() {
     var g = new Graph({'nodes':[{'id':'A', status:'BADSTATUS'}]});
   }, "should throw an error");
+  t.end();
+});
+test("Graph edge can have vars infos id/names from name", function(t) {
+  let g = makeGraph();
+  let actual = g.findEdge('A', 'B');
+  t.deepEqual(actual.element.vars, {'0':'a', '1':'b'});
+  t.end();
+});
+
+function makeGraph2() {
+  var mdo = {'nodes':[{'id':'A'}, {'id':'B'}, {'id':'C'}, {'id':'D'}, {'id':'E'}],
+      'edges':[{'from':'A', 'to':'B', 'vars':{'1':'a', '2':'b'}},
+               {'from':'C', 'to':'A', 'vars':{'1':'a', '3':'c'}},
+               {'from':'C', 'to':'B', 'vars':{'3':'c', '2':'b'}},
+               {'from':'C', 'to':'D', 'vars':{'3':'c', '4':'d'}},
+               {'from':'E', 'to':'A', 'vars':{'5':'e', '1':'a'}}],
+      'workflow':[]};
+  return new Graph(mdo);
+};
+test("Graph edge can have vars infos id/names", function(t) {
+  let g2 = makeGraph2();
+  t.equal(g2.getNode("E"), g2.nodes[5]);
+  let edgeCD = g2.findEdge('C', 'D').element;
+  t.equal(edgeCD.vars['3'], 'c');
+  t.equal(edgeCD.vars['4'], 'd');
+  t.deepEqual(edgeCD.vars, {'3':'c', '4':'d'});
+  t.equal(edgeCD.name, 'c, d');
+  t.end();
+});
+test("Graph add new var between two given nodes not linked", function(t) {
+  let g2 = makeGraph2();
+  g2.addEdgeVar('A','D', {'4':'d'});
+  let edgeAD = g2.findEdge('A', 'D').element;
+  t.equal(edgeAD.vars['4'], 'd');
+  t.deepEqual(edgeAD.vars, {'4':'d'});
+  t.equal(edgeAD.name, 'd');
+  t.end();
+});
+test("Graph a var should appear once even if added twice", function(t) {
+  let g2 = makeGraph2();
+  g2.addEdgeVar('A','D', {'4':'d'});
+  g2.addEdgeVar('A','D', {'4':'d'});
+  let edgeAD = g2.findEdge('A', 'D').element;
+  t.equal(edgeAD.name, 'd');
+  g2.removeEdge('A', 'D');
+  let index = g2.findEdge('A', 'D').index;
+  t.equal(edgeAD.index, undefined);
+  t.end();
+});
+test("Graph add new var between two given nodes already linked", function(t) {
+  let g2 = makeGraph2();
+  g2.addEdgeVar('A','B', {'4':'d'});
+  let edgeAD = g2.findEdge('A', 'B').element;
+  t.deepEqual(edgeAD.vars, {'1':'a', '2':'b', '4':'d'});
+  t.equal(edgeAD.name, 'a, b, d');
+  t.end();
+});
+test("Remove edge between two given nodes", function(t) {
+  let g2 = makeGraph2();
+  let edge = g2.findEdge('E', 'A').element;
+  t.notEqual(edge, undefined);
+  g2.removeEdge('E', 'A');
+  edge = g2.findEdge('E', 'A').element;
+  t.equal(edge, undefined);
   t.end();
 });

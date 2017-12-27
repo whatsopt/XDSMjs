@@ -76,8 +76,8 @@ Xdsm.prototype.addNode = function(nodeName) {
   this.draw();
 };
 
-Xdsm.prototype.removeNode = function() {
-  this.graph.removeNode(2);
+Xdsm.prototype.removeNode = function(index) {
+  this.graph.removeNode(index);
   this.draw();
 };
 

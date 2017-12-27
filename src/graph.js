@@ -1,12 +1,15 @@
 var UID = "_U_";
 var MULTI_TYPE = "_multi";
 
-var STATUS = {UNKNOWN: 'UNKNOWN',
-              PENDING: 'PENDING',
-              RUNNING: 'RUNNING',
-              DONE: 'DONE',
-              FAILED: 'FAILED'};
+var STATUS = {
+  UNKNOWN : 'UNKNOWN',
+  PENDING : 'PENDING',
+  RUNNING : 'RUNNING',
+  DONE : 'DONE',
+  FAILED : 'FAILED'
+};
 
+// *** Node *******************************************************************
 function Node(id, name, type, status) {
   if (typeof (name) === 'undefined') {
     name = id;
@@ -18,14 +21,14 @@ function Node(id, name, type, status) {
     status = STATUS.UNKNOWN;
   }
   if (typeof STATUS[status] === 'undefined') {
-    throw Error("Unknown status '" + status +
-                "' for node " + name + "(id=" + id + ")");
+    throw Error("Unknown status '" + status + "' for node " + name + "(id="
+        + id + ")");
   }
   this.id = id;
   this.name = name;
   this.isMulti = (type.search(/_multi$/) >= 0);
-  this.type = this.isMulti ?
-    type.substr(0, type.length - MULTI_TYPE.length) : type;
+  this.type = this.isMulti ? type.substr(0, type.length - MULTI_TYPE.length)
+      : type;
   this.status = status;
 }
 
@@ -37,8 +40,8 @@ Node.prototype.getScenarioId = function() {
   if (this.isMdo()) {
     var idxscn = this.name.indexOf("_scn-");
     if (idxscn === -1) {
-      console.log("Warning: MDO Scenario not found. " +
-                  "Bad type or name for node: " + JSON.stringify(this));
+      console.log("Warning: MDO Scenario not found. "
+          + "Bad type or name for node: " + JSON.stringify(this));
       return null;
     }
     return this.name.substr(idxscn + 1);
@@ -46,15 +49,28 @@ Node.prototype.getScenarioId = function() {
   return null;
 };
 
-function Edge(from, to, name, row, col, isMulti) {
+// *** Edge *******************************************************************
+function Edge(from, to, nameOrVars, row, col, isMulti) {
   this.id = "link_" + from + "_" + to;
-  this.name = name;
+  if (typeof (nameOrVars) === "string") {
+    this.name = nameOrVars; 
+    this.vars = {};
+    let vars = this.name.split(',');
+    vars.forEach((n, i) => this.vars[i] = n.trim());
+  } else { // vars = {id: name, ...}
+    this.vars = nameOrVars;
+    let names = [];
+    for (let k in this.vars) {
+      names.push(this.vars[k]);
+    }
+    this.name = names.join(", ") 
+  }
   this.row = row;
   this.col = col;
   this.iotype = row < col ? "in" : "out";
   this.io = {
-    fromU: (from === UID),
-    toU: (to === UID),
+    fromU : (from === UID),
+    toU : (to === UID),
   };
   this.isMulti = isMulti;
 }
@@ -63,8 +79,54 @@ Edge.prototype.isIO = function() {
   return this.io.fromU || this.io.toU;
 };
 
+Edge.prototype.addVar = function(nameOrVar) {
+  if (typeof(nameOrVar) === "string") {
+    if (this.name==="") {
+      this.name=nameOrVar;
+    } else {
+      this.name+=", "+nameOrVar;
+    }
+    this.vars[this.vars.length] = nameOrVar;
+  } else {
+    for (let k in nameOrVar) {
+      this.vars[k] = nameOrVar[k];
+      let names = [];
+      for (let k in this.vars) {
+        names.push(this.vars[k]);
+      }
+      this.name = names.join(", ") 
+    } 
+  }
+}
+
+Edge.prototype.removeVar = function(nameOrId) {
+  let found = false;
+  for (k in this.nameOrVars) {
+    if (k === nameOrId) {
+      this.nameOrVars.delete(k);
+      found = true;
+    }
+  }
+  if (!found) {
+    for (k in this.nameOrVars) {
+      if (this.nameOrVars[k] === nameOrId) {
+        this.nameOrVars.delete(k);
+        found = true;
+      }
+    }
+  }
+  if (found) {
+    let names = [];
+    for (let k in this.vars) {
+      names.push(this.vars[k]);
+    }
+    this.name = names.join(", ");     
+  }
+}
+
+// *** Graph ******************************************************************
 function Graph(mdo, refname) {
-  this.nodes = [new Node(UID, UID, "user")];
+  this.nodes = [ new Node(UID, UID, "user") ];
   this.edges = [];
   this.chains = [];
   this.refname = refname || "";
@@ -76,18 +138,13 @@ function Graph(mdo, refname) {
 
   mdo.nodes.forEach(function(item) {
     var num = numPrefixes[item.id];
-    this.nodes.push(new Node(item.id,
-      num ? num + ":" + item.name : item.name,
-      item.type, item.status));
+    this.nodes.push(new Node(item.id, num ? num + ":" + item.name : item.name,
+        item.type, item.status));
   }, this);
 
   if (mdo.edges) {
     mdo.edges.forEach(function(item) {
-      var idA = this.idxOf(item.from);
-      var idB = this.idxOf(item.to);
-      var isMulti = this.nodes[idA].isMulti || this.nodes[idB].isMulti;
-      this.edges.push(new Edge(item.from, item.to,
-                               item.name, idA, idB, isMulti));
+      this.addEdge(item.from, item.to, item.vars?item.vars:item.name);
     }, this);
   }
 
@@ -112,16 +169,16 @@ Graph.prototype._makeChaining = function(workflow) {
         if (j !== 0) {
           var idA = ids.indexOf(leafChain[j - 1]);
           if (idA < 0) {
-            throw new Error("Process chain element (" +
-                            leafChain[j - 1] + ") not found");
+            throw new Error("Process chain element (" + leafChain[j - 1]
+                + ") not found");
           }
           var idB = ids.indexOf(leafChain[j]);
           if (idB < 0) {
-            throw new Error("Process chain element (" +
-                            leafChain[j] + ") not found");
+            throw new Error("Process chain element (" + leafChain[j]
+                + ") not found");
           }
           if (idA !== idB) {
-            this.chains[this.chains.length - 1].push([idA, idB]);
+            this.chains[this.chains.length - 1].push([ idA, idB ]);
           }
         }
       }, this);
@@ -150,21 +207,20 @@ Graph.prototype.getNodeFromIndex = function(idx) {
   if (idx >= 0 && idx < this.nodes.length) {
     node = this.nodes[idx];
   } else {
-    throw "Index out of range : " + idx + 
-          " not in [0, " + (this.nodes.length - 1) +"]"
+    throw Error("Index out of range : " + idx + " not in [0, "
+        + (this.nodes.length - 1) + "]");
   }
   return node;
 }
 
 Graph.prototype.addNode = function(nodeName) {
   this._newNodeCount += 1;
-  this.nodes.push(
-      new Node("NewNode" + this._newNodeCount, nodeName, "analysis"));
+  this.nodes
+      .push(new Node("NewNode" + this._newNodeCount, nodeName, "analysis"));
 };
 
 Graph.prototype.removeNode = function(index) {
   var self = this;
-
   // Update edges
   var edges = this.findEdgesOf(index);
   edges.toRemove.forEach(function(edge) {
@@ -186,6 +242,44 @@ Graph.prototype.removeNode = function(index) {
   this.nodes.splice(index, 1);
 };
 
+Graph.prototype.moveLeft = function(index) {
+  if (index>1) {
+    let tmp = this.nodes[index-1];
+    this.nodes[index-1] = this.nodes[index];
+    this.nodes[index] = tmp;
+  } 
+};
+
+Graph.prototype.moveRight = function(index) {
+  if (index<this.nodes.length-1) {
+    let tmp = this.nodes[index+1];
+    this.nodes[index+1] = this.nodes[index];
+    this.nodes[index] = tmp;    
+  } 
+};
+
+Graph.prototype.addEdge = function(nodeIdFrom, nodeIdTo, nameOrVar) {
+  var idA = this.idxOf(nodeIdFrom);
+  var idB = this.idxOf(nodeIdTo);
+  var isMulti = this.nodes[idA].isMulti || this.nodes[idB].isMulti;
+  this.edges
+      .push(new Edge(nodeIdFrom, nodeIdTo, nameOrVar, idA, idB, isMulti));    
+}
+
+Graph.prototype.removeEdge = function(nodeIdFrom, nodeIdTo) {
+  let edge = this.findEdge(nodeIdFrom, nodeIdTo);
+  this.edges.splice(edge.index, 1);
+}
+
+Graph.prototype.addEdgeVar = function(nodeIdFrom, nodeIdTo, nameOrVar) {
+  let edge = this.findEdge(nodeIdFrom, nodeIdTo).element;
+  if (edge) {
+    edge.addVar(nameOrVar);
+  } else {
+    this.addEdge(nodeIdFrom, nodeIdTo, nameOrVar)
+  }
+}
+
 Graph.prototype.findEdgesOf = function(nodeIdx) {
   var toRemove = [];
   var toShift = [];
@@ -196,8 +290,29 @@ Graph.prototype.findEdgesOf = function(nodeIdx) {
       toShift.push(edge);
     }
   }, this);
-  return {toRemove: toRemove, toShift: toShift};
+  return {
+    toRemove : toRemove,
+    toShift : toShift
+  };
 };
+
+Graph.prototype.findEdge = function(nodeIdFrom, nodeIdTo) {
+  let element, index;
+  let idxFrom = this.idxOf(nodeIdFrom);
+  let idxTo = this.idxOf(nodeIdTo);
+  this.edges.some(function(edge, i) {
+    if ((edge.row === idxFrom) && (edge.col === idxTo)) {
+      if (element) {
+        throw Error('edge have be uniq between two nodes, but got: '+
+            JSON.stringify(element)+ ' and '+JSON.stringify(edge))
+      }
+      element = edge;
+      index = i;
+      return true;
+    } 
+  }, this);
+  return {element, index};
+}
 
 function _expand(workflow) {
   var ret = [];
@@ -206,13 +321,13 @@ function _expand(workflow) {
     if (item instanceof Array) {
       if (item[0].hasOwnProperty('parallel')) {
         if (prev) {
-          ret = ret.slice(0, ret.length - 1).concat(item[0].parallel.map(
-              function(elt) {
-                return [prev].concat(_expand([elt]), prev);
+          ret = ret.slice(0, ret.length - 1).concat(
+              item[0].parallel.map(function(elt) {
+                return [ prev ].concat(_expand([ elt ]), prev);
               }));
         } else {
-          throw new Error("Bad workflow structure : " +
-              "cannot parallel loop without previous starting point.");
+          throw new Error("Bad workflow structure : "
+              + "cannot parallel loop without previous starting point.");
         }
       } else if (prev) {
         ret = ret.concat(_expand(item), prev);
@@ -224,13 +339,12 @@ function _expand(workflow) {
       if (prev) {
         ret = ret.slice(0, ret.length - 1).concat(
             item.parallel.map(function(elt) {
-              return [prev].concat(_expand([elt]));
+              return [ prev ].concat(_expand([ elt ]));
             }));
       } else {
-        ret = ret.concat(item.parallel.map(
-            function(elt) {
-              return _expand([elt]);
-            }));
+        ret = ret.concat(item.parallel.map(function(elt) {
+          return _expand([ elt ]);
+        }));
       }
       prev = undefined;
     } else {
@@ -280,7 +394,8 @@ Graph.expand = function(item) {
   var expanded = _expand(item);
   var result = [];
   var current = [];
-  // first pass to add missing 'end link' in case of parallel branches at the end of a loop
+  // first pass to add missing 'end link' in case of parallel branches at the
+  // end of a loop
   // [a, [b, d], [b, c], a] -> [a, [b, d, a], [b, c, a], a]
   Graph._patchParallel(expanded);
   // [a, aa, [b, c], d] -> [[a, aa, b], [b,c], [c, d]]
@@ -316,7 +431,7 @@ Graph.number = function(workflow, num) {
     if (step in toNode) {
       toNode[step].push(nodeId);
     } else {
-      toNode[step] = [nodeId];
+      toNode[step] = [ nodeId ];
     }
   }
 
@@ -369,7 +484,10 @@ Graph.number = function(workflow, num) {
   _number(workflow, num);
   // console.log('toNodes=', JSON.stringify(toNode));
   // console.log('toNum=',JSON.stringify(toNum));
-  return {toNum: toNum, toNode: toNode};
+  return {
+    toNum : toNum,
+    toNode : toNode
+  };
 };
 
 module.exports = Graph;
