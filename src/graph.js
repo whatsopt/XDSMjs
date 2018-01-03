@@ -187,9 +187,13 @@ Graph.prototype._makeChaining = function(workflow) {
 };
 
 Graph.prototype.idxOf = function(nodeId) {
-  return this.nodes.map(function(elt) {
+  let idx = this.nodes.map(function(elt) {
     return elt.id;
   }).indexOf(nodeId);
+  if (idx<0) {
+    throw new Error("Graph.idxOf: "+nodeId+" not found in "+JSON.stringify(this.nodes));
+  }
+  return idx;
 };
 
 Graph.prototype.getNode = function(nodeId) {
@@ -207,7 +211,7 @@ Graph.prototype.getNodeFromIndex = function(idx) {
   if (idx >= 0 && idx < this.nodes.length) {
     node = this.nodes[idx];
   } else {
-    throw Error("Index out of range : " + idx + " not in [0, "
+    throw new Error("Index out of range : " + idx + " not in [0, "
         + (this.nodes.length - 1) + "]");
   }
   return node;
