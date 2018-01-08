@@ -130,7 +130,6 @@ function Graph(mdo, refname) {
   this.edges = [];
   this.chains = [];
   this.refname = refname || "";
-  this._newNodeCount = 0;
 
   var numbering = Graph.number(mdo.workflow);
   var numPrefixes = numbering.toNum;
@@ -218,8 +217,7 @@ Graph.prototype.getNodeFromIndex = function(idx) {
 }
 
 Graph.prototype.addNode = function(node) {
-  this._newNodeCount += 1;
-  this.nodes.push(new Node(node.id, node.name, node.kind));
+  this.nodes.push(new Node(node['id'], node['name'], node['kind']));
 };
 
 Graph.prototype.removeNode = function(index) {
