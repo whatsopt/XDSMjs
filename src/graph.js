@@ -217,10 +217,9 @@ Graph.prototype.getNodeFromIndex = function(idx) {
   return node;
 }
 
-Graph.prototype.addNode = function(nodeName) {
+Graph.prototype.addNode = function(node) {
   this._newNodeCount += 1;
-  this.nodes
-      .push(new Node("NewNode" + this._newNodeCount, nodeName, "analysis"));
+  this.nodes.push(new Node(node.id, node.name, node.kind));
 };
 
 Graph.prototype.removeNode = function(index) {
