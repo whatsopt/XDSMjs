@@ -54,15 +54,15 @@ function Xdsm(graph, svgid, config) {
     this.config.labelizer.subSupScript = config.labelizer.subSupScript;
     this.config.labelizer.showLinkNbOnly = config.labelizer.showLinkNbOnly;
   }
-  if (config && config.layout) {  
+  if (config && config.layout) {
     this.config.layout.origin.x = config.layout.origin.x;
     this.config.layout.origin.y = config.layout.origin.y;
     this.config.layout.cellsize.w = config.layout.cellsize.w;
     this.config.layout.cellsize.h = config.layout.cellsize.h;
     this.config.layout.padding = config.layout.padding;
   }
-  this.config.titleTooltip = config.titleTooltip
-  
+  this.config.titleTooltip = config.titleTooltip;
+
   // Xdsm built-in tooltip for variable connexions
   if (!this.config.titleTooltip) {
     this.tooltip = d3.select("body").append("div").attr("class", "xdsm-tooltip")
@@ -149,7 +149,7 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
   selection.exit().remove();  // EXIT
 
   if (self.tooltip) {
-  	d3.selectAll(".ellipsized").on("mouseover", function(d) {
+    d3.selectAll(".ellipsized").on("mouseover", function(d) {
       self.tooltip.transition().duration(200).style("opacity", 0.9);
       var tooltipize = Labelizer.tooltipize()
                           .subSupScript(self.config.labelizer.subSupScript)
@@ -158,12 +158,12 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
         .style("width", TOOLTIP_WIDTH+"px")
         .style("left", (d3.event.pageX) + "px")
         .style("top", (d3.event.pageY - 28) + "px");
-  	}).on("mouseout", function() {
-  	  self.tooltip.transition().duration(500).style("opacity", 0);
-  	});
+    }).on("mouseout", function() {
+      self.tooltip.transition().duration(500).style("opacity", 0);
+    });
   } else {
-	  d3.selectAll(".ellipsized")
-      .attr("title", function(d) {return d.name.split(',').join(', '); })
+    d3.selectAll(".ellipsized")
+      .attr("title", function(d) {return d.name.split(',').join(', '); });
   }
   self._layoutText(textGroups, decorate, selection.empty() ? 0 : ANIM_DURATION);
 };

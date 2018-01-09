@@ -16,10 +16,10 @@ d3.json("xdsm.json", function(error, mdo) {
   }
 
   let config = {
-    labelizer : {
-      ellipsis : 5,
-      subSupScript : true,
-      showLinkNbOnly : false,
+    labelizer: {
+      ellipsis: 5,
+      subSupScript: true,
+      showLinkNbOnly: false,
     },
   };
 

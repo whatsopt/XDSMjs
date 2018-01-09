@@ -2,11 +2,11 @@ var UID = "_U_";
 var MULTI_TYPE = "_multi";
 
 var STATUS = {
-  UNKNOWN : 'UNKNOWN',
-  PENDING : 'PENDING',
-  RUNNING : 'RUNNING',
-  DONE : 'DONE',
-  FAILED : 'FAILED'
+  UNKNOWN: 'UNKNOWN',
+  PENDING: 'PENDING',
+  RUNNING: 'RUNNING',
+  DONE: 'DONE',
+  FAILED: 'FAILED',
 };
 
 // *** Node *******************************************************************
@@ -53,7 +53,7 @@ Node.prototype.getScenarioId = function() {
 function Edge(from, to, nameOrVars, row, col, isMulti) {
   this.id = "link_" + from + "_" + to;
   if (typeof (nameOrVars) === "string") {
-    this.name = nameOrVars; 
+    this.name = nameOrVars;
     this.vars = {};
     let vars = this.name.split(',');
     vars.forEach((n, i) => this.vars[i] = n.trim());
@@ -61,16 +61,18 @@ function Edge(from, to, nameOrVars, row, col, isMulti) {
     this.vars = nameOrVars;
     let names = [];
     for (let k in this.vars) {
-      names.push(this.vars[k]);
+      if (this.vars.hasOwnProperty(k)) {
+        names.push(this.vars[k]);
+      }
     }
-    this.name = names.join(", ") 
+    this.name = names.join(", ");
   }
   this.row = row;
   this.col = col;
   this.iotype = row < col ? "in" : "out";
   this.io = {
-    fromU : (from === UID),
-    toU : (to === UID),
+    fromU: (from === UID),
+    toU: (to === UID),
   };
   this.isMulti = isMulti;
 }
@@ -89,15 +91,19 @@ Edge.prototype.addVar = function(nameOrVar) {
     this.vars[this.vars.length] = nameOrVar;
   } else {
     for (let k in nameOrVar) {
-      this.vars[k] = nameOrVar[k];
-      let names = [];
-      for (let k in this.vars) {
-        names.push(this.vars[k]);
+      if (nameOrVar.hasOwnProperty(k)) {
+        this.vars[k] = nameOrVar[k];
+        let names = [];
+        for (let k in this.vars) {
+          if (this.vars.hasOwnProperty(k)) {
+            names.push(this.vars[k]);
+          }
+        }
+        this.name = names.join(", ");
       }
-      this.name = names.join(", ") 
-    } 
+    }
   }
-}
+};
 
 Edge.prototype.removeVar = function(nameOrId) {
   let found = false;
@@ -118,15 +124,17 @@ Edge.prototype.removeVar = function(nameOrId) {
   if (found) {
     let names = [];
     for (let k in this.vars) {
-      names.push(this.vars[k]);
+      if (this.vars.hasOwnProperty(k)) {
+        names.push(this.vars[k]);
+      }
     }
-    this.name = names.join(", ");     
+    this.name = names.join(", ");
   }
-}
+};
 
 // *** Graph ******************************************************************
 function Graph(mdo, refname) {
-  this.nodes = [ new Node(UID, UID, "user") ];
+  this.nodes = [new Node(UID, UID, "user")];
   this.edges = [];
   this.chains = [];
   this.refname = refname || "";
@@ -177,7 +185,7 @@ Graph.prototype._makeChaining = function(workflow) {
                 + ") not found");
           }
           if (idA !== idB) {
-            this.chains[this.chains.length - 1].push([ idA, idB ]);
+            this.chains[this.chains.length - 1].push([idA, idB]);
           }
         }
       }, this);
@@ -214,7 +222,7 @@ Graph.prototype.getNodeFromIndex = function(idx) {
         + (this.nodes.length - 1) + "]");
   }
   return node;
-}
+};
 
 Graph.prototype.addNode = function(node) {
   this.nodes.push(new Node(node['id'], node['name'], node['kind']));
@@ -248,15 +256,15 @@ Graph.prototype.moveLeft = function(index) {
     let tmp = this.nodes[index-1];
     this.nodes[index-1] = this.nodes[index];
     this.nodes[index] = tmp;
-  } 
+  }
 };
 
 Graph.prototype.moveRight = function(index) {
   if (index<this.nodes.length-1) {
     let tmp = this.nodes[index+1];
     this.nodes[index+1] = this.nodes[index];
-    this.nodes[index] = tmp;    
-  } 
+    this.nodes[index] = tmp;
+  }
 };
 
 Graph.prototype.addEdge = function(nodeIdFrom, nodeIdTo, nameOrVar) {
@@ -264,22 +272,22 @@ Graph.prototype.addEdge = function(nodeIdFrom, nodeIdTo, nameOrVar) {
   var idB = this.idxOf(nodeIdTo);
   var isMulti = this.nodes[idA].isMulti || this.nodes[idB].isMulti;
   this.edges
-      .push(new Edge(nodeIdFrom, nodeIdTo, nameOrVar, idA, idB, isMulti));    
-}
+      .push(new Edge(nodeIdFrom, nodeIdTo, nameOrVar, idA, idB, isMulti));
+};
 
 Graph.prototype.removeEdge = function(nodeIdFrom, nodeIdTo) {
   let edge = this.findEdge(nodeIdFrom, nodeIdTo);
   this.edges.splice(edge.index, 1);
-}
+};
 
 Graph.prototype.addEdgeVar = function(nodeIdFrom, nodeIdTo, nameOrVar) {
   let edge = this.findEdge(nodeIdFrom, nodeIdTo).element;
   if (edge) {
     edge.addVar(nameOrVar);
   } else {
-    this.addEdge(nodeIdFrom, nodeIdTo, nameOrVar)
+    this.addEdge(nodeIdFrom, nodeIdTo, nameOrVar);
   }
-}
+};
 
 Graph.prototype.findEdgesOf = function(nodeIdx) {
   var toRemove = [];
@@ -292,28 +300,29 @@ Graph.prototype.findEdgesOf = function(nodeIdx) {
     }
   }, this);
   return {
-    toRemove : toRemove,
-    toShift : toShift
+    toRemove: toRemove,
+    toShift: toShift,
   };
 };
 
 Graph.prototype.findEdge = function(nodeIdFrom, nodeIdTo) {
-  let element, index;
+  let element;
+  let index;
   let idxFrom = this.idxOf(nodeIdFrom);
   let idxTo = this.idxOf(nodeIdTo);
   this.edges.some(function(edge, i) {
     if ((edge.row === idxFrom) && (edge.col === idxTo)) {
       if (element) {
         throw Error('edge have be uniq between two nodes, but got: '+
-            JSON.stringify(element)+ ' and '+JSON.stringify(edge))
+            JSON.stringify(element)+ ' and '+JSON.stringify(edge));
       }
       element = edge;
       index = i;
       return true;
-    } 
+    }
   }, this);
   return {element, index};
-}
+};
 
 function _expand(workflow) {
   var ret = [];
@@ -324,7 +333,7 @@ function _expand(workflow) {
         if (prev) {
           ret = ret.slice(0, ret.length - 1).concat(
               item[0].parallel.map(function(elt) {
-                return [ prev ].concat(_expand([ elt ]), prev);
+                return [prev].concat(_expand([elt]), prev);
               }));
         } else {
           throw new Error("Bad workflow structure : "
@@ -340,11 +349,11 @@ function _expand(workflow) {
       if (prev) {
         ret = ret.slice(0, ret.length - 1).concat(
             item.parallel.map(function(elt) {
-              return [ prev ].concat(_expand([ elt ]));
+              return [prev].concat(_expand([elt]));
             }));
       } else {
         ret = ret.concat(item.parallel.map(function(elt) {
-          return _expand([ elt ]);
+          return _expand([elt]);
         }));
       }
       prev = undefined;
@@ -432,7 +441,7 @@ Graph.number = function(workflow, num) {
     if (step in toNode) {
       toNode[step].push(nodeId);
     } else {
-      toNode[step] = [ nodeId ];
+      toNode[step] = [nodeId];
     }
   }
 
@@ -486,8 +495,8 @@ Graph.number = function(workflow, num) {
   // console.log('toNodes=', JSON.stringify(toNode));
   // console.log('toNum=',JSON.stringify(toNum));
   return {
-    toNum : toNum,
-    toNode : toNode
+    toNum: toNum,
+    toNode: toNode,
   };
 };
 
