@@ -228,6 +228,10 @@ Graph.prototype.addNode = function(node) {
   this.nodes.push(new Node(node['id'], node['name'], node['kind']));
 };
 
+Graph.prototype.updateNode = function(index, attrs) {
+  Object.assign(this.nodes[index], attrs);
+};  
+
 Graph.prototype.removeNode = function(index) {
   var self = this;
   // Update edges
