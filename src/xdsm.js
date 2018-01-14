@@ -135,14 +135,39 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
           klass = "dataIO";
         }
         return d.id + " " + kind + " " + klass;
-      }).each(function() {
+      }).each(function(d, i) {
+        var that = d3.select(this); // eslint-disable-line no-invalid-this
         var labelize = Labelizer.labelize()
                         .labelKind(kind)
                         .ellipsis(self.config.labelizer.ellipsis)
                         .subSupScript(self.config.labelizer.subSupScript)
                         .linkNbOnly(self.config.labelizer.showLinkNbOnly);
-        d3.select(this).call(labelize);  // eslint-disable-line
-											// no-invalid-this
+        that.call(labelize);  // eslint-disable-line no-invalid-this
+      }).each(function(d, i) {
+        var grid = self.grid;
+        var item = d3.select(this); // eslint-disable-line no-invalid-this
+        if (grid[i] === undefined) {
+          grid[i] = new Array(self.graph["nodes"].length);
+        }
+        item.select("text").each(function(d, j) {
+          var that = d3.select(this); // eslint-disable-line no-invalid-this
+          var data = item.data()[0];
+          var m = (data.row === undefined) ? i : data.row;
+          var n = (data.col === undefined) ? i : data.col;
+          var bbox = that.nodes()[j].getBBox();
+          grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
+          that
+            .attr("width", function() { return grid[m][n].width; })
+            .attr("height", function() { return grid[m][n].height; })
+            .attr("x", function() { return grid[m][n].x; })
+            .attr("y", function() { return grid[m][n].y; });
+        })
+      }).each(function(d, i) {    
+        d3.select(this).call(decorate.bind(self), d, i, 0);
+        if (d.isMulti) {
+          that.call(decorate.bind(self), d, i, 1 * Number(MULTI_OFFSET));
+          that.call(decorate.bind(self), d, i, 2 * Number(MULTI_OFFSET));
+        }
       })
     .merge(selection);  // UPDATE + ENTER
 
@@ -171,25 +196,6 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
 Xdsm.prototype._layoutText = function(items, decorate, delay) {
   var self = this;
   var grid = self.grid;
-  items.each(function(d, i) {
-    var item = d3.select(this); // eslint-disable-line no-invalid-this
-    if (grid[i] === undefined) {
-      grid[i] = new Array(items.length);
-    }
-    item.select("text").each(function(d, j) {
-      var that = d3.select(this); // eslint-disable-line no-invalid-this
-      var data = item.data()[0];
-      var m = (data.row === undefined) ? i : data.row;
-      var n = (data.col === undefined) ? i : data.col;
-      var bbox = that.nodes()[j].getBBox();
-      grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
-      that
-        .attr("width", function() { return grid[m][n].width; })
-        .attr("height", function() { return grid[m][n].height; })
-        .attr("x", function() { return grid[m][n].x; })
-        .attr("y", function() { return grid[m][n].y; });
-    });
-  });
 
   items.transition().duration(delay).attr("transform", function(d, i) {
     var m = (d.col === undefined) ? i : d.col;
@@ -197,15 +203,6 @@ Xdsm.prototype._layoutText = function(items, decorate, delay) {
     var w = self.config.layout.cellsize.w * m + self.config.layout.origin.x;
     var h = self.config.layout.cellsize.h * n + self.config.layout.origin.y;
     return "translate(" + (self.config.layout.origin.x + w) + "," + (self.config.layout.origin.y + h) + ")";
-  });
-
-  items.each(function(d, i) {
-    var that = d3.select(this); // eslint-disable-line no-invalid-this
-    that.call(decorate.bind(self), d, i, 0);
-    if (d.isMulti) {
-      that.call(decorate.bind(self), d, i, 1 * Number(MULTI_OFFSET));
-      that.call(decorate.bind(self), d, i, 2 * Number(MULTI_OFFSET));
-    }
   });
 };
 
