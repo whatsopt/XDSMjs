@@ -95,6 +95,17 @@ Xdsm.prototype._initialize = function() {
   self.edgeGroup = self.svg.append('g').attr("class", "edges");
 };
 
+Xdsm.prototype.refreshNode = function(index) {
+  var node = this.graph.nodes[index];
+  var sel = d3.select(".nodes").select("."+node.id).select("text").remove();
+  var labelize = Labelizer.labelize()
+    .labelKind(kind)
+    .ellipsis(self.config.labelizer.ellipsis)
+    .subSupScript(self.config.labelizer.subSupScript)
+    .linkNbOnly(self.config.labelizer.showLinkNbOnly);
+  d3.select(".nodes").select(".id"+node.id).select("text").call(labelize)
+}
+  
 Xdsm.prototype.draw = function() {
   var self = this;
 
@@ -140,7 +151,7 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
         if (klass === "dataInter" && d.isIO()) {
           klass = "dataIO";
         }
-        return d.id + " " + kind + " " + klass;
+        return "id"+d.id + " " + kind + " " + klass;
       }).each(function(d, i) {
         var that = d3.select(this); // eslint-disable-line no-invalid-this
         that.call(labelize);  // eslint-disable-line no-invalid-this
