@@ -95,15 +95,12 @@ Xdsm.prototype._initialize = function() {
   self.edgeGroup = self.svg.append('g').attr("class", "edges");
 };
 
-Xdsm.prototype.refreshNode = function(index) {
-  var node = this.graph.nodes[index];
-  var sel = d3.select(".nodes").select("."+node.id).select("text").remove();
-  var labelize = Labelizer.labelize()
-    .labelKind(kind)
-    .ellipsis(self.config.labelizer.ellipsis)
-    .subSupScript(self.config.labelizer.subSupScript)
-    .linkNbOnly(self.config.labelizer.showLinkNbOnly);
-  d3.select(".nodes").select(".id"+node.id).select("text").call(labelize)
+Xdsm.prototype.refresh = function() {
+  var self = this;
+  self.svg.selectAll("g").remove();
+  self.nodeGroup = self.svg.append('g').attr("class", "nodes");
+  self.edgeGroup = self.svg.append('g').attr("class", "edges");
+  self.draw();
 }
   
 Xdsm.prototype.draw = function() {
