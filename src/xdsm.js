@@ -11,7 +11,7 @@ var CELL_W = 250;
 var CELL_H = 75;
 var MULTI_OFFSET = 3;
 var BORDER_PADDING = 4;
-var ANIM_DURATION = 1000; // ms
+var ANIM_DURATION = 0; // ms
 var TOOLTIP_WIDTH = 300;
 
 function Cell(x, y, width, height) {
@@ -127,6 +127,12 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
       .data(this.graph[kind + "s"],        // DATA JOIN
             function(d) { return d.id; });
 
+  var labelize = Labelizer.labelize()
+                  .labelKind(kind)
+                  .ellipsis(self.config.labelizer.ellipsis)
+                  .subSupScript(self.config.labelizer.subSupScript)
+                  .linkNbOnly(self.config.labelizer.showLinkNbOnly);
+  
   var textGroups = selection
     .enter() // ENTER
       .append("g").attr("class", function(d) {
@@ -137,11 +143,6 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
         return d.id + " " + kind + " " + klass;
       }).each(function(d, i) {
         var that = d3.select(this); // eslint-disable-line no-invalid-this
-        var labelize = Labelizer.labelize()
-                        .labelKind(kind)
-                        .ellipsis(self.config.labelizer.ellipsis)
-                        .subSupScript(self.config.labelizer.subSupScript)
-                        .linkNbOnly(self.config.labelizer.showLinkNbOnly);
         that.call(labelize);  // eslint-disable-line no-invalid-this
       }).each(function(d, i) {
         var grid = self.grid;
