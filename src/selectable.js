@@ -27,7 +27,7 @@ Selectable.prototype._toggleSelection = function(klass, borderElt) {
     } else {
       self._select(self._selection);
     }
-    self._callback(self._getFilter());
+    self._callback(self.getFilter());
     self._prevSelection = self._selection;
   });
 };
@@ -40,7 +40,7 @@ Selectable.prototype._unselect = function(selection) {
   selection.transition().duration(100).style('stroke-width', null);
 };
 
-Selectable.prototype._getFilter = function() {
+Selectable.prototype.getFilter = function() {
   var filter = {
     fr: undefined,
     to: undefined,
@@ -57,5 +57,25 @@ Selectable.prototype._getFilter = function() {
   }
   return filter;
 };
+
+Selectable.prototype.setFilter = function(filter) {
+  var self = this;
+  if (filter.fr === filter.to) {
+    if (filter.fr !== undefined) {
+      var node = this._xdsm.graph.getNode(filter.fr);
+      self._selection = d3.select(".id"+node.id+" > rect");
+      self._select(self._selection);
+    }
+    if (self._prevSelection) {
+      self._unselect(self._prevSelection);
+    }
+  } else {
+    if (filter.fr !== undefined && filter.to !== undefined) {
+      var edge = this._xdsm.graph.findEdge(filter.fr, filter.to);
+      self._selection = d3.select(".link"+node.id+" > rect");
+    }
+  }
+  self._prevSelection = self._selection;
+} 
 
 module.exports = Selectable;
