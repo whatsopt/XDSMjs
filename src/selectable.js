@@ -16,19 +16,12 @@ Selectable.prototype._toggleSelection = function(klass, borderElt) {
   d3.selectAll(klass).on('click', function() {
     self._selection = d3.select(this).select(borderElt); // eslint-disable-line
                                                           // no-invalid-this
-    if (self._prevSelection) {
-      if (self._selection.data()[0].id !== self._prevSelection.data()[0].id) {
-        self._select(self._selection);
-        self._unselect(self._prevSelection);
-      } else {
-        self._unselect(self._prevSelection);
-        self._selection = null;
-      }
-    } else {
-      self._select(self._selection);
+    if (self._prevSelection &&
+        self._prevSelection.data()[0].id === self._selection.data()[0].id) {
+      // unselect if already selected
+      self._selection = null;
     }
     self._callback(self.getFilter());
-    self._prevSelection = self._selection;
   });
 };
 
@@ -59,6 +52,7 @@ Selectable.prototype.getFilter = function() {
 };
 
 Selectable.prototype.setFilter = function(filter) {
+  // console.log('selectable.setFilter '+JSON.stringify(filter));
   var self = this;
   if (filter.fr === filter.to) {
     if (filter.fr !== undefined) {
@@ -66,16 +60,16 @@ Selectable.prototype.setFilter = function(filter) {
       self._selection = d3.select(".id"+node.id+" > rect");
       self._select(self._selection);
     }
-    if (self._prevSelection) {
-      self._unselect(self._prevSelection);
-    }
   } else {
     if (filter.fr !== undefined && filter.to !== undefined) {
-      var edge = this._xdsm.graph.findEdge(filter.fr, filter.to);
-      self._selection = d3.select(".link"+node.id+" > rect");
+      self._selection = d3.select(".idlink_"+filter.fr+"_"+filter.to+" > polygon");
+      self._select(self._selection);
     }
   }
+  if (self._prevSelection) {
+    self._unselect(self._prevSelection);
+  }
   self._prevSelection = self._selection;
-} 
+};
 
 module.exports = Selectable;
