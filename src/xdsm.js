@@ -101,8 +101,8 @@ Xdsm.prototype.refresh = function() {
   self.nodeGroup = self.svg.append('g').attr("class", "nodes");
   self.edgeGroup = self.svg.append('g').attr("class", "edges");
   self.draw();
-}
-  
+};
+
 Xdsm.prototype.draw = function() {
   var self = this;
 
@@ -140,7 +140,7 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
                   .ellipsis(self.config.labelizer.ellipsis)
                   .subSupScript(self.config.labelizer.subSupScript)
                   .linkNbOnly(self.config.labelizer.showLinkNbOnly);
-  
+
   var textGroups = selection
     .enter() // ENTER
       .append("g").attr("class", function(d) {
@@ -170,9 +170,9 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
             .attr("height", function() { return grid[m][n].height; })
             .attr("x", function() { return grid[m][n].x; })
             .attr("y", function() { return grid[m][n].y; });
-        })
-      }).each(function(d, i) {    
-        d3.select(this).call(decorate.bind(self), d, i, 0);
+        });
+      }).each(function(d, i) {
+        d3.select(this).call(decorate.bind(self), d, i, 0); // eslint-disable-line no-invalid-this
         if (d.isMulti) {
           that.call(decorate.bind(self), d, i, 1 * Number(MULTI_OFFSET));
           that.call(decorate.bind(self), d, i, 2 * Number(MULTI_OFFSET));
@@ -204,8 +204,6 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
 
 Xdsm.prototype._layoutText = function(items, decorate, delay) {
   var self = this;
-  var grid = self.grid;
-
   items.transition().duration(delay).attr("transform", function(d, i) {
     var m = (d.col === undefined) ? i : d.col;
     var n = (d.row === undefined) ? i : d.row;
