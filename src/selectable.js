@@ -1,28 +1,31 @@
 var d3 = require('d3');
 
 function Selectable(xdsm, callback) {
-  var self = this;
   this._xdsm = xdsm;
   this._selection = null;
   this._prevSelection = null;
   this._callback = callback;
 
-  self._toggleSelection('.node', 'rect');
-  self._toggleSelection('.edge', 'polygon');
+  this.enable();
 }
+
+Selectable.prototype.enable = function() {
+  this._toggleSelection('.node', 'rect');
+  this._toggleSelection('.edge', 'polygon');
+};
 
 Selectable.prototype._toggleSelection = function(klass, borderElt) {
   var self = this;
   d3.selectAll(klass).on('click', function() {
-    self._selection = d3.select(this).select(borderElt); // eslint-disable-line
-                                                          // no-invalid-this
-    if (self._prevSelection &&
-        self._prevSelection.data()[0].id === self._selection.data()[0].id) {
-      // unselect if already selected
-      self._selection = null;
-    }
-    self._callback(self.getFilter());
-  });
+            self._selection = d3.select(this).select(borderElt); // eslint-disable-line
+            // no-invalid-this
+            if (self._prevSelection
+                && self._prevSelection.data()[0].id === self._selection.data()[0].id) {
+              // unselect if already selected
+              self._selection = null;
+            }
+            self._callback(self.getFilter());
+          });
 };
 
 Selectable.prototype._select = function(selection) {
@@ -57,12 +60,13 @@ Selectable.prototype.setFilter = function(filter) {
   if (filter.fr === filter.to) {
     if (filter.fr !== undefined) {
       var node = this._xdsm.graph.getNode(filter.fr);
-      self._selection = d3.select(".id"+node.id+" > rect");
+      self._selection = d3.select(".id" + node.id + " > rect");
       self._select(self._selection);
     }
   } else {
     if (filter.fr !== undefined && filter.to !== undefined) {
-      self._selection = d3.select(".idlink_"+filter.fr+"_"+filter.to+" > polygon");
+      self._selection = d3.select(".idlink_" + filter.fr + "_" + filter.to
+          + " > polygon");
       self._select(self._selection);
     }
   }
