@@ -172,7 +172,8 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
             .attr("y", function() { return grid[m][n].y; });
         });
       }).each(function(d, i) {
-        d3.select(this).call(decorate.bind(self), d, i, 0); // eslint-disable-line no-invalid-this
+        d3.select(this).call(decorate.bind(self), d, i, 0); // eslint-disable-line
+                                                            // no-invalid-this
         if (d.isMulti) {
           that.call(decorate.bind(self), d, i, 1 * Number(MULTI_OFFSET));
           that.call(decorate.bind(self), d, i, 2 * Number(MULTI_OFFSET));
@@ -339,13 +340,15 @@ Xdsm.prototype._customRect = function(node, d, i, offset) {
     return grid[i][i].height + (self.config.layout.padding * 2);
   })
   .attr("rx", function() {
-    var rounded = d.type === 'optimization' ||
+    var rounded = d.type === 'user' ||
+                  d.type === 'optimization' ||
                   d.type === 'mda' ||
                   d.type === 'doe';
     return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
   })
   .attr("ry", function() {
-    var rounded = d.type === 'optimization' ||
+    var rounded = d.type === 'user' ||
+                  d.type === 'optimization' ||
                   d.type === 'mda' ||
                   d.type === 'doe';
     return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;

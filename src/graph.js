@@ -1,4 +1,5 @@
 var UID = "_U_";
+var UNAME = "User";
 var MULTI_TYPE = "_multi";
 
 var STATUS = {
@@ -134,7 +135,7 @@ Edge.prototype.removeVar = function(nameOrId) {
 
 // *** Graph ******************************************************************
 function Graph(mdo, refname) {
-  this.nodes = [new Node(UID, UID, "user")];
+  this.nodes = [new Node(UID, UNAME, "user")];
   this.edges = [];
   this.chains = [];
   this.refname = refname || "";
