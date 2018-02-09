@@ -327,51 +327,54 @@ Xdsm.prototype._customRect = function(node, d, i, offset) {
   var self = this;
   var grid = self.grid;
   node.insert("rect", ":first-child")
-  .attr("x", function() {
-    return grid[i][i].x + offset - self.config.layout.padding;
-  })
-  .attr("y", function() {
-    return -grid[i][i].height * 2 / 3 - self.config.layout.padding - offset;
-  })
-  .attr("width", function() {
-    return grid[i][i].width + (self.config.layout.padding * 2);
-  })
-  .attr("height", function() {
-    return grid[i][i].height + (self.config.layout.padding * 2);
-  })
-  .attr("rx", function() {
-    var rounded = d.type === 'user' ||
-                  d.type === 'optimization' ||
-                  d.type === 'mda' ||
-                  d.type === 'doe';
-    return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
-  })
-  .attr("ry", function() {
-    var rounded = d.type === 'user' ||
-                  d.type === 'optimization' ||
-                  d.type === 'mda' ||
-                  d.type === 'doe';
-    return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
-  });
+    .classed("shape", true)
+    .attr("x", function() {
+      return grid[i][i].x + offset - self.config.layout.padding;
+    })
+    .attr("y", function() {
+      return -grid[i][i].height * 2 / 3 - self.config.layout.padding - offset;
+    })
+    .attr("width", function() {
+      return grid[i][i].width + (self.config.layout.padding * 2);
+    })
+    .attr("height", function() {
+      return grid[i][i].height + (self.config.layout.padding * 2);
+    })
+    .attr("rx", function() {
+      var rounded = d.type === 'user' ||
+                    d.type === 'optimization' ||
+                    d.type === 'mda' ||
+                    d.type === 'doe';
+      return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
+    })
+    .attr("ry", function() {
+      var rounded = d.type === 'user' ||
+                    d.type === 'optimization' ||
+                    d.type === 'mda' ||
+                    d.type === 'doe';
+      return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
+    });
 };
 
 Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
   var grid = this.grid;
-  edge.insert("polygon", ":first-child").attr("points", function(d) {
-    var pad = 5;
-    var w = grid[d.row][d.col].width;
-    var h = grid[d.row][d.col].height;
-    var topleft = (-pad - w / 2 + offset) + ", " +
-                  (-pad - h * 2 / 3 - offset);
-    var topright = (w / 2 + pad + offset + 5) + ", " +
-                   (-pad - h * 2 / 3 - offset);
-    var botright = (w / 2 + pad + offset - 5 + 5) + ", " +
-                   (pad + h / 3 - offset);
-    var botleft = (-pad - w / 2 + offset - 5) + ", " +
-                  (pad + h / 3 - offset);
-    var tpz = [topleft, topright, botright, botleft].join(" ");
-    return tpz;
-  });
+  edge.insert("polygon", ":first-child")
+    .classed("shape", true)
+    .attr("points", function(d) {
+      var pad = 5;
+      var w = grid[d.row][d.col].width;
+      var h = grid[d.row][d.col].height;
+      var topleft = (-pad - w / 2 + offset) + ", " +
+                    (-pad - h * 2 / 3 - offset);
+      var topright = (w / 2 + pad + offset + 5) + ", " +
+                     (-pad - h * 2 / 3 - offset);
+      var botright = (w / 2 + pad + offset - 5 + 5) + ", " +
+                     (pad + h / 3 - offset);
+      var botleft = (-pad - w / 2 + offset - 5) + ", " +
+                    (pad + h / 3 - offset);
+      var tpz = [topleft, topright, botright, botleft].join(" ");
+      return tpz;
+    });
 };
 
 Xdsm.prototype._createTitle = function() {

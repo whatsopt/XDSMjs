@@ -108,19 +108,22 @@ Edge.prototype.addVar = function(nameOrVar) {
 
 Edge.prototype.removeVar = function(nameOrId) {
   let found = false;
-  for (k in this.nameOrVars) {
+  for (let k in this.vars) {
     if (k === nameOrId) {
-      this.nameOrVars.delete(k);
+      this.vars.delete(k);
       found = true;
     }
   }
   if (!found) {
-    for (k in this.nameOrVars) {
-      if (this.nameOrVars[k] === nameOrId) {
-        this.nameOrVars.delete(k);
+    let newvars = {};
+    for (let k in this.vars) {
+      if (this.vars[k] === nameOrId) {
         found = true;
+      } else {
+        newvars[k] = this.vars[k];
       }
     }
+    this.vars = newvars;
   }
   if (found) {
     let names = [];
@@ -284,9 +287,22 @@ Graph.prototype.removeEdge = function(nodeIdFrom, nodeIdTo) {
 Graph.prototype.addEdgeVar = function(nodeIdFrom, nodeIdTo, nameOrVar) {
   let edge = this.findEdge(nodeIdFrom, nodeIdTo).element;
   if (edge) {
+    console.log(nameOrVar);
     edge.addVar(nameOrVar);
   } else {
     this.addEdge(nodeIdFrom, nodeIdTo, nameOrVar);
+  }
+};
+
+Graph.prototype.removeEdgeVar = function(nodeIdFrom, nodeIdTo, nameOrId) {
+  let ret = this.findEdge(nodeIdFrom, nodeIdTo);
+  let edge = ret.element;
+  let index = ret.index;
+  if (edge) {
+    edge.removeVar(nameOrId);
+  }
+  if (edge.name === "") {
+    this.edges.splice(index, 1);
   }
 };
 
@@ -308,7 +324,7 @@ Graph.prototype.findEdgesOf = function(nodeIdx) {
 
 Graph.prototype.findEdge = function(nodeIdFrom, nodeIdTo) {
   let element;
-  let index;
+  let index = -1;
   let idxFrom = this.idxOf(nodeIdFrom);
   let idxTo = this.idxOf(nodeIdTo);
   this.edges.some(function(edge, i) {

@@ -370,6 +370,13 @@ test("Graph add new var between two given nodes already linked", function(t) {
   t.equal(edgeAD.name, 'a, b, d');
   t.end();
 });
+test("Remove var of an edge", function(t) {
+  let g2 = makeGraph2();
+  let edge = g2.findEdge('A', 'B').element;
+  edge.removeVar('b');
+  t.equal(edge.name, 'a');
+  t.end();
+});
 test("Remove edge between two given nodes", function(t) {
   let g2 = makeGraph2();
   let edge = g2.findEdge('E', 'A').element;
@@ -379,3 +386,23 @@ test("Remove edge between two given nodes", function(t) {
   t.equal(edge, undefined);
   t.end();
 });
+test("Remove edge one var between two given nodes", function(t) {
+  let g2 = makeGraph2();
+  let edge = g2.findEdge('E', 'A').element;
+  t.notEqual(edge, undefined);
+  g2.removeEdgeVar('E', 'A', 'e');
+  edge = g2.findEdge('E', 'A').element;
+  t.deepEqual(edge.vars, {'1':'a'});
+  t.end();
+});
+test("Remove edge all vars between two given nodes", function(t) {
+  let g2 = makeGraph2();
+  let edge = g2.findEdge('E', 'A').element;
+  t.notEqual(edge, undefined);
+  g2.removeEdgeVar('E', 'A', 'e');
+  g2.removeEdgeVar('E', 'A', 'a');
+  edge = g2.findEdge('E', 'A').element;
+  t.equal(edge, undefined);
+  t.end();
+});
+

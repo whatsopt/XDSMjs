@@ -17,23 +17,28 @@ Selectable.prototype.enable = function() {
 Selectable.prototype._toggleSelection = function(klass, borderElt) {
   var self = this;
   d3.selectAll(klass).on('click', function() {
-            self._selection = d3.select(this).select(borderElt); // eslint-disable-line
-            // no-invalid-this
-            if (self._prevSelection
-                && self._prevSelection.data()[0].id === self._selection.data()[0].id) {
-              // unselect if already selected
-              self._selection = null;
+            var prevSelection = d3.select('[data-xdsm-selected="true"]');
+            self._unselect(prevSelection);
+            
+            var selection = d3.select(this); // eslint-disable-line no-invalid-this
+            if (!prevSelection.empty()
+                && prevSelection.data()[0].id !== selection.data()[0].id) {
+              self._select(selection);
             }
             self._callback(self.getFilter());
           });
 };
 
 Selectable.prototype._select = function(selection) {
-  selection.transition().duration(100).style('stroke-width', '4px');
+  selection.attr("data-xdsm-selected", true);
+  selection.select('.shape')  
+    .transition().duration(100).style('stroke-width', '4px');
 };
 
 Selectable.prototype._unselect = function(selection) {
-  selection.transition().duration(100).style('stroke-width', null);
+  selection.attr("data-xdsm-selected", null);
+  selection.select('.shape')  
+    .transition().duration(100).style('stroke-width', null);
 };
 
 Selectable.prototype.getFilter = function() {
@@ -41,8 +46,9 @@ Selectable.prototype.getFilter = function() {
     fr: undefined,
     to: undefined,
   };
-  if (this._selection) {
-    var selected = this._selection.data()[0];
+  var selection = d3.select('[data-xdsm-selected="true"]');
+  if (!selection.empty()) {
+    var selected = selection.data()[0];
     if (selected.iotype) { // edge
       filter.fr = this._xdsm.graph.getNodeFromIndex(selected.row).id;
       filter.to = this._xdsm.graph.getNodeFromIndex(selected.col).id;
@@ -57,23 +63,23 @@ Selectable.prototype.getFilter = function() {
 Selectable.prototype.setFilter = function(filter) {
   // console.log('selectable.setFilter '+JSON.stringify(filter));
   var self = this;
+  var prevSelection = d3.select('[data-xdsm-selected="true"]');
   if (filter.fr === filter.to) {
     if (filter.fr !== undefined) {
       var node = this._xdsm.graph.getNode(filter.fr);
-      self._selection = d3.select(".id" + node.id + " > rect");
-      self._select(self._selection);
+      var selection = d3.select(".id" + node.id);
+      self._select(selection);
     }
   } else {
     if (filter.fr !== undefined && filter.to !== undefined) {
-      self._selection = d3.select(".idlink_" + filter.fr + "_" + filter.to
-          + " > polygon");
-      self._select(self._selection);
+      var selection = d3.select(".idlink_" + filter.fr + "_" + filter.to);
+      self._select(selection);
     }
   }
-  if (self._prevSelection) {
-    self._unselect(self._prevSelection);
+  if (!prevSelection.empty()
+      && prevSelection.data()[0].id !== selection.data()[0].id) {
+    self._unselect(prevSelection);
   }
-  self._prevSelection = self._selection;
 };
 
 module.exports = Selectable;
