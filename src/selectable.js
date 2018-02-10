@@ -10,34 +10,34 @@ function Selectable(xdsm, callback) {
 }
 
 Selectable.prototype.enable = function() {
-  this._toggleSelection('.node', 'rect');
-  this._toggleSelection('.edge', 'polygon');
+  this._addEventHandler('.node');
+  this._addEventHandler('.edge');
 };
 
-Selectable.prototype._toggleSelection = function(klass, borderElt) {
+Selectable.prototype._addEventHandler = function(klass) {
   var self = this;
   d3.selectAll(klass).on('click', function() {
-            var prevSelection = d3.select('[data-xdsm-selected="true"]');
-            self._unselect(prevSelection);
-            
-            var selection = d3.select(this); // eslint-disable-line no-invalid-this
-            if (!prevSelection.empty()
-                && prevSelection.data()[0].id !== selection.data()[0].id) {
-              self._select(selection);
-            }
-            self._callback(self.getFilter());
-          });
+    var prevSelection = d3.select('[data-xdsm-selected="true"]');
+    self._unselect(prevSelection);
+
+    var selection = d3.select(this); // eslint-disable-line no-invalid-this
+    if (prevSelection.empty()
+        || prevSelection.data()[0].id !== selection.data()[0].id) {
+      self._select(selection);
+    }
+    self._callback(self.getFilter());
+  });
 };
 
 Selectable.prototype._select = function(selection) {
   selection.attr("data-xdsm-selected", true);
-  selection.select('.shape')  
+  selection.select('.shape')
     .transition().duration(100).style('stroke-width', '4px');
 };
 
 Selectable.prototype._unselect = function(selection) {
   selection.attr("data-xdsm-selected", null);
-  selection.select('.shape')  
+  selection.select('.shape')
     .transition().duration(100).style('stroke-width', null);
 };
 
@@ -64,20 +64,20 @@ Selectable.prototype.setFilter = function(filter) {
   // console.log('selectable.setFilter '+JSON.stringify(filter));
   var self = this;
   var prevSelection = d3.select('[data-xdsm-selected="true"]');
+  var selection = d3.select({});
   if (filter.fr === filter.to) {
     if (filter.fr !== undefined) {
-      var node = this._xdsm.graph.getNode(filter.fr);
-      var selection = d3.select(".id" + node.id);
+      selection = d3.select(".id" + filter.fr);
       self._select(selection);
     }
   } else {
     if (filter.fr !== undefined && filter.to !== undefined) {
-      var selection = d3.select(".idlink_" + filter.fr + "_" + filter.to);
+      selection = d3.select(".idlink_" + filter.fr + "_" + filter.to);
       self._select(selection);
     }
   }
-  if (!prevSelection.empty()
-      && prevSelection.data()[0].id !== selection.data()[0].id) {
+  if (selection.empty() ||
+      (!prevSelection.empty() && prevSelection.data()[0].id !== selection.data()[0].id)) {
     self._unselect(prevSelection);
   }
 };
