@@ -1,3 +1,4 @@
+'use strict';
 function Labelizer() {}
 
 Labelizer.strParse = function(str) {

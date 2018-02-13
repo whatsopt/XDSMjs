@@ -1,3 +1,4 @@
+'use strict';
 var UID = "_U_";
 var UNAME = "User";
 var MULTI_TYPE = "_multi";
