@@ -72,16 +72,8 @@ function Edge(from, to, nameOrVars, row, col, isMulti) {
   this.row = row;
   this.col = col;
   this.iotype = row < col ? "in" : "out";
-  this.io = {
-    fromU: (from === UID),
-    toU: (to === UID),
-  };
   this.isMulti = isMulti;
 }
-
-Edge.prototype.isIO = function() {
-  return this.io.fromU || this.io.toU;
-};
 
 Edge.prototype.addVar = function(nameOrVar) {
   if (typeof(nameOrVar) === "string") {
@@ -138,8 +130,12 @@ Edge.prototype.removeVar = function(nameOrId) {
 };
 
 // *** Graph ******************************************************************
-function Graph(mdo, refname) {
-  this.nodes = [new Node(UID, UNAME, "user")];
+function Graph(mdo, refname, noDefaultDriver) {
+  this.nodes = [new Node(UID, UNAME, "driver")];
+  if (noDefaultDriver) {
+    this.nodes = []
+  }
+  
   this.edges = [];
   this.chains = [];
   this.refname = refname || "";
@@ -153,6 +149,7 @@ function Graph(mdo, refname) {
     this.nodes.push(new Node(item.id, num ? num + ":" + item.name : item.name,
         item.type, item.status));
   }, this);
+  this.uid = this.nodes[0].id;
 
   if (mdo.edges) {
     mdo.edges.forEach(function(item) {

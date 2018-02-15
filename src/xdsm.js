@@ -146,7 +146,7 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
     .enter() // ENTER
       .append("g").attr("class", function(d) {
         var klass = kind === "node" ? d.type : "dataInter";
-        if (klass === "dataInter" && d.isIO()) {
+        if (klass === "dataInter" && (d.row === 0 || d.col === 0)) {
           klass = "dataIO";
         }
         return "id"+d.id + " " + kind + " " + klass;
@@ -303,19 +303,19 @@ Xdsm.prototype._createDataflow = function() {
         var h = self.config.layout.cellsize.h * Math.abs(d.col - d.row);
         var points = [];
         if (d.iotype === "in") {
-          if (!d.io.fromU) {
+          if (d.row !== 0) {
             points.push((-w) + ",0");
           }
           points.push("0,0");
-          if (!d.io.toU) {
+          if (d.col !== 0) {
             points.push("0," + h);
           }
         } else {
-          if (!d.io.fromU) {
+          if (d.row !== 0) {
             points.push(w + ",0");
           }
           points.push("0,0");
-          if (!d.io.toU) {
+          if (d.col !== 0) {
             points.push("0," + (-h));
           }
         }
@@ -342,14 +342,14 @@ Xdsm.prototype._customRect = function(node, d, i, offset) {
       return grid[i][i].height + (self.config.layout.padding * 2);
     })
     .attr("rx", function() {
-      var rounded = d.type === 'user' ||
+      var rounded = d.type === 'driver' ||
                     d.type === 'optimization' ||
                     d.type === 'mda' ||
                     d.type === 'doe';
       return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
     })
     .attr("ry", function() {
-      var rounded = d.type === 'user' ||
+      var rounded = d.type === 'driver' ||
                     d.type === 'optimization' ||
                     d.type === 'mda' ||
                     d.type === 'doe';
