@@ -62,10 +62,9 @@ Selectable.prototype.getFilter = function() {
 };
 
 Selectable.prototype.setFilter = function(filter) {
-  // console.log('selectable.setFilter '+JSON.stringify(filter));
   var self = this;
   var prevSelection = d3.select('[data-xdsm-selected="true"]');
-  var selection = d3.select({});
+  var selection;
   if (filter.fr === filter.to) {
     if (filter.fr !== undefined) {
       selection = d3.select(".id" + filter.fr);
@@ -77,7 +76,7 @@ Selectable.prototype.setFilter = function(filter) {
       self._select(selection);
     }
   }
-  if (selection.empty() ||
+  if (!selection || selection.empty() ||
       (!prevSelection.empty() && prevSelection.data()[0].id !== selection.data()[0].id)) {
     self._unselect(prevSelection);
   }
