@@ -160,6 +160,7 @@ Animation.prototype.renderNodeStatuses = function() {
     if (self._isSubScenario(node.id)) {
       var scnId = graph.getNode(node.id).getScenarioId();
       var anim = new Animation(self.xdsms, scnId);
+
       anim.renderNodeStatuses();
     }
   });
@@ -228,7 +229,7 @@ Animation.prototype._onAnimationDone = function(delay) {
 };
 
 Animation.prototype._isSubScenario = function(nodeId) {
-  var gnode = "g." + nodeId;
+  var gnode = "g.id" + nodeId;
   var nodeSel = d3.select("svg." + this.rootId).select(gnode);
   return nodeSel.classed("mdo");
 };
@@ -251,7 +252,7 @@ Animation.prototype._scheduleAnimation = function() {
           self._pulseLink(elapsed, prevNodeId, nodeId);
         });
 
-        var gnode = "g." + nodeId;
+        var gnode = "g.id" + nodeId;
         if (self._isSubScenario(nodeId)) {
           self._pulse(elapsed, gnode + " > rect", "in");
           var scnId = graph.getNode(nodeId).getScenarioId();
@@ -299,7 +300,7 @@ Animation.prototype._reset = function(all) {
 
 Animation.prototype._resetPreviousStep = function() {
   this.root.graph.nodesByStep[this.curStep - 1].forEach(function(nodeId) {
-    var gnode = "g." + nodeId;
+    var gnode = "g.id" + nodeId;
     this._pulse(0, gnode + " > rect", "out");
   }, this);
 };

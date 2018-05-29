@@ -133,9 +133,9 @@ Edge.prototype.removeVar = function(nameOrId) {
 function Graph(mdo, refname, noDefaultDriver) {
   this.nodes = [new Node(UID, UNAME, "driver")];
   if (noDefaultDriver) {
-    this.nodes = []
+    this.nodes = [];
   }
-  
+
   this.edges = [];
   this.chains = [];
   this.refname = refname || "";
