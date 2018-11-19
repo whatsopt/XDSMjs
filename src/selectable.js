@@ -1,5 +1,5 @@
 'use strict';
-var d3 = require('d3');
+import {select, selectAll} from 'd3-selection';
 
 function Selectable(xdsm, callback) {
   this._xdsm = xdsm;
@@ -17,11 +17,11 @@ Selectable.prototype.enable = function() {
 
 Selectable.prototype._addEventHandler = function(klass) {
   var self = this;
-  d3.selectAll(klass).on('click', function() {
-    var prevSelection = d3.select('[data-xdsm-selected="true"]');
+  selectAll(klass).on('click', function() {
+    var prevSelection = select('[data-xdsm-selected="true"]');
     self._unselect(prevSelection);
 
-    var selection = d3.select(this); // eslint-disable-line no-invalid-this
+    var selection = select(this); // eslint-disable-line no-invalid-this
     if (prevSelection.empty()
         || prevSelection.data()[0].id !== selection.data()[0].id) {
       self._select(selection);
@@ -47,7 +47,7 @@ Selectable.prototype.getFilter = function() {
     fr: undefined,
     to: undefined,
   };
-  var selection = d3.select('[data-xdsm-selected="true"]');
+  var selection = select('[data-xdsm-selected="true"]');
   if (!selection.empty()) {
     var selected = selection.data()[0];
     if (selected.iotype) { // edge
@@ -63,16 +63,16 @@ Selectable.prototype.getFilter = function() {
 
 Selectable.prototype.setFilter = function(filter) {
   var self = this;
-  var prevSelection = d3.select('[data-xdsm-selected="true"]');
+  var prevSelection = select('[data-xdsm-selected="true"]');
   var selection;
   if (filter.fr === filter.to) {
     if (filter.fr !== undefined) {
-      selection = d3.select(".id" + filter.fr);
+      selection = select(".id" + filter.fr);
       self._select(selection);
     }
   } else {
     if (filter.fr !== undefined && filter.to !== undefined) {
-      selection = d3.select(".idlink_" + filter.fr + "_" + filter.to);
+      selection = select(".idlink_" + filter.fr + "_" + filter.to);
       self._select(selection);
     }
   }

@@ -1,11 +1,11 @@
 'use strict';
-var d3 = require('d3');
+import {select} from 'd3-selection';
 var Animation = require('./animation');
 
 function Controls(animation) {
   this.animation = animation;
 
-  var buttonGroup = d3.select(".toolbar")
+  var buttonGroup = select(".toolbar")
                        .append("div")
                        .classed("button_group", true);
   buttonGroup.append("button")
@@ -21,10 +21,10 @@ function Controls(animation) {
     .attr("id", "step-next")
     .append("i").attr("class", "icon-step-next");
 
-  this.startButton = d3.select('button#start');
-  this.stopButton = d3.select('button#stop');
-  this.stepPrevButton = d3.select('button#step-prev');
-  this.stepNextButton = d3.select('button#step-next');
+  this.startButton = select('button#start');
+  this.stopButton = select('button#stop');
+  this.stepPrevButton = select('button#step-prev');
+  this.stepNextButton = select('button#step-next');
 
   this.startButton.on('click', (function() {
     this.animation.start();
@@ -81,4 +81,4 @@ Controls.prototype._disable = function(button) {
   button.attr("disabled", true);
 };
 
-module.exports = Controls;
+export default Controls;

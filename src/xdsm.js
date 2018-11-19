@@ -1,7 +1,7 @@
 'use strict';
-var d3 = require('d3');
-// import * as d3 from 'd3';
-var Labelizer = require('./labelizer.js');
+import {select, selectAll, event} from 'd3-selection';
+import {transition} from 'd3-transition';
+import Labelizer from './labelizer.js';
 
 var WIDTH = 1000;
 var HEIGHT = 500;
@@ -24,7 +24,7 @@ function Cell(x, y, width, height) {
 
 function Xdsm(graph, svgid, config) {
   this.graph = graph;
-  var container = d3.select(".xdsm");
+  var container = select(".xdsm");
   this.svg = container.append("svg")
                  .attr("width", WIDTH)
                  .attr("height", HEIGHT)
@@ -66,7 +66,7 @@ function Xdsm(graph, svgid, config) {
 
   // Xdsm built-in tooltip for variable connexions
   if (!this.config.titleTooltip) {
-    this.tooltip = d3.select("body").append("div").attr("class", "xdsm-tooltip")
+    this.tooltip = select("body").append("div").attr("class", "xdsm-tooltip")
         .style("opacity", 0);
   }
   this._initialize();
@@ -151,16 +151,16 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
         }
         return "id"+d.id + " " + kind + " " + klass;
       }).each(function(d, i) {
-        var that = d3.select(this); // eslint-disable-line no-invalid-this
+        var that = select(this); // eslint-disable-line no-invalid-this
         that.call(labelize);  // eslint-disable-line no-invalid-this
       }).each(function(d, i) {
         var grid = self.grid;
-        var item = d3.select(this); // eslint-disable-line no-invalid-this
+        var item = select(this); // eslint-disable-line no-invalid-this
         if (grid[i] === undefined) {
           grid[i] = new Array(self.graph["nodes"].length);
         }
         item.select("text").each(function(d, j) {
-          var that = d3.select(this); // eslint-disable-line no-invalid-this
+          var that = select(this); // eslint-disable-line no-invalid-this
           var data = item.data()[0];
           var m = (data.row === undefined) ? i : data.row;
           var n = (data.col === undefined) ? i : data.col;
@@ -173,7 +173,7 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
             .attr("y", function() { return grid[m][n].y; });
         });
       }).each(function(d, i) {
-        var that = d3.select(this); // eslint-disable-line no-invalid-this
+        var that = select(this); // eslint-disable-line no-invalid-this
         that.call(decorate.bind(self), d, i, 0);
         if (d.isMulti) {
           that.call(decorate.bind(self), d, i, 1 * Number(MULTI_OFFSET));
@@ -185,27 +185,27 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
   selection.exit().remove();  // EXIT
 
   if (self.tooltip) {
-    d3.selectAll(".ellipsized").on("mouseover", function(d) {
+    selectAll(".ellipsized").on("mouseover", function(d) {
       self.tooltip.transition().duration(200).style("opacity", 0.9);
       var tooltipize = Labelizer.tooltipize()
                           .subSupScript(self.config.labelizer.subSupScript)
                           .text(d.name);
       self.tooltip.call(tooltipize)
         .style("width", TOOLTIP_WIDTH+"px")
-        .style("left", (d3.event.pageX) + "px")
-        .style("top", (d3.event.pageY - 28) + "px");
+        .style("left", (event.pageX) + "px")
+        .style("top", (event.pageY - 28) + "px");
     }).on("mouseout", function() {
       self.tooltip.transition().duration(500).style("opacity", 0);
     });
   } else {
-    d3.selectAll(".ellipsized")
+    selectAll(".ellipsized")
       .attr("title", function(d) {return d.name.split(',').join(', '); });
   }
   self._layoutText(textGroups, decorate, selection.empty() ? 0 : ANIM_DURATION);
 };
 
 Xdsm.prototype._layoutText = function(items, decorate, delay) {
-  var self = this;
+  var self = this; 
   items.transition().duration(delay).attr("transform", function(d, i) {
     var m = (d.col === undefined) ? i : d.col;
     var n = (d.row === undefined) ? i : d.row;

@@ -1,20 +1,17 @@
 /*
  * XDSMjs
- * Copyright 2016-2017 Rémi Lafage
+ * Copyright 2016-2018 Rémi Lafage
  */
 "use strict";
 
-var d3 = require('d3');
-var Graph = require('./src/graph');
-var Xdsm = require('./src/xdsm');
-var Animation = require('./src/animation');
-var Controls = require('./src/controls');
+import {json} from 'd3-fetch';
+import {select, event} from 'd3-selection';
+import Graph from './src/graph';
+import Xdsm from './src/xdsm';
+import Animation from './src/animation';
+import Controls from './src/controls';
 
-d3.json("xdsm.json", function(error, mdo) {
-  if (error) {
-    throw error;
-  }
-
+json("xdsm.json").then(function(mdo) {
   let config = {
     labelizer: {
       ellipsis: 5,
@@ -26,13 +23,13 @@ d3.json("xdsm.json", function(error, mdo) {
   var scenarioKeys = Object.keys(mdo).sort();
 
   // Optimization problem display setup
-  d3.select("body").selectAll("optpb").data(scenarioKeys).enter().append("div")
+  select("body").selectAll("optpb").data(scenarioKeys).enter().append("div")
       .filter(function(d) {
         return mdo[d].optpb;
       }).attr("class", function(d) {
         return "optpb " + d;
       }).style("opacity", 0).on("click", function() {
-        d3.select(this).transition().duration(500) // eslint-disable-line
+        select(this).transition().duration(500) // eslint-disable-line
         // no-invalid-this
         .style("opacity", 0).style("pointer-events", "none");
       }).append("pre").text(function(d) {
@@ -56,10 +53,10 @@ d3.json("xdsm.json", function(error, mdo) {
         xdsms[k].svg.select(".optimization").on(
             "click",
             function() {
-              var info = d3.select(".optpb." + k);
+              var info = select(".optpb." + k);
               info.style("opacity", 0.9);
-              info.style("left", (d3.event.pageX) + "px").style("top",
-                  (d3.event.pageY - 28) + "px");
+              info.style("left", (event.pageX) + "px").style("top",
+                  (event.pageY - 28) + "px");
               info.style("pointer-events", "auto");
             });
       }
@@ -72,11 +69,11 @@ d3.json("xdsm.json", function(error, mdo) {
   }
   anim.renderNodeStatuses();
 
-  var addButton = d3.select('button#add');
+  var addButton = select('button#add');
   addButton.on('click', function() {
     xdsms.root.addNode("Discipline");
   });
-  var delButton = d3.select('button#del');
+  var delButton = select('button#del');
   delButton.on('click', function() {
     xdsms.root.removeNode();
   });

@@ -1,13 +1,14 @@
 'use strict';
-var d3 = require('d3');
-var Graph = require('./graph');
+import {select, selectAll} from 'd3-selection';
+import {rgb} from 'd3-color';
+import Graph from './graph';
 
 var PULSE_DURATION = 700;
 var SUB_ANIM_DELAY = 200;
-var RUNNING_COLOR = d3.rgb("seagreen");
-var FAILED_COLOR = d3.rgb("firebrick");
-var PENDING_COLOR = d3.rgb("darkseagreen");
-var DONE_COLOR = d3.rgb("darkcyan");
+var RUNNING_COLOR = rgb("seagreen");
+var FAILED_COLOR = rgb("firebrick");
+var PENDING_COLOR = rgb("darkseagreen");
+var DONE_COLOR = rgb("darkcyan");
 
 function Animation(xdsms, rootId, delay) {
   this.rootId = rootId;
@@ -181,7 +182,7 @@ Animation.prototype._pulse = function(delay, toBeSelected, easeInOut, color) {
   if (color === undefined) {
     color = RUNNING_COLOR;
   }
-  var sel = d3.select("svg." + this.rootId)
+  var sel = select("svg." + this.rootId)
               .selectAll(toBeSelected)
               .transition().delay(delay);
   if (easeInOut !== "out") {
@@ -209,9 +210,9 @@ Animation.prototype._pulseLink = function(delay, fromId, toId) {
 };
 
 Animation.prototype._onAnimationStart = function(delay) {
-  var title = d3.select("svg." + this.rootId).select("g.title");
+  var title = select("svg." + this.rootId).select("g.title");
   title.select("text").transition().delay(delay).style("fill", RUNNING_COLOR);
-  d3.select("svg." + this.rootId).select("rect.border")
+  select("svg." + this.rootId).select("rect.border")
     .transition().delay(delay)
       .style("stroke-width", '5px').duration(200)
     .transition().duration(1000)
@@ -220,7 +221,7 @@ Animation.prototype._onAnimationStart = function(delay) {
 
 Animation.prototype._onAnimationDone = function(delay) {
   var self = this;
-  var title = d3.select("svg." + this.rootId).select("g.title");
+  var title = select("svg." + this.rootId).select("g.title");
   title.select("text").transition()
     .delay(delay)
     .style("fill", null).on("end", function() {
@@ -230,7 +231,7 @@ Animation.prototype._onAnimationDone = function(delay) {
 
 Animation.prototype._isSubScenario = function(nodeId) {
   var gnode = "g.id" + nodeId;
-  var nodeSel = d3.select("svg." + this.rootId).select(gnode);
+  var nodeSel = select("svg." + this.rootId).select(gnode);
   return nodeSel.classed("mdo");
 };
 
@@ -278,9 +279,9 @@ Animation.prototype._scheduleAnimation = function() {
 };
 
 Animation.prototype._reset = function(all) {
-  var svg = d3.select("svg." + this.rootId);
+  var svg = select("svg." + this.rootId);
   if (all) {
-    svg = d3.selectAll("svg");
+    svg = selectAll("svg");
   }
   svg.selectAll('rect').transition().duration(0)
             .style('stroke-width', null)

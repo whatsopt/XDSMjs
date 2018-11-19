@@ -2,6 +2,7 @@ const path = require('path');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
+  mode: 'production',
   entry: {
     xdsm: './xdsm-main.js',
     'xdsm-test': './test/xdsm-test.js'

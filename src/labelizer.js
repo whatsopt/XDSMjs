@@ -184,4 +184,4 @@ Labelizer.tooltipize = function() {
   return createTooltip;
 };
 
-module.exports = Labelizer;
+export default Labelizer;

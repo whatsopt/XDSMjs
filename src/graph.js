@@ -515,4 +515,4 @@ Graph.number = function(workflow, num) {
   };
 };
 
-module.exports = Graph;
+export default Graph;
