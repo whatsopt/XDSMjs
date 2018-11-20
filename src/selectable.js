@@ -82,4 +82,4 @@ Selectable.prototype.setFilter = function(filter) {
   }
 };
 
-module.exports = Selectable;
+export default Selectable;
