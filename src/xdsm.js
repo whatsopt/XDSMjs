@@ -414,4 +414,4 @@ Xdsm.prototype._createBorder = function() {
       .style("stroke-width", 0);
 };
 
-module.exports = Xdsm;
+export default Xdsm;

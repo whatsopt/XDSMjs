@@ -316,4 +316,4 @@ Animation.prototype._subAnimationInProgress = function() {
   return running;
 };
 
-module.exports = Animation;
+export default Animation;
