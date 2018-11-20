@@ -2,7 +2,7 @@ const path = require('path');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
-  mode: 'production',
+  mode: 'development',
   entry: {
     xdsm: './xdsm-main.js',
     'xdsm-test': './test/xdsm-test.js'
@@ -20,7 +20,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['env']
+            presets: ['@babel/preset-env']
           }
         }
       }

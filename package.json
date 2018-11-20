@@ -9,7 +9,9 @@
   "scripts": {
     "lint": "eslint xdsm-main.js ./src/* || true",
     "lintfix": "eslint --fix xdsm-main.js ./src/* || true",
-    "build": "webpack --config webpack.config.js",
+    "build": "webpack --progress --mode=production --config webpack.config.js",
+    "watch": "webpack --progress --watch",
+    "server": "webpack-dev-server --open",
     "test": "babel-tape-runner test/xdsm-test.js | faucet",
     "test2": "babel-tape-runner test/xdsm-test.js",
     "testall": "testem || true",
@@ -39,7 +41,8 @@
     "uglify-js": "^3.4.9",
     "uglifyjs-webpack-plugin": "^2.0.1",
     "webpack": "^4.26.0",
-    "webpack-cli": "^3.1.2"
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.10"
   },
   "dependencies": {
     "d3-color": "^1.2.3",
