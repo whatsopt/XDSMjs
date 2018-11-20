@@ -33,13 +33,13 @@ Selectable.prototype._addEventHandler = function(klass) {
 Selectable.prototype._select = function(selection) {
   selection.attr("data-xdsm-selected", true);
   selection.select('.shape')
-    .transition().duration(100).style('stroke-width', '4px');
+      .transition().duration(100).style('stroke-width', '4px');
 };
 
 Selectable.prototype._unselect = function(selection) {
   selection.attr("data-xdsm-selected", null);
   selection.select('.shape')
-    .transition().duration(100).style('stroke-width', null);
+      .transition().duration(100).style('stroke-width', null);
 };
 
 Selectable.prototype.getFilter = function() {

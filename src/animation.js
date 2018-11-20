@@ -25,11 +25,11 @@ function Animation(xdsms, rootId, delay) {
 }
 
 Animation.STATUS = {READY: "ready",
-                    RUNNING_STEP: "running_step",
-                    RUNNING_AUTO: "running_auto",
-                    STOPPED: "stopped",
-                    DONE: "done",
-                    DISABLED: "disabled"};
+  RUNNING_STEP: "running_step",
+  RUNNING_AUTO: "running_auto",
+  STOPPED: "stopped",
+  DONE: "done",
+  DISABLED: "disabled"};
 
 Animation.prototype.reset = function() {
   this.curStep = 0;
@@ -183,22 +183,22 @@ Animation.prototype._pulse = function(delay, toBeSelected, easeInOut, color) {
     color = RUNNING_COLOR;
   }
   var sel = select("svg." + this.rootId)
-              .selectAll(toBeSelected)
-              .transition().delay(delay);
+      .selectAll(toBeSelected)
+      .transition().delay(delay);
   if (easeInOut !== "out") {
     sel = sel.transition().duration(200)
-            .style('stroke-width', '8px')
-            .style('stroke', color)
-            .style('fill', function(d) {
-              if (d.id) {
-                return color.brighter();
-              }});
+        .style('stroke-width', '8px')
+        .style('stroke', color)
+        .style('fill', function(d) {
+          if (d.id) {
+            return color.brighter();
+          }});
   }
   if (easeInOut !== "in") {
     sel.transition().duration(3 * PULSE_DURATION)
-            .style('stroke-width', null)
-            .style('stroke', null)
-            .style('fill', null);
+        .style('stroke-width', null)
+        .style('stroke', null)
+        .style('fill', null);
   }
 };
 
@@ -213,9 +213,9 @@ Animation.prototype._onAnimationStart = function(delay) {
   var title = select("svg." + this.rootId).select("g.title");
   title.select("text").transition().delay(delay).style("fill", RUNNING_COLOR);
   select("svg." + this.rootId).select("rect.border")
-    .transition().delay(delay)
+      .transition().delay(delay)
       .style("stroke-width", '5px').duration(200)
-    .transition().duration(1000)
+      .transition().duration(1000)
       .style("stroke", 'black').style("stroke-width", '0px');
 };
 
@@ -223,10 +223,10 @@ Animation.prototype._onAnimationDone = function(delay) {
   var self = this;
   var title = select("svg." + this.rootId).select("g.title");
   title.select("text").transition()
-    .delay(delay)
-    .style("fill", null).on("end", function() {
-      self._updateStatus(Animation.STATUS.DONE);
-    });
+      .delay(delay)
+      .style("fill", null).on("end", function() {
+        self._updateStatus(Animation.STATUS.DONE);
+      });
 };
 
 Animation.prototype._isSubScenario = function(nodeId) {
@@ -284,19 +284,19 @@ Animation.prototype._reset = function(all) {
     svg = selectAll("svg");
   }
   svg.selectAll('rect').transition().duration(0)
-            .style('stroke-width', null)
-            .style('stroke', null);
+      .style('stroke-width', null)
+      .style('stroke', null);
   svg.selectAll('.title > text').transition().duration(0)
-            .style('fill', null);
+      .style('fill', null);
 
   svg.selectAll('.node > rect').transition().duration(0)
-            .style('stroke-width', null)
-            .style('stroke', null)
-            .style('fill', null);
+      .style('stroke-width', null)
+      .style('stroke', null)
+      .style('fill', null);
   svg.selectAll('path').transition().duration(0)
-            .style('stroke-width', null)
-            .style('stroke', null)
-            .style('fill', null);
+      .style('stroke-width', null)
+      .style('stroke', null)
+      .style('fill', null);
 };
 
 Animation.prototype._resetPreviousStep = function() {

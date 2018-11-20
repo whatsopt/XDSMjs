@@ -57,12 +57,12 @@ function Edge(from, to, nameOrVars, row, col, isMulti) {
   if (typeof (nameOrVars) === "string") {
     this.name = nameOrVars;
     this.vars = {};
-    let vars = this.name.split(',');
+    const vars = this.name.split(',');
     vars.forEach((n, i) => this.vars[i] = n.trim());
   } else { // vars = {id: name, ...}
     this.vars = nameOrVars;
-    let names = [];
-    for (let k in this.vars) {
+    const names = [];
+    for (const k in this.vars) {
       if (this.vars.hasOwnProperty(k)) {
         names.push(this.vars[k]);
       }
@@ -84,11 +84,11 @@ Edge.prototype.addVar = function(nameOrVar) {
     }
     this.vars[this.vars.length] = nameOrVar;
   } else {
-    for (let k in nameOrVar) {
+    for (const k in nameOrVar) {
       if (nameOrVar.hasOwnProperty(k)) {
         this.vars[k] = nameOrVar[k];
-        let names = [];
-        for (let k in this.vars) {
+        const names = [];
+        for (const k in this.vars) {
           if (this.vars.hasOwnProperty(k)) {
             names.push(this.vars[k]);
           }
@@ -101,15 +101,15 @@ Edge.prototype.addVar = function(nameOrVar) {
 
 Edge.prototype.removeVar = function(nameOrId) {
   let found = false;
-  for (let k in this.vars) {
+  for (const k in this.vars) {
     if (k === nameOrId) {
       this.vars.delete(k);
       found = true;
     }
   }
   if (!found) {
-    let newvars = {};
-    for (let k in this.vars) {
+    const newvars = {};
+    for (const k in this.vars) {
       if (this.vars[k] === nameOrId) {
         found = true;
       } else {
@@ -119,8 +119,8 @@ Edge.prototype.removeVar = function(nameOrId) {
     this.vars = newvars;
   }
   if (found) {
-    let names = [];
-    for (let k in this.vars) {
+    const names = [];
+    for (const k in this.vars) {
       if (this.vars.hasOwnProperty(k)) {
         names.push(this.vars[k]);
       }
@@ -196,7 +196,7 @@ Graph.prototype._makeChaining = function(workflow) {
 };
 
 Graph.prototype.idxOf = function(nodeId) {
-  let idx = this.nodes.map(function(elt) {
+  const idx = this.nodes.map(function(elt) {
     return elt.id;
   }).indexOf(nodeId);
   if (idx<0) {
@@ -255,7 +255,7 @@ Graph.prototype.removeNode = function(index) {
 
 Graph.prototype.moveLeft = function(index) {
   if (index>1) {
-    let tmp = this.nodes[index-1];
+    const tmp = this.nodes[index-1];
     this.nodes[index-1] = this.nodes[index];
     this.nodes[index] = tmp;
   }
@@ -263,7 +263,7 @@ Graph.prototype.moveLeft = function(index) {
 
 Graph.prototype.moveRight = function(index) {
   if (index<this.nodes.length-1) {
-    let tmp = this.nodes[index+1];
+    const tmp = this.nodes[index+1];
     this.nodes[index+1] = this.nodes[index];
     this.nodes[index] = tmp;
   }
@@ -278,12 +278,12 @@ Graph.prototype.addEdge = function(nodeIdFrom, nodeIdTo, nameOrVar) {
 };
 
 Graph.prototype.removeEdge = function(nodeIdFrom, nodeIdTo) {
-  let edge = this.findEdge(nodeIdFrom, nodeIdTo);
+  const edge = this.findEdge(nodeIdFrom, nodeIdTo);
   this.edges.splice(edge.index, 1);
 };
 
 Graph.prototype.addEdgeVar = function(nodeIdFrom, nodeIdTo, nameOrVar) {
-  let edge = this.findEdge(nodeIdFrom, nodeIdTo).element;
+  const edge = this.findEdge(nodeIdFrom, nodeIdTo).element;
   if (edge) {
     console.log(nameOrVar);
     edge.addVar(nameOrVar);
@@ -293,9 +293,9 @@ Graph.prototype.addEdgeVar = function(nodeIdFrom, nodeIdTo, nameOrVar) {
 };
 
 Graph.prototype.removeEdgeVar = function(nodeIdFrom, nodeIdTo, nameOrId) {
-  let ret = this.findEdge(nodeIdFrom, nodeIdTo);
-  let edge = ret.element;
-  let index = ret.index;
+  const ret = this.findEdge(nodeIdFrom, nodeIdTo);
+  const edge = ret.element;
+  const index = ret.index;
   if (edge) {
     edge.removeVar(nameOrId);
   }
@@ -323,8 +323,8 @@ Graph.prototype.findEdgesOf = function(nodeIdx) {
 Graph.prototype.findEdge = function(nodeIdFrom, nodeIdTo) {
   let element;
   let index = -1;
-  let idxFrom = this.idxOf(nodeIdFrom);
-  let idxTo = this.idxOf(nodeIdTo);
+  const idxFrom = this.idxOf(nodeIdFrom);
+  const idxTo = this.idxOf(nodeIdTo);
   this.edges.some(function(edge, i) {
     if ((edge.row === idxFrom) && (edge.col === idxTo)) {
       if (element) {

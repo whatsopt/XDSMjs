@@ -1,6 +1,5 @@
 var test = require('tape');
-var Labelizer = require('../src/labelizer');
-// var Graph = require('../src/graph');
+import Labelizer from '../src/labelizer';
 import Graph from '../src/graph';
 
 test("Labelizer.strParse('') returns [{'base':'', 'sub':undefined, 'sup':undefined}]", function(t) {

@@ -50,30 +50,30 @@ Labelizer._createVarListLabel = function(selection, name, text, ellipsis) {
       if (token.sub) {
         offsetSub = 10;
         text.append("tspan")
-          .attr("class", "sub")
-          .attr("dy", offsetSub)
-          .text(token.sub);
+            .attr("class", "sub")
+            .attr("dy", offsetSub)
+            .text(token.sub);
       }
       if (token.sup) {
         offsetSup = -10;
         text.append("tspan")
-          .attr("class", "sup")
-          .attr("dx", -5)
-          .attr("dy", -offsetSub + offsetSup)
-          .text(token.sup);
+            .attr("class", "sup")
+            .attr("dx", -5)
+            .attr("dy", -offsetSub + offsetSup)
+            .text(token.sup);
         offsetSub = 0;
       }
     } else {
       text.append("tspan")
-        .attr("dy", -offsetSub - offsetSup)
-        .text("...");
+          .attr("dy", -offsetSub - offsetSup)
+          .text("...");
       selection.classed("ellipsized", true);
       return false;
     }
     if (i < ary.length - 1) {
       text.append("tspan")
-        .attr("dy", -offsetSub - offsetSup)
-        .text(", ");
+          .attr("dy", -offsetSub - offsetSup)
+          .text(", ");
     }
     return true;
   }, this);
@@ -86,7 +86,7 @@ Labelizer._createLinkNbLabel = function(selection, name, text) {
     str += 's';
   }
   text.append("tspan").text(str);
-  selection.classed("ellipsized", true);  // activate tooltip
+  selection.classed("ellipsized", true); // activate tooltip
 };
 
 Labelizer.labelize = function() {
@@ -98,7 +98,7 @@ Labelizer.labelize = function() {
   function createLabel(selection) {
     selection.each(function(d) {
       var text = selection.append("text");
-      if (linkNbOnly && labelKind !== "node") {  // show connexion nb
+      if (linkNbOnly && labelKind !== "node") { // show connexion nb
         Labelizer._createLinkNbLabel(selection, d.name, text);
       } else {
         Labelizer._createVarListLabel(selection, d.name, text, ellipsis);

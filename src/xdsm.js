@@ -1,6 +1,6 @@
 'use strict';
 import {select, selectAll, event} from 'd3-selection';
-import {transition} from 'd3-transition';
+import 'd3-transition';
 import Labelizer from './labelizer.js';
 
 var WIDTH = 1000;
@@ -26,9 +26,9 @@ function Xdsm(graph, svgid, config) {
   this.graph = graph;
   var container = select(".xdsm");
   this.svg = container.append("svg")
-                 .attr("width", WIDTH)
-                 .attr("height", HEIGHT)
-                 .attr("class", svgid);
+      .attr("width", WIDTH)
+      .attr("height", HEIGHT)
+      .attr("class", svgid);
 
   this.grid = [];
   this.nodes = [];
@@ -46,7 +46,7 @@ function Xdsm(graph, svgid, config) {
       cellsize: {w: CELL_W, h: CELL_H},
       padding: PADDING,
     },
-    titleTooltip: false,  // allow to use external tooltip mechanism
+    titleTooltip: false, // allow to use external tooltip mechanism
   };
 
   this.config = this.default_config;
@@ -124,8 +124,8 @@ Xdsm.prototype.draw = function() {
   var h = self.config.layout.cellsize.h * (self.graph.nodes.length + 1);
   self.svg.attr("width", w).attr("height", h);
   self.svg.selectAll(".border")
-    .attr("height", h - BORDER_PADDING)
-    .attr("width", w - BORDER_PADDING);
+      .attr("height", h - BORDER_PADDING)
+      .attr("width", w - BORDER_PADDING);
 };
 
 Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
@@ -133,17 +133,17 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
 
   var selection =
     group.selectAll("." + kind)
-      .data(this.graph[kind + "s"],        // DATA JOIN
-            function(d) { return d.id; });
+        .data(this.graph[kind + "s"], // DATA JOIN
+            function(d) {return d.id;});
 
   var labelize = Labelizer.labelize()
-                  .labelKind(kind)
-                  .ellipsis(self.config.labelizer.ellipsis)
-                  .subSupScript(self.config.labelizer.subSupScript)
-                  .linkNbOnly(self.config.labelizer.showLinkNbOnly);
+      .labelKind(kind)
+      .ellipsis(self.config.labelizer.ellipsis)
+      .subSupScript(self.config.labelizer.subSupScript)
+      .linkNbOnly(self.config.labelizer.showLinkNbOnly);
 
   var textGroups = selection
-    .enter() // ENTER
+      .enter() // ENTER
       .append("g").attr("class", function(d) {
         var klass = kind === "node" ? d.type : "dataInter";
         if (klass === "dataInter" && (d.row === 0 || d.col === 0)) {
@@ -152,7 +152,7 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
         return "id"+d.id + " " + kind + " " + klass;
       }).each(function(d, i) {
         var that = select(this); // eslint-disable-line no-invalid-this
-        that.call(labelize);  // eslint-disable-line no-invalid-this
+        that.call(labelize); // eslint-disable-line no-invalid-this
       }).each(function(d, i) {
         var grid = self.grid;
         var item = select(this); // eslint-disable-line no-invalid-this
@@ -167,10 +167,10 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
           var bbox = that.nodes()[j].getBBox();
           grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
           that
-            .attr("width", function() { return grid[m][n].width; })
-            .attr("height", function() { return grid[m][n].height; })
-            .attr("x", function() { return grid[m][n].x; })
-            .attr("y", function() { return grid[m][n].y; });
+              .attr("width", function() {return grid[m][n].width;})
+              .attr("height", function() {return grid[m][n].height;})
+              .attr("x", function() {return grid[m][n].x;})
+              .attr("y", function() {return grid[m][n].y;});
         });
       }).each(function(d, i) {
         var that = select(this); // eslint-disable-line no-invalid-this
@@ -180,32 +180,32 @@ Xdsm.prototype._createTextGroup = function(kind, group, decorate) {
           that.call(decorate.bind(self), d, i, 2 * Number(MULTI_OFFSET));
         }
       })
-    .merge(selection);  // UPDATE + ENTER
+      .merge(selection); // UPDATE + ENTER
 
-  selection.exit().remove();  // EXIT
+  selection.exit().remove(); // EXIT
 
   if (self.tooltip) {
     selectAll(".ellipsized").on("mouseover", function(d) {
       self.tooltip.transition().duration(200).style("opacity", 0.9);
       var tooltipize = Labelizer.tooltipize()
-                          .subSupScript(self.config.labelizer.subSupScript)
-                          .text(d.name);
+          .subSupScript(self.config.labelizer.subSupScript)
+          .text(d.name);
       self.tooltip.call(tooltipize)
-        .style("width", TOOLTIP_WIDTH+"px")
-        .style("left", (event.pageX) + "px")
-        .style("top", (event.pageY - 28) + "px");
+          .style("width", TOOLTIP_WIDTH+"px")
+          .style("left", (event.pageX) + "px")
+          .style("top", (event.pageY - 28) + "px");
     }).on("mouseout", function() {
       self.tooltip.transition().duration(500).style("opacity", 0);
     });
   } else {
     selectAll(".ellipsized")
-      .attr("title", function(d) {return d.name.split(',').join(', '); });
+        .attr("title", function(d) {return d.name.split(',').join(', ');});
   }
   self._layoutText(textGroups, decorate, selection.empty() ? 0 : ANIM_DURATION);
 };
 
 Xdsm.prototype._layoutText = function(items, decorate, delay) {
-  var self = this; 
+  var self = this;
   items.transition().duration(delay).attr("transform", function(d, i) {
     var m = (d.col === undefined) ? i : d.col;
     var n = (d.row === undefined) ? i : d.row;
@@ -218,78 +218,78 @@ Xdsm.prototype._layoutText = function(items, decorate, delay) {
 Xdsm.prototype._createWorkflow = function() {
   var self = this;
   var workflow = this.svg.selectAll(".workflow")
-    .data([self.graph])
-  .enter()
-    .insert("g", ":first-child")
-    .attr("class", "workflow");
+      .data([self.graph])
+      .enter()
+      .insert("g", ":first-child")
+      .attr("class", "workflow");
 
   workflow.selectAll("g")
-    .data(self.graph.chains)
-  .enter()
-    .insert('g').attr("class", "workflow-chain")
-    .selectAll('path')
-      .data(function(d) { return d; })
-    .enter()
+      .data(self.graph.chains)
+      .enter()
+      .insert('g').attr("class", "workflow-chain")
+      .selectAll('path')
+      .data(function(d) {return d;})
+      .enter()
       .append("path")
-        .attr("class", function(d) {
-          return "link_" + d[0] + "_" + d[1];
-        })
-        .attr("transform", function(d) {
-          var max = Math.max(d[0], d[1]);
-          var min = Math.min(d[0], d[1]);
-          var w;
-          var h;
-          if (d[0] < d[1]) {
-            w = self.config.layout.cellsize.w * max + self.config.layout.origin.x;
-            h = self.config.layout.cellsize.h * min + self.config.layout.origin.y;
-          } else {
-            w = self.config.layout.cellsize.w * min + self.config.layout.origin.x;
-            h = self.config.layout.cellsize.h * max + self.config.layout.origin.y;
+      .attr("class", function(d) {
+        return "link_" + d[0] + "_" + d[1];
+      })
+      .attr("transform", function(d) {
+        var max = Math.max(d[0], d[1]);
+        var min = Math.min(d[0], d[1]);
+        var w;
+        var h;
+        if (d[0] < d[1]) {
+          w = self.config.layout.cellsize.w * max + self.config.layout.origin.x;
+          h = self.config.layout.cellsize.h * min + self.config.layout.origin.y;
+        } else {
+          w = self.config.layout.cellsize.w * min + self.config.layout.origin.x;
+          h = self.config.layout.cellsize.h * max + self.config.layout.origin.y;
+        }
+        return "translate(" + (self.config.layout.origin.x + w) + "," + (self.config.layout.origin.y + h) + ")";
+      })
+      .attr("d", function(d) {
+        var w = self.config.layout.cellsize.w * Math.abs(d[0] - d[1]);
+        var h = self.config.layout.cellsize.h * Math.abs(d[0] - d[1]);
+        var points = [];
+        if (d[0] < d[1]) {
+          if (d[0] !== 0) {
+            points.push((-w) + ",0");
           }
-          return "translate(" + (self.config.layout.origin.x + w) + "," + (self.config.layout.origin.y + h) + ")";
-        })
-        .attr("d", function(d) {
-          var w = self.config.layout.cellsize.w * Math.abs(d[0] - d[1]);
-          var h = self.config.layout.cellsize.h * Math.abs(d[0] - d[1]);
-          var points = [];
-          if (d[0] < d[1]) {
-            if (d[0] !== 0) {
-              points.push((-w) + ",0");
-            }
-            points.push("0,0");
-            if (d[1] !== 0) {
-              points.push("0," + h);
-            }
-          } else {
-            if (d[0] !== 0) {
-              points.push(w + ",0");
-            }
-            points.push("0,0");
-            if (d[1] !== 0) {
-              points.push("0," + (-h));
-            }
+          points.push("0,0");
+          if (d[1] !== 0) {
+            points.push("0," + h);
           }
-          return "M" + points.join(" ");
-        });
+        } else {
+          if (d[0] !== 0) {
+            points.push(w + ",0");
+          }
+          points.push("0,0");
+          if (d[1] !== 0) {
+            points.push("0," + (-h));
+          }
+        }
+        return "M" + points.join(" ");
+      });
 };
 
 Xdsm.prototype._createDataflow = function() {
   var self = this;
   self.svg.selectAll(".dataflow")
-    .data([self])
-  .enter()
-    .insert("g", ":first-child")
-    .attr("class", "dataflow");
+      .data([self])
+      .enter()
+      .insert("g", ":first-child")
+      .attr("class", "dataflow");
 
   var selection =
     self.svg.select(".dataflow").selectAll("path")
-      .data(self.graph.edges, function(d) {
-        return d.id;
-      });
+        .data(self.graph.edges, function(d) {
+          return d.id;
+        });
 
   selection.enter()
       .append("path")
-    .merge(selection)
+      .merge(selection)
       .transition().duration(selection.empty() ? 0 : ANIM_DURATION)
       .attr("transform", function(d, i) {
         var m = (d.col === undefined) ? i : d.col;
@@ -328,90 +328,90 @@ Xdsm.prototype._customRect = function(node, d, i, offset) {
   var self = this;
   var grid = self.grid;
   node.insert("rect", ":first-child")
-    .classed("shape", true)
-    .attr("x", function() {
-      return grid[i][i].x + offset - self.config.layout.padding;
-    })
-    .attr("y", function() {
-      return -grid[i][i].height * 2 / 3 - self.config.layout.padding - offset;
-    })
-    .attr("width", function() {
-      return grid[i][i].width + (self.config.layout.padding * 2);
-    })
-    .attr("height", function() {
-      return grid[i][i].height + (self.config.layout.padding * 2);
-    })
-    .attr("rx", function() {
-      var rounded = d.type === 'driver' ||
+      .classed("shape", true)
+      .attr("x", function() {
+        return grid[i][i].x + offset - self.config.layout.padding;
+      })
+      .attr("y", function() {
+        return -grid[i][i].height * 2 / 3 - self.config.layout.padding - offset;
+      })
+      .attr("width", function() {
+        return grid[i][i].width + (self.config.layout.padding * 2);
+      })
+      .attr("height", function() {
+        return grid[i][i].height + (self.config.layout.padding * 2);
+      })
+      .attr("rx", function() {
+        var rounded = d.type === 'driver' ||
                     d.type === 'optimization' ||
                     d.type === 'mda' ||
                     d.type === 'doe';
-      return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
-    })
-    .attr("ry", function() {
-      var rounded = d.type === 'driver' ||
+        return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
+      })
+      .attr("ry", function() {
+        var rounded = d.type === 'driver' ||
                     d.type === 'optimization' ||
                     d.type === 'mda' ||
                     d.type === 'doe';
-      return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
-    });
+        return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
+      });
 };
 
 Xdsm.prototype._customTrapz = function(edge, d, i, offset) {
   var grid = this.grid;
   edge.insert("polygon", ":first-child")
-    .classed("shape", true)
-    .attr("points", function(d) {
-      var pad = 5;
-      var w = grid[d.row][d.col].width;
-      var h = grid[d.row][d.col].height;
-      var topleft = (-pad - w / 2 + offset) + ", " +
+      .classed("shape", true)
+      .attr("points", function(d) {
+        var pad = 5;
+        var w = grid[d.row][d.col].width;
+        var h = grid[d.row][d.col].height;
+        var topleft = (-pad - w / 2 + offset) + ", " +
                     (-pad - h * 2 / 3 - offset);
-      var topright = (w / 2 + pad + offset + 5) + ", " +
+        var topright = (w / 2 + pad + offset + 5) + ", " +
                      (-pad - h * 2 / 3 - offset);
-      var botright = (w / 2 + pad + offset - 5 + 5) + ", " +
+        var botright = (w / 2 + pad + offset - 5 + 5) + ", " +
                      (pad + h / 3 - offset);
-      var botleft = (-pad - w / 2 + offset - 5) + ", " +
+        var botleft = (-pad - w / 2 + offset - 5) + ", " +
                     (pad + h / 3 - offset);
-      var tpz = [topleft, topright, botright, botleft].join(" ");
-      return tpz;
-    });
+        var tpz = [topleft, topright, botright, botleft].join(" ");
+        return tpz;
+      });
 };
 
 Xdsm.prototype._createTitle = function() {
   var self = this;
   var ref = self.svg.selectAll(".title")
-    .data([self.graph.refname])
-  .enter()
-    .append('g')
-    .classed('title', true)
-    .append("text").text(self.graph.refname);
+      .data([self.graph.refname])
+      .enter()
+      .append('g')
+      .classed('title', true)
+      .append("text").text(self.graph.refname);
 
   var bbox = ref.nodes()[0].getBBox();
 
   ref.insert("rect", "text")
-    .attr('x', bbox.x)
-    .attr('y', bbox.y)
-    .attr('width', bbox.width)
-    .attr('height', bbox.height);
+      .attr('x', bbox.x)
+      .attr('y', bbox.y)
+      .attr('width', bbox.width)
+      .attr('height', bbox.height);
 
   ref.attr('transform',
-           'translate(' + self.config.layout.origin.x + ',' + (self.config.layout.origin.y + bbox.height) + ')');
+      'translate(' + self.config.layout.origin.x + ',' + (self.config.layout.origin.y + bbox.height) + ')');
 };
 
 Xdsm.prototype._createBorder = function() {
   var self = this;
   var bordercolor = 'black';
   self.svg.selectAll(".border")
-    .data([self])
-  .enter()
-    .append("rect")
-    .classed("border", true)
-    .attr("x", BORDER_PADDING)
-    .attr("y", BORDER_PADDING)
-    .style("stroke", bordercolor)
-    .style("fill", "none")
-    .style("stroke-width", 0);
+      .data([self])
+      .enter()
+      .append("rect")
+      .classed("border", true)
+      .attr("x", BORDER_PADDING)
+      .attr("y", BORDER_PADDING)
+      .style("stroke", bordercolor)
+      .style("fill", "none")
+      .style("stroke-width", 0);
 };
 
 module.exports = Xdsm;

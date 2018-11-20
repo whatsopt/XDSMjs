@@ -6,20 +6,20 @@ function Controls(animation) {
   this.animation = animation;
 
   var buttonGroup = select(".toolbar")
-                       .append("div")
-                       .classed("button_group", true);
+      .append("div")
+      .classed("button_group", true);
   buttonGroup.append("button")
-    .attr("id", "start")
-    .append("i").attr("class", "icon-start");
+      .attr("id", "start")
+      .append("i").attr("class", "icon-start");
   buttonGroup.append("button")
-    .attr("id", "stop")
-    .append("i").attr("class", "icon-stop");
+      .attr("id", "stop")
+      .append("i").attr("class", "icon-stop");
   buttonGroup.append("button")
-    .attr("id", "step-prev")
-    .append("i").attr("class", "icon-step-prev");
+      .attr("id", "step-prev")
+      .append("i").attr("class", "icon-step-prev");
   buttonGroup.append("button")
-    .attr("id", "step-next")
-    .append("i").attr("class", "icon-step-next");
+      .attr("id", "step-next")
+      .append("i").attr("class", "icon-step-next");
 
   this.startButton = select('button#start');
   this.stopButton = select('button#stop');
@@ -48,7 +48,7 @@ Controls.prototype.update = function(status) {
   switch (status) {
     case Animation.STATUS.STOPPED:
     case Animation.STATUS.DONE:
-      this.animation.reset();  // trigger READY status
+      this.animation.reset(); // trigger READY status
     case Animation.STATUS.READY: // eslint-disable-line no-fallthrough
       this._enable(this.startButton);
       this._disable(this.stopButton);

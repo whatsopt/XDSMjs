@@ -12,7 +12,7 @@ import Animation from './src/animation';
 import Controls from './src/controls';
 
 json("xdsm.json").then(function(mdo) {
-  let config = {
+  const config = {
     labelizer: {
       ellipsis: 5,
       subSupScript: true,
@@ -31,7 +31,7 @@ json("xdsm.json").then(function(mdo) {
       }).style("opacity", 0).on("click", function() {
         select(this).transition().duration(500) // eslint-disable-line
         // no-invalid-this
-        .style("opacity", 0).style("pointer-events", "none");
+            .style("opacity", 0).style("pointer-events", "none");
       }).append("pre").text(function(d) {
         return mdo[d].optpb;
       });
