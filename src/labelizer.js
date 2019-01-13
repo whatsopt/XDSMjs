@@ -1,14 +1,17 @@
 'use strict';
 function Labelizer() {}
 
-Labelizer.strParse = function(str) {
+Labelizer.strParse = function(str, subSupScript) {
   if (str === "") {
     return [{base: '', sub: undefined, sup: undefined}];
   }
-
   var lstr = str.split(',');
+  if (subSupScript === false) {
+    return lstr.map((s) => {return {base: s, sub: undefined, sup: undefined};});
+  }
+
   var underscores = /_/g;
-  var rg = /([0-9\-]+:)?([A-Za-z0-9\-\.]+)(_[A-Za-z0-9\-\._]+)?(\^.+)?/;
+  var rg = /([0-9\-]+:)?([&#;A-Za-z0-9\-\.]+)(_[&#;A-Za-z0-9\-\._]+)?(\^.+)?/;
 
   var res = lstr.map(function(s) {
     var base;
@@ -40,19 +43,20 @@ Labelizer.strParse = function(str) {
   return res;
 };
 
-Labelizer._createVarListLabel = function(selection, name, text, ellipsis) {
-  var tokens = Labelizer.strParse(name);
+Labelizer._createVarListLabel = function(selection, name, text, ellipsis, subSupScript) {
+  var tokens = Labelizer.strParse(name, subSupScript);
+
   tokens.every(function(token, i, ary) {
     var offsetSub = 0;
     var offsetSup = 0;
     if (ellipsis < 1 || (i < 5 && text.nodes()[0].getBBox().width < 100)) {
-      text.append("tspan").text(token.base);
+      text.append("tspan").html(token.base);
       if (token.sub) {
         offsetSub = 10;
         text.append("tspan")
             .attr("class", "sub")
             .attr("dy", offsetSub)
-            .text(token.sub);
+            .html(token.sub);
       }
       if (token.sup) {
         offsetSup = -10;
@@ -60,20 +64,20 @@ Labelizer._createVarListLabel = function(selection, name, text, ellipsis) {
             .attr("class", "sup")
             .attr("dx", -5)
             .attr("dy", -offsetSub + offsetSup)
-            .text(token.sup);
+            .html(token.sup);
         offsetSub = 0;
       }
     } else {
       text.append("tspan")
           .attr("dy", -offsetSub - offsetSup)
-          .text("...");
+          .html("...");
       selection.classed("ellipsized", true);
       return false;
     }
     if (i < ary.length - 1) {
       text.append("tspan")
           .attr("dy", -offsetSub - offsetSup)
-          .text(", ");
+          .html(", ");
     }
     return true;
   }, this);
@@ -85,7 +89,7 @@ Labelizer._createLinkNbLabel = function(selection, name, text) {
   if (lstr.length > 1) {
     str += 's';
   }
-  text.append("tspan").text(str);
+  text.append("tspan").html(str);
   selection.classed("ellipsized", true); // activate tooltip
 };
 
@@ -101,7 +105,7 @@ Labelizer.labelize = function() {
       if (linkNbOnly && labelKind !== "node") { // show connexion nb
         Labelizer._createLinkNbLabel(selection, d.name, text);
       } else {
-        Labelizer._createVarListLabel(selection, d.name, text, ellipsis);
+        Labelizer._createVarListLabel(selection, d.name, text, ellipsis, subSupScript);
       }
     });
   }
