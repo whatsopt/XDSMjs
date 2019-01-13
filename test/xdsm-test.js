@@ -18,6 +18,14 @@ test("Labelizer.strParse('x') returns [{'base':'x', 'sub':undefined, 'sup':undef
   t.deepEqual(Labelizer.strParse("x"), [{'base':'x', 'sub':undefined, 'sup':undefined}]);
   t.end();
 });
+test("Labelizer.strParse('&#x03BB') returns [{'base':'&#x03BB', 'sub':undefined, 'sup':undefined}]", function(t) {
+  t.deepEqual(Labelizer.strParse("&#x03BB"), [{'base':'&#x03BB', 'sub':undefined, 'sup':undefined}]);
+  t.end();
+});
+test("Labelizer.strParse('&#x03BB_&#x03BB^&#x03BB') returns [{'base':'&#x03BB', 'sub':'&#x03BB', 'sup':'&#x03BB'}]", function(t) {
+  t.deepEqual(Labelizer.strParse("&#x03BB"), [{'base':'&#x03BB', 'sub':'&#x03BB', 'sup':'&#x03BB'}]);
+  t.end();
+});
 test("Labelizer.strParse('Optimization') returns [{'base':'Optimization', 'sub':undefined, 'sup':undefined}]", function(t) {
   t.deepEqual(Labelizer.strParse("Optimization"), [{'base':'Optimization', 'sub':undefined, 'sup':undefined}]);
   t.end();
