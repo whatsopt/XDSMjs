@@ -1,6 +1,6 @@
 /*
  * XDSMjs
- * Copyright 2016-2018 Rémi Lafage
+ * Copyright 2016-2019 Rémi Lafage
  */
 "use strict";
 
@@ -32,7 +32,7 @@ json("xdsm.json").then(function(mdo) {
         select(this).transition().duration(500) // eslint-disable-line
         // no-invalid-this
             .style("opacity", 0).style("pointer-events", "none");
-      }).append("pre").text(function(d) {
+      }).append("pre").html(function(d) {
         return mdo[d].optpb;
       });
 
