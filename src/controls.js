@@ -1,6 +1,6 @@
 'use strict';
 import {select} from 'd3-selection';
-var Animation = require('./animation');
+import Animation from './animation';
 
 function Controls(animation) {
   this.animation = animation;
