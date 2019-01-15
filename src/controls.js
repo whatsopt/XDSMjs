@@ -1,11 +1,11 @@
 'use strict';
 import {select} from 'd3-selection';
-var Animation = require('./animation');
+import Animation from './animation';
 
 function Controls(animation) {
   this.animation = animation;
 
-  var buttonGroup = select(".toolbar")
+  var buttonGroup = select(".xdsm-toolbar")
       .append("div")
       .classed("button_group", true);
   buttonGroup.append("button")

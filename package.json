@@ -2,13 +2,13 @@
   "name": "xdsmjs",
   "version": "0.4.3",
   "description": "XDSM diagram generator",
-  "main": "xdsm-main.js",
+  "main": "src/xdsm-factory.js",
   "directories": {
     "example": "examples"
   },
   "scripts": {
-    "lint": "eslint xdsm-main.js ./src/* || true",
-    "lintfix": "eslint --fix xdsm-main.js ./src/* || true",
+    "lint": "eslint ./src/* || true",
+    "lintfix": "eslint --fix ./src/* || true",
     "build": "webpack --progress --mode=production --config webpack.config.js",
     "watch": "webpack --progress --watch",
     "server": "webpack-dev-server --open",

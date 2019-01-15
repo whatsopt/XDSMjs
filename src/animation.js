@@ -82,11 +82,11 @@ Animation.prototype._step = function(dir) {
           } else {
             self._pulseLink(0, prevNodeId, nodeId);
           }
-          var gnode = "g." + prevNodeId;
+          var gnode = "g.id" + prevNodeId;
           self._pulse(0, gnode + " > rect", "out");
         });
       }
-      var gnode = "g." + nodeId;
+      var gnode = "g.id" + nodeId;
       self._pulse(0, gnode + " > rect", "in");
     });
   }
