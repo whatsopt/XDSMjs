@@ -15,10 +15,39 @@ XDSM permissions:
 ## Description
 XDSMjs is a javascript generator allowing to display a XDSM diagram within a web page.
 It is based on [D3](https://d3js.org/).
-It uses the xdsm.json file as input which contains required information to generate the XDSM diagram. See the dedicated Wiki page for a description of the [XDSMjs json format](https://github.com/OneraHub/XDSMjs/wiki/XDMSjs-JSON-format).
+It uses the <code>xdsm.json</code> file as input which contains required MDO information to generate the XDSM diagram. See the dedicated Wiki page for a description of the [XDSMjs json format](https://github.com/OneraHub/XDSMjs/wiki/XDMSjs-JSON-format).
+As of 0.6.0, the MDO data can be specified through data attribute. 
 
 ## Usage
 Open `xdsm.html` in your browser. To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page.
+
+As of 0.6.0 version, to use XDSMjs in your web page, you can :
+* include the following declarations in your header :
+
+```html
+  <link rel="stylesheet" href="xdsm.css">
+  <script src="build/xdsm.bundle.js"></script>
+```
+
+* add the place-holder div element that will contain the XDSM diagram :
+
+```html
+  <div class="xdsm"></div>
+```
+
+You can either use the attribute <code>data-mdo</code> to specify MDO data in the XDSMjs JSON format in an HTML escaped string 
+
+```html
+  <div class="xdsm" data-mdo="{&quot;root&quot;: {&quot;nodes&quot;: [...], &quot;edges&quot;: [...], ... }}"></div>
+```
+
+or use the attribute <code>data-mdo-file</code> to specify another MDO filename
+
+```html
+  <div class="xdsm" data-mdo="examples/mdf.json"></div>
+```
+
+If no data attribute is specified, the default file <code>xdsm.json</code> is expected.
 
 ## Example
 Below an example describing BLISS formulation inspired from XDSM description given in [Martins and Lambe MDO architecture survey](http://arc.aiaa.org/doi/pdf/10.2514/1.J051895). While the formulation could have been described in one diagram as in the survey, the example below use XDSMjs multi-level diagram capability to separate system and discipline optimization levels.
@@ -30,8 +59,16 @@ The corresponding [xdsm.json](./examples/bliss.json) file is available in the ex
 * If you don't see the diagram, may be you need to serve the files with your favourite HTTP server ('same origin' policy of your browser). An example with Python HTTP simple server:
 ```
 > cd <install-dir>/XDSMjs
+```
+With Python 2:
+```
 > python -m SimpleHTTPServer 8020
 ```
+With Python 3:
+```
+> python -m http.server 8020
+```
+
 * Open `http://localhost:8020/xdsm.html` in the browser.
 
 ## Licence
