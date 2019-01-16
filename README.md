@@ -44,7 +44,7 @@ You can either use the attribute <code>data-mdo</code> to specify MDO data in th
 or use the attribute <code>data-mdo-file</code> to specify another MDO filename
 
 ```html
-  <div class="xdsm" data-mdo="examples/mdf.json"></div>
+  <div class="xdsm" data-mdo-file="examples/mdf.json"></div>
 ```
 
 If no data attribute is specified, the default file <code>xdsm.json</code> is expected.
