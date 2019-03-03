@@ -26,6 +26,12 @@
     stroke-width: 1px;
 }
 
+.xdsm .implicit_analysis {
+    fill: #9FCCC9;
+    stroke: black;
+    stroke-width: 1px;
+}
+
 .xdsm .mdo {
     fill: #FFCCCC;
     stroke: black;
