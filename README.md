@@ -18,6 +18,10 @@ It is based on [D3](https://d3js.org/).
 It uses the <code>xdsm.json</code> file as input which contains required MDO information to generate the XDSM diagram. See the dedicated Wiki page for a description of the [XDSMjs JSON format](https://github.com/OneraHub/XDSMjs/wiki/XDSMjs-JSON-format).
 As of 0.6.0, the MDO data can be specified through data attribute. 
 
+## Citation
+If you happen to find XDSMjs useful for research and include diagrams generated with it, it will be appreciated if you cite the following paper which describes the project that lead to XDSMjs development:
+>Rémi  Lafage,  Sébastien  Defoort,  and  Thierry  Lefèbvre. Whatsopt: a web application for multidisciplinary design analysis and optimization. In 20th AIAA/ISSMO Multidisciplinary Analysis and Optimization Conference, Dallas, United States, 2019
+
 ## Usage
 Open `xdsm.html` in your browser. To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page.
 
@@ -54,7 +58,6 @@ Below an example describing BLISS formulation inspired from XDSM description giv
 The corresponding [xdsm.json](./examples/bliss.json) file is available in the example directory.
 
 ![](gallery/xdsm_bliss_anim.gif)
-
 ## Troubleshooting
 * If you don't see the diagram, may be you need to serve the files with your favourite HTTP server ('same origin' policy of your browser). An example with Python HTTP simple server:
 ```
