@@ -1,6 +1,6 @@
 {
   "name": "xdsmjs",
-  "version": "0.4.3",
+  "version": "0.6.1",
   "description": "XDSM diagram generator",
   "main": "src/xdsm-factory.js",
   "directories": {
@@ -34,8 +34,8 @@
     "babel-core": "^7.0.0-bridge",
     "babel-loader": "^8.0.0",
     "babel-tape-runner": "^3.0.0",
-    "eslint": "^5.9.0",
-    "eslint-config-google": "^0.11.0",
+    "eslint": "^6.2.0",
+    "eslint-config-google": "^0.13.0",
     "faucet": "0.0.1",
     "tape": "^4.9.1",
     "testem": "^2.14.0",
@@ -55,6 +55,7 @@
     "extends": [
       "google"
     ],
+    "settings": {"react": {"version": "detect"}},
     "parserOptions": {
       "ecmaVersion": 6,
       "sourceType": "module"
