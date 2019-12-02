@@ -2,7 +2,7 @@
 XDSM diagram generator written in javascript.
 
 [![Build Status](https://travis-ci.org/OneraHub/XDSMjs.svg?branch=master)](https://travis-ci.org/OneraHub/XDSMjs)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/OneraHub/XDSMjs.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/OneraHub/XDSMjs/context:javascript)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4b639cf0ec404fb38e7b2c776bd21fc3)](https://www.codacy.com/manual/relf/XDSMjs?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=OneraHub/XDSMjs&amp;utm_campaign=Badge_Grade)
 
 ## XDSM
 The XDSM (eXtended Design Structure Matrix) is a notation used to visualize MDO processes.
@@ -20,20 +20,20 @@ As of 0.6.0, the MDO data can be specified through data attribute.
 
 ## Citation
 If you happen to find XDSMjs useful for research and include diagrams generated with it, it will be appreciated if you cite the following paper which describes the project that lead to XDSMjs development:
->Rémi  Lafage,  Sébastien  Defoort,  and  Thierry  Lefèbvre. Whatsopt: a web application for multidisciplinary design analysis and optimization. In 20th AIAA/ISSMO Multidisciplinary Analysis and Optimization Conference, Dallas, United States, 2019
+> Rémi  Lafage,  Sébastien  Defoort,  and  Thierry  Lefèbvre. Whatsopt: a web application for multidisciplinary design analysis and optimization. In 20th AIAA/ISSMO Multidisciplinary Analysis and Optimization Conference, Dallas, United States, 2019
 
 ## Usage
 Open `xdsm.html` in your browser. To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page.
 
 As of 0.6.0 version, to use XDSMjs in your web page, you can :
-* include the following declarations in your header :
+  * include the following declarations in your header :
 
 ```html
   <link rel="stylesheet" href="xdsm.css">
   <script src="build/xdsm.bundle.js"></script>
 ```
 
-* add the place-holder div element that will contain the XDSM diagram :
+  * add the place-holder div element that will contain the XDSM diagram :
 
 ```html
   <div class="xdsm"></div>
@@ -59,20 +59,20 @@ The corresponding [xdsm.json](./examples/bliss.json) file is available in the ex
 
 ![](gallery/xdsm_bliss_anim.gif)
 ## Troubleshooting
-* If you don't see the diagram, may be you need to serve the files with your favourite HTTP server ('same origin' policy of your browser). An example with Python HTTP simple server:
-```
+  * If you don't see the diagram, may be you need to serve the files with your favourite HTTP server ('same origin' policy of your browser). An example with Python HTTP simple server:
+``` bash
 > cd <install-dir>/XDSMjs
 ```
 With Python 2:
-```
+``` bash
 > python -m SimpleHTTPServer 8020
 ```
 With Python 3:
-```
+``` bash
 > python -m http.server 8020
 ```
 
-* Open `http://localhost:8020/xdsm.html` in the browser.
+  * Open `http://localhost:8020/xdsm.html` in the browser.
 
 ## Licence
  Copyright 2016 Rémi Lafage
