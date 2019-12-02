@@ -17,7 +17,7 @@ Selectable.prototype.enable = function enable() {
 
 Selectable.prototype._addEventHandler = function _addEventHandler(klass) {
   const self = this;
-  selectAll(klass).on('click', () => {
+  selectAll(klass).on('click', function makeSelection() {
     const prevSelection = select('[data-xdsm-selected="true"]');
     self._unselect(prevSelection);
 
