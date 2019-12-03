@@ -35,16 +35,16 @@ function Controls(animation, defaultVersion) {
   this.stepNextButton = select('button#step-next');
   this.toggleVersionButton = select('select#xdsm-version-toggle');
   const versions = ['v1', 'v2'];
-  const versionsMap = { 'v1': VERSION1, 'v2': VERSION2 };
+  const versionsMap = { v1: VERSION1, v2: VERSION2 };
   this.toggleVersionButton
-    .classed("xdsm-version", true)
+    .classed('xdsm-version', true)
     .selectAll('versions')
     .data(versions)
     .enter()
     .append('option')
     .text((d) => d)
-    .attr("value", (d) => versionsMap[d])
-    .property("selected", (d) => defaultVersion === versionsMap[d]);
+    .attr('value', (d) => versionsMap[d])
+    .property('selected', (d) => defaultVersion === versionsMap[d]);
 
   this.startButton.on('click', () => {
     this.animation.start();
@@ -59,17 +59,17 @@ function Controls(animation, defaultVersion) {
     this.animation.stepNext();
   });
   this.toggleVersionButton.on('change', function toggleVersion() {
-    let selectVersion = select(this).property("value");
+    const selectVersion = select(this).property('value');
     let xdsm = select(`.${selectVersion}`);
     if (xdsm.empty() && selectVersion === VERSION1) {
-      xdsm = select(`.${VERSION2}`)
+      xdsm = select(`.${VERSION2}`);
       xdsm.classed(VERSION2, false)
-        .classed(VERSION1, true)
+        .classed(VERSION1, true);
     }
     if (xdsm.empty() && selectVersion === VERSION2) {
-      xdsm = select(`.${VERSION1}`)
+      xdsm = select(`.${VERSION1}`);
       xdsm.classed(VERSION1, false)
-        .classed(VERSION2, true)
+        .classed(VERSION2, true);
     }
   });
 

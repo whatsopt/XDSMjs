@@ -5,8 +5,9 @@
 import { json } from 'd3-fetch';
 import { select, selectAll, event } from 'd3-selection';
 import Graph from './graph';
-import Xdsm from './xdsm';
-import { VERSION1, VERSION2 } from './xdsm';
+import Xdsm, { VERSION1, VERSION2 } from './xdsm';
+
+
 import Animation from './animation';
 import Controls from './controls';
 
@@ -29,7 +30,7 @@ class XdsmFactory {
         subSupScript: true,
         showLinkNbOnly: false,
       },
-      version: version,
+      version,
     };
 
     const scenarioKeys = Object.keys(mdo).sort();
@@ -90,15 +91,14 @@ const XDSM_FACTORY = new XdsmFactory();
 function detectVersion() {
   if (select(`.${VERSION1}`).empty()) {
     return VERSION2;
-  } else {
-    return VERSION1;
   }
+  return VERSION1;
 }
 
 function createXDSM(version) {
   const elts = selectAll(`.${version}`);
-  elts.each(function createXDSM(/* d, i */) {
-    const elt = select(this); // eslint-disable-line no-invalid-this
+  elts.each(function create(/* d, i */) {
+    const elt = select(this);
     XDSM_FACTORY.createXdsm(elt, version);
   });
 }

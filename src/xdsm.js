@@ -3,8 +3,8 @@ import { select, selectAll, event } from 'd3-selection';
 import 'd3-transition';
 import Labelizer from './labelizer';
 
-export const VERSION1 = "xdsm";
-export const VERSION2 = "xdsm2";
+export const VERSION1 = 'xdsm';
+export const VERSION2 = 'xdsm2';
 
 const WIDTH = 1000;
 const HEIGHT = 500;
