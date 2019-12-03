@@ -1,121 +1,231 @@
 /*
  * XDSMjs
- * Copyright 2016 Rémi Lafage
+ * Copyright 2016-2019 Rémi Lafage
  */
+
+/** XDSM v1 ***************************************************/
 
 /* Component types */
 .xdsm .driver {
     visibility: hidden;
 }
 
+.xdsm .node {
+  stroke: black;
+  stroke-width: 1px;
+}
+
+/** XDSM v1 */
 .xdsm .optimization {
     fill: #CCCCFF;
-    stroke: black;
-    stroke-width: 1px;
 }
 
 .xdsm .lp_optimization {
     fill: #CCCCFF;
-    stroke: black;
-    stroke-width: 1px;
 }
 
 .xdsm .analysis {
     fill: #CCFFCC;
-    stroke: black;
-    stroke-width: 1px;
 }
 
 .xdsm .implicit_analysis {
     fill: #9FCCC9;
-    stroke: black;
-    stroke-width: 1px;
 }
 
 .xdsm .mdo {
     fill: #FFCCCC;
-    stroke: black;
-    stroke-width: 1px;
 }
 
 .xdsm .function {
     fill: #F2CCD9;
-    stroke: black;
-    stroke-width: 1px;
 }
 
 .xdsm .mda {
     fill: #FFE5CC;
-    stroke: black;
-    stroke-width: 1px;
 }
 
 .xdsm .metamodel {
     fill: #FFFCCC;
-    stroke: black;
-    stroke-width: 1px;
 }
 
 .xdsm .doe {
     fill: #FFFCCC;
-    stroke: black;
-    stroke-width: 1px;
 }
+
 
 /* Title */
 .xdsm g.title text {
-    display: block;
-    font-size: 2em;
-    margin-top: 0.67em;
-    margin-bottom: 0.67em;
-    margin-left: 0;
-    margin-right: 0;
-    font-weight: bold;
+  display: block;
+  font-size: 2em;
+  margin-top: 0.67em;
+  margin-bottom: 0.67em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
 }
 .xdsm g.title rect {
-    fill: none;
+  fill: none;
 }
 
 
 /* Text Default */
 .xdsm text {
-  fill: black;
-  stroke: none;
-  font-size: large;
-  font-family: Arial, sans-serif;
+fill: black;
+stroke: none;
+font-size: large;
+font-family: Arial, sans-serif;
 }
 .xdsm tspan.sub {
-  font-size: small;
+font-size: small;
 }
 .xdsm tspan.sup {
-  font-size: small;
+font-size: small;
 }
 
 /* Data */
 .xdsm .dataInter polygon {
-  fill: #E5E5E5;
-  stroke: black;
-  stroke-width: 1px;
+fill: #E5E5E5;
+stroke: black;
+stroke-width: 1px;
 }
 
 .xdsm .dataIO polygon {
-  fill: #FFFFFF;
-  stroke: black;
-  stroke-width: 1px;
+fill: #FFFFFF;
+stroke: black;
+stroke-width: 1px;
 }
 
 /* Dataflow */
 .xdsm g.dataflow {
-    fill: none;
-    stroke: grey;
-    stroke-width: 8px;
+  fill: none;
+  stroke: grey;
+  stroke-width: 8px;
 }
 
 /* Workflow */
 .xdsm g.workflow {
-    fill: none;
-    stroke: black;
-    stroke-width: 2px;
+  fill: none;
+  stroke: black;
+  stroke-width: 2px;
+}
+
+/** XDSM v2 ***************************************************/
+
+/* Component types */
+.xdsm2 .driver {
+  visibility: hidden;
+}
+
+.xdsm2 .node {
+  stroke: black;
+  stroke-width: 1px;
+}
+
+.xdsm2 .optimization {
+  fill: #A0CBE8;
+}
+.xdsm .sub-optimization {
+  fill: #A0CBE8;
+}
+
+/* for backward compatibility: use optimization */
+.xdsm2 .lp_optimization {
+  fill: #A0CBE8;
+}
+/* for backward compatibility: use sub-optimization */
+.xdsm2 .mdo {
+  fill: #A0CBE8;
+}
+
+.xdsm2 .doe {
+  fill: #A0CBE8;
+}
+
+.xdsm2 .function {
+  fill: #8CD17D;
+}
+.xdsm2 .implicit-function {
+  fill: #FF9D9A;
+}
+
+/* for backward compatibility: use function */
+.xdsm2 .analysis {
+  fill: #8CD17D;
+}
+.xdsm2 .implicit-analysis {
+  fill: #FF9D9A;
+}
+
+
+.xdsm2 .mda {
+  fill: #FFBE7D;
+}
+
+.xdsm2 .metamodel {
+  fill: #F1CE63;
+}
+
+.xdsm2 .group {
+  fill: #8CD17D;
+}
+.xdsm2 .implicit-group {
+  fill: #FF9D9A;
+}
+
+/* Title */
+.xdsm2 g.title text {
+  display: block;
+  font-size: 2em;
+  margin-top: 0.67em;
+  margin-bottom: 0.67em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
+}
+.xdsm2 g.title rect {
+  fill: none;
+}
+
+
+/* Text Default */
+.xdsm2 text {
+fill: black;
+stroke: none;
+font-size: large;
+font-family: Arial, sans-serif;
+}
+.xdsm2 tspan.sub {
+font-size: small;
+}
+.xdsm2 tspan.sup {
+font-size: small;
+}
+
+/* Data */
+.xdsm2 .dataInter polygon {
+fill: #E5E5E5;
+stroke: black;
+stroke-width: 1px;
+}
+
+.xdsm2 .dataIO polygon {
+fill: #FFFFFF;
+stroke: black;
+stroke-width: 1px;
+}
+
+/* Dataflow */
+.xdsm2 g.dataflow {
+  fill: none;
+  stroke: grey;
+  stroke-width: 8px;
+}
+
+/* Workflow */
+.xdsm2 g.workflow {
+  fill: none;
+  stroke: black;
+  stroke-width: 2px;
 }
 
 /* Tooltip */
@@ -160,5 +270,18 @@ sub {
   bottom: -0.5em;
 }
 
-
+/* Version button */
+label#xdsm-version-label {
+  margin: 0px 5px 0px 50px;
+  font-weight: bolder;
+  font-size: 24px;
+  font-family: Arial, sans-serif;
+}
+select#xdsm-version-toggle {
+  display: table-cell;
+  vertical-align: top;
+  font-weight: bolder;
+  font-size: 20px;
+  font-family: Arial, sans-serif;
+}
 

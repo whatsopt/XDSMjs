@@ -3,6 +3,9 @@ import { select, selectAll, event } from 'd3-selection';
 import 'd3-transition';
 import Labelizer from './labelizer';
 
+export const VERSION1 = "xdsm";
+export const VERSION2 = "xdsm2";
+
 const WIDTH = 1000;
 const HEIGHT = 500;
 const X_ORIG = 100;
@@ -24,7 +27,9 @@ function Cell(x, y, width, height) {
 
 function Xdsm(graph, svgid, config) {
   this.graph = graph;
-  const container = select('.xdsm');
+  this.version = config.version || VERSION2;
+
+  const container = select(`.${this.version}`);
   this.svg = container.append('svg')
     .attr('width', WIDTH)
     .attr('height', HEIGHT)
