@@ -5,9 +5,9 @@
 
 /** XDSM v1 ***************************************************/
 
-/* Component types */
+/* Special hidden first component */
 .xdsm .driver {
-    visibility: hidden;
+  visibility: hidden;
 }
 
 .xdsm .node {
@@ -17,39 +17,39 @@
 
 /** XDSM v1 */
 .xdsm .optimization {
-    fill: #CCCCFF;
+  fill: #CCCCFF;
 }
 
 .xdsm .lp_optimization {
-    fill: #CCCCFF;
+  fill: #CCCCFF;
 }
 
 .xdsm .analysis {
-    fill: #CCFFCC;
+  fill: #CCFFCC;
 }
 
 .xdsm .implicit_analysis {
-    fill: #9FCCC9;
+  fill: #9FCCC9;
 }
 
 .xdsm .mdo {
-    fill: #FFCCCC;
+  fill: #FFCCCC;
 }
 
 .xdsm .function {
-    fill: #F2CCD9;
+  fill: #F2CCD9;
 }
 
 .xdsm .mda {
-    fill: #FFE5CC;
+  fill: #FFE5CC;
 }
 
 .xdsm .metamodel {
-    fill: #FFFCCC;
+  fill: #FFFCCC;
 }
 
 .xdsm .doe {
-    fill: #FFFCCC;
+  fill: #FFFCCC;
 }
 
 
@@ -70,29 +70,29 @@
 
 /* Text Default */
 .xdsm text {
-fill: black;
-stroke: none;
-font-size: large;
-font-family: Arial, sans-serif;
+  fill: black;
+  stroke: none;
+  font-size: large;
+  font-family: Arial, sans-serif;
 }
 .xdsm tspan.sub {
-font-size: small;
+  font-size: small;
 }
 .xdsm tspan.sup {
-font-size: small;
+  font-size: small;
 }
 
 /* Data */
 .xdsm .dataInter polygon {
-fill: #E5E5E5;
-stroke: black;
-stroke-width: 1px;
+  fill: #E5E5E5;
+  stroke: black;
+  stroke-width: 1px;
 }
 
 .xdsm .dataIO polygon {
-fill: #FFFFFF;
-stroke: black;
-stroke-width: 1px;
+  fill: #FFFFFF;
+  stroke: black;
+  stroke-width: 1px;
 }
 
 /* Dataflow */
@@ -111,7 +111,6 @@ stroke-width: 1px;
 
 /** XDSM v2 ***************************************************/
 
-/* Component types */
 .xdsm2 .driver {
   visibility: hidden;
 }
@@ -160,7 +159,6 @@ stroke-width: 1px;
 .xdsm2 .mda {
   fill: #FFBE7D;
 }
-
 .xdsm2 .metamodel {
   fill: #F1CE63;
 }
@@ -189,29 +187,29 @@ stroke-width: 1px;
 
 /* Text Default */
 .xdsm2 text {
-fill: black;
-stroke: none;
-font-size: large;
-font-family: Arial, sans-serif;
+  fill: black;
+  stroke: none;
+  font-size: large;
+  font-family: Arial, sans-serif;
 }
 .xdsm2 tspan.sub {
-font-size: small;
+  font-size: small;
 }
 .xdsm2 tspan.sup {
-font-size: small;
+  font-size: small;
 }
 
 /* Data */
 .xdsm2 .dataInter polygon {
-fill: #E5E5E5;
-stroke: black;
-stroke-width: 1px;
+  fill: #E5E5E5;
+  stroke: black;
+  stroke-width: 1px;
 }
 
 .xdsm2 .dataIO polygon {
-fill: #FFFFFF;
-stroke: black;
-stroke-width: 1px;
+  fill: #FFFFFF;
+  stroke: black;
+  stroke-width: 1px;
 }
 
 /* Dataflow */
@@ -230,23 +228,23 @@ stroke-width: 1px;
 
 /* Tooltip */
 div.tooltip {
-    position: absolute;
-    text-align: center;
-    padding: 10px;
-    background: lightsteelblue;
-    border: 0px;
-    border-radius: 8px;
-    pointer-events: none;
+  position: absolute;
+  text-align: center;
+  padding: 10px;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
 }
 
 /* Info */
 div.optpb {
-    position: absolute;
-    padding: 10px;
-    background: #CCCCFF;
-    border: 0px;
-    border-radius: 8px;
-    font-size: 150%;
+  position: absolute;
+  padding: 10px;
+  background: #CCCCFF;
+  border: 0px;
+  border-radius: 8px;
+  font-size: 150%;
 }
 
 sub, sup {
