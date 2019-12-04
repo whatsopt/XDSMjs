@@ -38,6 +38,7 @@ function Xdsm(graph, svgid, config) {
   this.grid = [];
   this.nodes = [];
   this.edges = [];
+  this.svgid = svgid;
 
   // TODO: Find better javascript way to do configuration.
   this.default_config = {
@@ -75,6 +76,10 @@ function Xdsm(graph, svgid, config) {
       .style('opacity', 0);
   }
   this._initialize();
+}
+
+Xdsm.prototype.setVersion = function setVersion(version) {
+  this.version = version;
 }
 
 Xdsm.prototype.addNode = function addNode(nodeName) {
@@ -330,26 +335,42 @@ Xdsm.prototype._createDataflow = function _createDataflow() {
 Xdsm.prototype._customRect = function _customRect(node, d, i, offset) {
   const self = this;
   const { grid } = self;
-  node.insert('rect', ':first-child')
-    .classed('shape', true)
-    .attr('x', () => grid[i][i].x + offset - self.config.layout.padding)
-    .attr('y', () => -grid[i][i].height * (2 / 3) - self.config.layout.padding - offset)
-    .attr('width', () => grid[i][i].width + (self.config.layout.padding * 2))
-    .attr('height', () => grid[i][i].height + (self.config.layout.padding * 2))
-    .attr('rx', () => {
-      const rounded = d.type === 'driver'
-        || d.type === 'optimization'
-        || d.type === 'mda'
-        || d.type === 'doe';
-      return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
-    })
-    .attr('ry', () => {
-      const rounded = d.type === 'driver'
-        || d.type === 'optimization'
-        || d.type === 'mda'
-        || d.type === 'doe';
-      return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
-    });
+  if (this.version === VERSION2
+    && (d.type === 'group'
+      || d.type === 'implicit-group'
+      || d.type === 'sub-optimization'
+      || d.type === 'mdo')) {
+    const x0 = grid[i][i].x + offset - self.config.layout.padding;
+    const y0 = -grid[i][i].height * (2 / 3) - self.config.layout.padding - offset;
+    const x1 = grid[i][i].x + offset + self.config.layout.padding + grid[i][i].width;
+    const y1 = -grid[i][i].height * (2 / 3) + self.config.layout.padding - offset + grid[i][i].height;
+    const ch = 10;
+    const points = `${x0 + ch},${y0} ${x1 - ch},${y0} ${x1},${y0 + ch} ${x1},${y1 - ch} ${x1 - ch},${y1} ${x0 + ch},${y1} ${x0},${y1 - ch} ${x0},${y0 + ch}`;
+    node.insert('polygon', ':first-child')
+      .classed('shape', true)
+      .attr('points', points);
+  } else {
+    node.insert('rect', ':first-child')
+      .classed('shape', true)
+      .attr('x', () => grid[i][i].x + offset - self.config.layout.padding)
+      .attr('y', () => -grid[i][i].height * (2 / 3) - self.config.layout.padding - offset)
+      .attr('width', () => grid[i][i].width + (self.config.layout.padding * 2))
+      .attr('height', () => grid[i][i].height + (self.config.layout.padding * 2))
+      .attr('rx', () => {
+        const rounded = d.type === 'driver'
+          || d.type === 'optimization'
+          || d.type === 'mda'
+          || d.type === 'doe';
+        return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
+      })
+      .attr('ry', () => {
+        const rounded = d.type === 'driver'
+          || d.type === 'optimization'
+          || d.type === 'mda'
+          || d.type === 'doe';
+        return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
+      });
+  }
 };
 
 Xdsm.prototype._customTrapz = function _customTrapz(edge, dat, i, offset) {
@@ -360,14 +381,19 @@ Xdsm.prototype._customTrapz = function _customTrapz(edge, dat, i, offset) {
       const pad = 5;
       const w = grid[d.row][d.col].width;
       const h = grid[d.row][d.col].height;
-      const topleft = `${-pad - w / 2 + offset}, ${
-        -pad - h * (2 / 3) - offset}`;
+      const topleft = `${-pad - w / 2 + offset
+        }, ${
+        -pad - h * (2 / 3) - offset
+        } `;
       const topright = `${w / 2 + pad + offset + 5}, ${
-        -pad - h * (2 / 3) - offset}`;
+        -pad - h * (2 / 3) - offset
+        } `;
       const botright = `${w / 2 + pad + offset - 5 + 5}, ${
-        pad + h / 3 - offset}`;
+        pad + h / 3 - offset
+        } `;
       const botleft = `${-pad - w / 2 + offset - 5}, ${
-        pad + h / 3 - offset}`;
+        pad + h / 3 - offset
+        } `;
       const tpz = [topleft, topright, botright, botleft].join(' ');
       return tpz;
     });
@@ -392,7 +418,7 @@ Xdsm.prototype._createTitle = function _createTitle() {
     .attr('height', bbox.height);
 
   ref.attr('transform',
-    `translate(${self.config.layout.origin.x},${self.config.layout.origin.y + bbox.height})`);
+    `translate(${self.config.layout.origin.x}, ${self.config.layout.origin.y + bbox.height})`);
 };
 
 Xdsm.prototype._createBorder = function _createBorder() {

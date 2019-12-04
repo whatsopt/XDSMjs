@@ -57,6 +57,13 @@ Animation.prototype.stepNext = function stepNext() {
   this._step('next');
 };
 
+Animation.prototype.setXdsmVersion = function setXdsmVersion(version) {
+  Object.values(this.xdsms).forEach((xdsm) => {
+    xdsm.setVersion(version);
+    xdsm.refresh();
+  }, this);
+}
+
 Animation.prototype._step = function _step(dir) {
   const backward = (dir === 'prev');
   const self = this;
@@ -85,26 +92,22 @@ Animation.prototype._step = function _step(dir) {
             self._pulseLink(0, prevNodeId, nodeId);
           }
           const gnode = `g.id${prevNodeId}`;
-          self._pulse(0, `${gnode} > rect`, 'out');
+          self._pulseNode(0, gnode, 'out');
         });
       }
       const gnode = `g.id${nodeId}`;
-      self._pulse(0, `${gnode} > rect`, 'in');
+      self._pulseNode(0, gnode, 'in');
     });
   }
 
-  // console.log(self.rootId+" -> nodesByStep = "+JSON.stringify(nodesByStep));
-  // console.log(self.rootId+" -> nodesAtStep = "+JSON.stringify(nodesAtStep));
-  // console.log(self.rootId+" -> self.curStep = "+self.curStep);
-
-  if (nodesByStep[self.curStep].some(self._isSubScenario, this)) {
+  if (nodesByStep[self.curStep].some(self._isSubXdsm, this)) {
     nodesByStep[self.curStep].forEach((nodeId) => {
-      if (self._isSubScenario(nodeId)) {
-        const scnId = graph.getNode(nodeId).getScenarioId();
-        if (!self.subAnimations[scnId]) {
-          self.subAnimations[scnId] = new Animation(self.xdsms, scnId);
+      if (self._isSubXdsm(nodeId)) {
+        const xdsmId = graph.getNode(nodeId).getSubXdsmId();
+        if (!self.subAnimations[xdsmId]) {
+          self.subAnimations[xdsmId] = new Animation(self.xdsms, xdsmId);
         }
-        const anim = self.subAnimations[scnId];
+        const anim = self.subAnimations[xdsmId];
         anim._step(dir);
       }
     }, this);
@@ -144,23 +147,23 @@ Animation.prototype.renderNodeStatuses = function renderNodeStatuses() {
     const gnode = `g.${node.id}`;
     switch (node.status) {
       case Graph.NODE_STATUS.RUNNING:
-        self._pulse(0, `${gnode} > rect`, 'in', RUNNING_COLOR);
+        self._pulseNode(0, gnode, 'in', RUNNING_COLOR);
         break;
       case Graph.NODE_STATUS.FAILED:
-        self._pulse(0, `${gnode} > rect`, 'in', FAILED_COLOR);
+        self._pulseNode(0, gnode, 'in', FAILED_COLOR);
         break;
       case Graph.NODE_STATUS.PENDING:
-        self._pulse(0, `${gnode} > rect`, 'in', PENDING_COLOR);
+        self._pulseNode(0, gnode, 'in', PENDING_COLOR);
         break;
       case Graph.NODE_STATUS.DONE:
-        self._pulse(0, `${gnode} > rect`, 'in', DONE_COLOR);
+        self._pulseNode(0, gnode, 'in', DONE_COLOR);
         break;
       default:
       // nothing to do
     }
-    if (self._isSubScenario(node.id)) {
-      const scnId = graph.getNode(node.id).getScenarioId();
-      const anim = new Animation(self.xdsms, scnId);
+    if (self._isSubXdsm(node.id)) {
+      const xdsmId = graph.getNode(node.id).getSubXdsmId();
+      const anim = new Animation(self.xdsms, xdsmId);
 
       anim.renderNodeStatuses();
     }
@@ -200,6 +203,11 @@ Animation.prototype._pulse = function _pulse(delay, toBeSelected, easeInOut, col
   }
 };
 
+Animation.prototype._pulseNode = function _pulseNode(delay, gnode, easeInOut, color) {
+  this._pulse(delay, `${gnode} > rect`, easeInOut, color);
+  this._pulse(delay, `${gnode} > polygon`, easeInOut, color);
+}
+
 Animation.prototype._pulseLink = function _pulseLink(delay, fromId, toId) {
   const { graph } = this.xdsms[this.rootId];
   const from = graph.idxOf(fromId);
@@ -231,10 +239,11 @@ Animation.prototype._onAnimationDone = function _onAnimationDone(delay) {
     });
 };
 
-Animation.prototype._isSubScenario = function _isSubScenario(nodeId) {
+Animation.prototype._isSubXdsm = function _isSubXdsm(nodeId) {
   const gnode = `g.id${nodeId}`;
   const nodeSel = select(`svg.${this.rootId}`).select(gnode);
-  return nodeSel.classed('mdo');
+  return nodeSel.classed('mdo') || nodeSel.classed('sub-optimization')
+    || nodeSel.classed('group') || nodeSel.classed('implicit-group');
 };
 
 Animation.prototype._scheduleAnimation = function _scheduleAnimation() {
@@ -256,15 +265,15 @@ Animation.prototype._scheduleAnimation = function _scheduleAnimation() {
         });
 
         const gnode = `g.id${nodeId}`;
-        if (self._isSubScenario(nodeId)) {
-          self._pulse(elapsed, `${gnode} > rect`, 'in');
-          const scnId = graph.getNode(nodeId).getScenarioId();
-          const anim = new Animation(self.xdsms, scnId, elapsed + animDelay);
+        if (self._isSubXdsm(nodeId)) {
+          self._pulseNode(elapsed, gnode, 'in');
+          const xdsmId = graph.getNode(nodeId).getSubXdsmId();
+          const anim = new Animation(self.xdsms, xdsmId, elapsed + animDelay);
           const offset = anim._scheduleAnimation();
           offsets.push(offset);
-          self._pulse(offset + elapsed + animDelay, `${gnode} > rect`, 'out');
+          self._pulseNode(offset + elapsed + animDelay, gnode, 'out');
         } else {
-          self._pulse(elapsed, `${gnode} > rect`);
+          self._pulseNode(elapsed, gnode);
         }
       }
     }, this);
@@ -288,10 +297,17 @@ Animation.prototype._reset = function _reset(all) {
   svg.selectAll('rect').transition().duration(0)
     .style('stroke-width', null)
     .style('stroke', null);
+  svg.selectAll('polygon').transition().duration(0)
+    .style('stroke-width', null)
+    .style('stroke', null);
   svg.selectAll('.title > text').transition().duration(0)
     .style('fill', null);
 
   svg.selectAll('.node > rect').transition().duration(0)
+    .style('stroke-width', null)
+    .style('stroke', null)
+    .style('fill', null);
+  svg.selectAll('.node > polygon').transition().duration(0)
     .style('stroke-width', null)
     .style('stroke', null)
     .style('fill', null);
@@ -304,7 +320,7 @@ Animation.prototype._reset = function _reset(all) {
 Animation.prototype._resetPreviousStep = function _resetPreviousStep() {
   this.root.graph.nodesByStep[this.curStep - 1].forEach((nodeId) => {
     const gnode = `g.id${nodeId}`;
-    this._pulse(0, `${gnode} > rect`, 'out');
+    this._pulseNode(0, gnode, 'out');
   }, this);
 };
 

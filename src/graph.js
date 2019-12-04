@@ -12,7 +12,7 @@ const STATUS = {
 };
 
 // *** Node *******************************************************************
-function Node(id, pname, ptype, pstatus) {
+function Node(id, pname, ptype, pstatus, psubxdsm) {
   const name = pname || id;
   const type = ptype || 'analysis';
   const status = pstatus || STATUS.UNKNOWN;
@@ -25,21 +25,32 @@ function Node(id, pname, ptype, pstatus) {
   this.type = this.isMulti ? type.substr(0, type.length - MULTI_TYPE.length)
     : type;
   this.status = status;
+  this.subxdsm = psubxdsm;
 }
 
-Node.prototype.isMdo = function isMdo() {
-  return this.type === 'mdo';
+Node.prototype.isComposite = function isComposite() {
+  return this.type === 'mdo' || this.type === 'sub-optimization'
+    || this.type === 'group' || this.type === 'implicit-group';
 };
 
-Node.prototype.getScenarioId = function getScenarioId() {
-  if (this.isMdo()) {
+Node.prototype.getSubXdsmId = function getSubXdsmId() {
+  if (this.isComposite()) {
+    // Deprecated
     const idxscn = this.name.indexOf('_scn-');
     if (idxscn === -1) {
-      console.log(`${'Warning: MDO Scenario not found. '
-        + 'Bad type or name for node: '}${JSON.stringify(this)}`);
-      return null;
+      // console.log(`${'Warning: MDO Scenario not found. '
+      //   + 'Bad type or name for node: '}${JSON.stringify(this)}`);
+    } else {
+      console.log("Use of <name>_scn-<id> pattern in node.name to detect sub scenario 'scn-<id>'"
+        + " is deprecated. Use node.subxdsm property instead (i.e. node.subxdsm = <id>)");
+      return this.name.substr(idxscn + 1);
     }
-    return this.name.substr(idxscn + 1);
+    if (this.subxdsm) {
+      return this.subxdsm;
+    } else {
+      console.log(`${'Warning: Sub XDSM id not found. '
+        + 'Bad type or name for node: '}${JSON.stringify(this)}`);
+    }
   }
   return null;
 };
@@ -140,7 +151,7 @@ function Graph(mdo, refname, noDefaultDriver) {
   mdo.nodes.forEach((item) => {
     const num = numPrefixes[item.id];
     this.nodes.push(new Node(item.id, num ? `${num}:${item.name}` : item.name,
-      item.type, item.status));
+      item.type, item.status, item.subxdsm));
   }, this);
   this.uid = this.nodes[0].id;
 

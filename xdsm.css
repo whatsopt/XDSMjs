@@ -19,7 +19,6 @@
 .xdsm .optimization {
   fill: #CCCCFF;
 }
-
 .xdsm .lp_optimization {
   fill: #CCCCFF;
 }
@@ -27,7 +26,7 @@
 .xdsm .analysis {
   fill: #CCFFCC;
 }
-
+/* Forward compatibility */
 .xdsm .implicit_analysis {
   fill: #9FCCC9;
 }
@@ -35,12 +34,28 @@
 .xdsm .mdo {
   fill: #FFCCCC;
 }
+/* Forward compatibility */
+.xdsm .sub-optimization {
+  fill: #FFCCCC;
+}
 
 .xdsm .function {
   fill: #F2CCD9;
 }
+/* Forward compatibility */
+.xdsm .implicit-function {
+  fill: #F2CCD9;
+}
 
 .xdsm .mda {
+  fill: #FFE5CC;
+}
+/* Forward compatibility */
+.xdsm .group {
+  fill: #FFE5CC;
+}
+/* Forward compatibility */
+.xdsm .implicit-group {
   fill: #FFE5CC;
 }
 
@@ -56,11 +71,8 @@
 /* Title */
 .xdsm g.title text {
   display: block;
+  margin: 0.67em 0;
   font-size: 2em;
-  margin-top: 0.67em;
-  margin-bottom: 0.67em;
-  margin-left: 0;
-  margin-right: 0;
   font-weight: bold;
 }
 .xdsm g.title rect {
@@ -123,15 +135,15 @@
 .xdsm2 .optimization {
   fill: #A0CBE8;
 }
-.xdsm .sub-optimization {
+.xdsm2 .sub-optimization {
   fill: #A0CBE8;
 }
 
-/* for backward compatibility: use optimization */
+/* Deprecated: use optimization */
 .xdsm2 .lp_optimization {
   fill: #A0CBE8;
 }
-/* for backward compatibility: use sub-optimization */
+/* Deprecated: use sub-optimization */
 .xdsm2 .mdo {
   fill: #A0CBE8;
 }
@@ -147,14 +159,10 @@
   fill: #FF9D9A;
 }
 
-/* for backward compatibility: use function */
+/* Deprecated: use function */
 .xdsm2 .analysis {
   fill: #8CD17D;
 }
-.xdsm2 .implicit-analysis {
-  fill: #FF9D9A;
-}
-
 
 .xdsm2 .mda {
   fill: #FFBE7D;
@@ -173,17 +181,13 @@
 /* Title */
 .xdsm2 g.title text {
   display: block;
+  margin: 0.67em 0; 
   font-size: 2em;
-  margin-top: 0.67em;
-  margin-bottom: 0.67em;
-  margin-left: 0;
-  margin-right: 0;
   font-weight: bold;
 }
 .xdsm2 g.title rect {
   fill: none;
 }
-
 
 /* Text Default */
 .xdsm2 text {
