@@ -42,15 +42,14 @@ Node.prototype.getSubXdsmId = function getSubXdsmId() {
       //   + 'Bad type or name for node: '}${JSON.stringify(this)}`);
     } else {
       console.log("Use of <name>_scn-<id> pattern in node.name to detect sub scenario 'scn-<id>'"
-        + " is deprecated. Use node.subxdsm property instead (i.e. node.subxdsm = <id>)");
+        + ' is deprecated. Use node.subxdsm property instead (i.e. node.subxdsm = <id>)');
       return this.name.substr(idxscn + 1);
     }
     if (this.subxdsm) {
       return this.subxdsm;
-    } else {
-      console.log(`${'Warning: Sub XDSM id not found. '
-        + 'Bad type or name for node: '}${JSON.stringify(this)}`);
     }
+    console.log(`${'Warning: Sub XDSM id not found. '
+        + 'Bad type or name for node: '}${JSON.stringify(this)}`);
   }
   return null;
 };

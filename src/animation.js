@@ -62,7 +62,7 @@ Animation.prototype.setXdsmVersion = function setXdsmVersion(version) {
     xdsm.setVersion(version);
     xdsm.refresh();
   }, this);
-}
+};
 
 Animation.prototype._step = function _step(dir) {
   const backward = (dir === 'prev');
@@ -206,7 +206,7 @@ Animation.prototype._pulse = function _pulse(delay, toBeSelected, easeInOut, col
 Animation.prototype._pulseNode = function _pulseNode(delay, gnode, easeInOut, color) {
   this._pulse(delay, `${gnode} > rect`, easeInOut, color);
   this._pulse(delay, `${gnode} > polygon`, easeInOut, color);
-}
+};
 
 Animation.prototype._pulseLink = function _pulseLink(delay, fromId, toId) {
   const { graph } = this.xdsms[this.rootId];

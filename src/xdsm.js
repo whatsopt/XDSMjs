@@ -80,7 +80,7 @@ function Xdsm(graph, svgid, config) {
 
 Xdsm.prototype.setVersion = function setVersion(version) {
   this.version = version;
-}
+};
 
 Xdsm.prototype.addNode = function addNode(nodeName) {
   this.graph.addNode(nodeName);
@@ -343,7 +343,8 @@ Xdsm.prototype._customRect = function _customRect(node, d, i, offset) {
     const x0 = grid[i][i].x + offset - self.config.layout.padding;
     const y0 = -grid[i][i].height * (2 / 3) - self.config.layout.padding - offset;
     const x1 = grid[i][i].x + offset + self.config.layout.padding + grid[i][i].width;
-    const y1 = -grid[i][i].height * (2 / 3) + self.config.layout.padding - offset + grid[i][i].height;
+    const y1 = -grid[i][i].height * (2 / 3) + self.config.layout.padding
+      - offset + grid[i][i].height;
     const ch = 10;
     const points = `${x0 + ch},${y0} ${x1 - ch},${y0} ${x1},${y0 + ch} ${x1},${y1 - ch} ${x1 - ch},${y1} ${x0 + ch},${y1} ${x0},${y1 - ch} ${x0},${y0 + ch}`;
     node.insert('polygon', ':first-child')
@@ -382,18 +383,18 @@ Xdsm.prototype._customTrapz = function _customTrapz(edge, dat, i, offset) {
       const w = grid[d.row][d.col].width;
       const h = grid[d.row][d.col].height;
       const topleft = `${-pad - w / 2 + offset
-        }, ${
+      }, ${
         -pad - h * (2 / 3) - offset
-        } `;
+      } `;
       const topright = `${w / 2 + pad + offset + 5}, ${
         -pad - h * (2 / 3) - offset
-        } `;
+      } `;
       const botright = `${w / 2 + pad + offset - 5 + 5}, ${
         pad + h / 3 - offset
-        } `;
+      } `;
       const botleft = `${-pad - w / 2 + offset - 5}, ${
         pad + h / 3 - offset
-        } `;
+      } `;
       const tpz = [topleft, topright, botright, botleft].join(' ');
       return tpz;
     });
