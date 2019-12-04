@@ -5,29 +5,32 @@
 import { json } from 'd3-fetch';
 import { select, selectAll, event } from 'd3-selection';
 import Graph from './graph';
-import Xdsm from './xdsm';
+import Xdsm, { VERSION1, VERSION2 } from './xdsm';
+
+
 import Animation from './animation';
 import Controls from './controls';
 
 class XdsmFactory {
-  createXdsm(elt) {
+  createXdsm(elt, version) {
     const mdostr = elt.attr('data-mdo');
     if (!mdostr) {
       const filename = elt.attr('data-mdo-file') || 'xdsm.json';
-      json(filename).then((mdo) => this._createXdsm(mdo));
+      json(filename).then((mdo) => this._createXdsm(mdo, version));
     } else {
       const mdo = JSON.parse(mdostr);
-      this._createXdsm(mdo);
+      this._createXdsm(mdo, version);
     }
   }
 
-  _createXdsm(mdo) {
+  _createXdsm(mdo, version) {
     const config = {
       labelizer: {
         ellipsis: 5,
         subSupScript: true,
         showLinkNbOnly: false,
       },
+      version,
     };
 
     const scenarioKeys = Object.keys(mdo).sort();
@@ -38,7 +41,7 @@ class XdsmFactory {
       .filter((d) => mdo[d].optpb)
       .attr('class', (d) => `optpb ${d}`)
       .style('opacity', 0)
-      .on('click', () => {
+      .on('click', function makeTransition() {
         select(this).transition().duration(500) // eslint-disable-line
           // no-invalid-this
           .style('opacity', 0)
@@ -77,7 +80,7 @@ class XdsmFactory {
 
     const anim = new Animation(xdsms);
     if (xdsms.root.hasWorkflow()) { // workflow is optional
-      const ctrls = new Controls(anim); // eslint-disable-line no-unused-vars
+      const ctrls = new Controls(anim, version); // eslint-disable-line no-unused-vars
     }
     anim.renderNodeStatuses();
   }
@@ -85,11 +88,22 @@ class XdsmFactory {
 
 const XDSM_FACTORY = new XdsmFactory();
 
+function detectVersion() {
+  if (select(`.${VERSION1}`).empty()) {
+    return VERSION2;
+  }
+  return VERSION1;
+}
+
+function createXDSM(version) {
+  const elts = selectAll(`.${version}`);
+  elts.each(function create(/* d, i */) {
+    const elt = select(this);
+    XDSM_FACTORY.createXdsm(elt, version);
+  });
+}
+
 document.addEventListener('DOMContentLoaded',
   (/* event */) => {
-    const elts = selectAll('.xdsm');
-    elts.each(function createXDSM(/* d, i */) {
-      const elt = select(this); // eslint-disable-line no-invalid-this
-      XDSM_FACTORY.createXdsm(elt);
-    });
+    createXDSM(detectVersion());
   });
