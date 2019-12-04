@@ -26,14 +26,14 @@ If you happen to find XDSMjs useful for research and include diagrams generated 
 Open `xdsm.html` in your browser. To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page.
 
 As of 0.6.0 version, to use XDSMjs in your web page, you can :
-* include the following declarations in your header :
+  * include the following declarations in your header :
 
 ```html
   <link rel="stylesheet" href="xdsm.css">
   <script src="build/xdsm.bundle.js"></script>
 ```
 
-* add the place-holder div element that will contain the XDSM diagram :
+  * add the place-holder div element that will contain the XDSM diagram :
 
 ```html
   <div class="xdsm"></div>
@@ -60,6 +60,7 @@ The corresponding [xdsm.json](./examples/bliss.json) file is available in the ex
 ![](gallery/xdsm_bliss_anim.gif)
 ## Troubleshooting
 * If you don't see the diagram, may be you need to serve the files with your favourite HTTP server ('same origin' policy of your browser). An example with Python HTTP simple server:
+
 ``` bash
 > cd <install-dir>/XDSMjs
 ```
@@ -72,7 +73,7 @@ With Python 3:
 > python -m http.server 8020
 ```
 
-* Open `http://localhost:8020/xdsm.html` in the browser.
+  * Open `http://localhost:8020/xdsm.html` in the browser.
 
 ## Licence
  Copyright 2016 Rémi Lafage
