@@ -54,7 +54,7 @@ class XdsmFactory {
 
     if (scenarioKeys.indexOf('root') === -1) {
       // old format: mono xdsm
-      const graph = new Graph(mdo);
+      const graph = new Graph(mdo, 'root');
       xdsms.root = new Xdsm(graph, 'root', config);
       xdsms.root.draw();
     } else {
