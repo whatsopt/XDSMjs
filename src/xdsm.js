@@ -402,13 +402,14 @@ Xdsm.prototype._customTrapz = function _customTrapz(edge, dat, i, offset) {
 
 Xdsm.prototype._createTitle = function _createTitle() {
   const self = this;
+  // do not display title if it is 'root'
   const ref = self.svg.selectAll('.title')
     .data([self.graph.refname])
     .enter()
     .append('g')
     .classed('title', true)
     .append('text')
-    .text(self.graph.refname);
+    .text(self.graph.refname === 'root' ? '' : self.graph.refname);
 
   const bbox = ref.nodes()[0].getBBox();
 
