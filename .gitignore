@@ -15,5 +15,6 @@
 /build/*.map
 
 # Python
+dist/
 *egg-info
 **/__pycache__
