@@ -13,3 +13,7 @@
 /xdsm-editor.html
 
 /build/*.map
+
+# Python
+*egg-info
+**/__pycache__
