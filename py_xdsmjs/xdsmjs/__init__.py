@@ -1,5 +1,4 @@
 __version__ = "0.8.0"
-__all__ = ["bundlejs", "css"]
 
 import os
 
@@ -14,8 +13,8 @@ def read(filename):
 
 
 def bundlejs():
-    return read("xdsm.bundle.js")
+    return read("xdsmjs.js")
 
 
 def css():
-    return "{}\n{}".format(read("fontello.css"), read("xdsm.css"))
+    return "{}\n{}".format(read("fontello.css"), read("xdsmjs.css"))

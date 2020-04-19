@@ -21,7 +21,7 @@ init = []
 with open("xdsmjs/__init__.py") as f:
     init = f.readlines()
 
-init[0] = '__version__ = "{}"'.format(version)
+init[0] = '__version__ = "{}"\n'.format(version)
 
 with open("xdsmjs/__init__.py", "w") as f:
     f.writelines(init)
