@@ -20,14 +20,16 @@ function _detectVersion() {
 
 class XdsmFactory {
   constructor(config) {
-    this._version = _detectVersion();
+    this._version = _detectVersion() || VERSION2;
     this._config = config || {
       labelizer: {
         ellipsis: 5,
         subSupScript: true,
         showLinkNbOnly: false,
       },
+      noDefaultDriver: false,
     };
+    this._noDefaultDriver = this._config.noDefaultDriver;
   }
 
   createXdsm(mdo) {
@@ -70,14 +72,14 @@ class XdsmFactory {
 
     if (scenarioKeys.indexOf('root') === -1) {
       // old format: mono xdsm
-      const graph = new Graph(mdo, 'root');
+      const graph = new Graph(mdo, 'root', this._config.noDefaultDriver);
       xdsms.root = new Xdsm(graph, 'root', this._config);
       xdsms.root.draw();
     } else {
       // new format managing several XDSM
       scenarioKeys.forEach((k) => {
         if (Object.prototype.hasOwnProperty.call(mdo, k)) {
-          const graph = new Graph(mdo[k], k);
+          const graph = new Graph(mdo[k], k, this._config.noDefaultDriver);
           xdsms[k] = new Xdsm(graph, k, this._config);
           xdsms[k].draw();
           xdsms[k].svg.select('.optimization').on(
