@@ -1,6 +1,8 @@
 from shutil import copy
 import json
 
+PACKAGE_VERSION_NUMBER = None
+
 # copy assets
 copy("../build/xdsmjs.js", "xdsmjs/dist/")
 copy("../fontello.css", "xdsmjs/dist/")
@@ -11,6 +13,9 @@ version = "0.0.0"
 with open("../package.json") as pkg:
     package = json.load(pkg)
     version = package["version"]
+
+if PACKAGE_VERSION_NUMBER:
+    version += ".{}".format(PACKAGE_VERSION_NUMBER)
 
 init = []
 with open("xdsmjs/__init__.py") as f:
