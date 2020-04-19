@@ -28,14 +28,23 @@ If you happen to find XDSMjs useful for research and include diagrams generated 
 > Rémi  Lafage,  Sébastien  Defoort,  and  Thierry  Lefèbvre. Whatsopt: a web application for multidisciplinary design analysis and optimization. In 20th AIAA/ISSMO Multidisciplinary Analysis and Optimization Conference, Dallas, United States, 2019
 
 ## Usage
-Open `xdsm.html` in your browser. To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page.
+
+``` bash
+> cd <install-dir>/XDSMjs
+```
+``` bash
+> python -m http.server 8020
+```
+Open `http://localhost:8020/xdsm.html` in the browser.
+
+To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page.
 
 As of 0.6.0 version, to use XDSMjs in your web page, you can :
 * include the following declarations in your header :
 
 ```html
   <link rel="stylesheet" href="xdsm.css">
-  <script src="build/xdsm.bundle.js"></script>
+  <script type="text/javascript" src="build/xdsm.bundle.js"></script>
 ```
 
 * add the place-holder div element that will contain the XDSM diagram :
@@ -63,6 +72,17 @@ As of 0.7.0, you can use XDSM v2 notation by using <code>xdsm2</code> class inst
   <div class="xdsm2"></div>
 ```
 
+As of 0.8.0, you can specify configuration and MDO data directly from the <script> element in the html file.
+<pre>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', () => {
+            let mdo = {nodes: ..., edges: ...}
+            let config = { labelizer: { showNbLinkOnly: true } };
+            XDSMjs(config).createXdsm(mdo);
+        });
+    </script>
+</pre>
+
 ## Example
 Below an example describing BLISS formulation inspired from XDSM description given in [Martins and Lambe MDO architecture survey](http://arc.aiaa.org/doi/pdf/10.2514/1.J051895). While the formulation could have been described in one diagram as in the survey, the example below use XDSMjs multi-level diagram capability to separate system and discipline optimization levels.
 The corresponding [xdsm.json](./examples/bliss.json) file is available in the example directory.
@@ -72,22 +92,9 @@ The corresponding [xdsm.json](./examples/bliss.json) file is available in the ex
 ## Troubleshooting
 * If you don't see the diagram, may be you need to serve the files with your favourite HTTP server ('same origin' policy of your browser). An example with Python HTTP simple server:
 
-``` bash
-> cd <install-dir>/XDSMjs
-```
-With Python 2:
-``` bash
-> python -m SimpleHTTPServer 8020
-```
-With Python 3:
-``` bash
-> python -m http.server 8020
-```
-
-* Open `http://localhost:8020/xdsm.html` in the browser.
 
 ## Licence
- Copyright 2016 Rémi Lafage
+ Copyright 2020 Rémi Lafage
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
