@@ -1,6 +1,6 @@
 {
   "name": "xdsmjs",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "XDSM diagram generator",
   "main": "src/xdsm-factory.js",
   "directories": {
@@ -12,8 +12,8 @@
     "build": "webpack --progress --mode=production --config webpack.config.js",
     "watch": "webpack --progress --watch",
     "server": "webpack-dev-server --open",
-    "test": "babel-tape-runner test/xdsm-test.js | faucet",
-    "test2": "babel-tape-runner test/xdsm-test.js",
+    "test": "babel-tape-runner test/xdsmjs-test.js | faucet",
+    "test2": "babel-tape-runner test/xdsmjs-test.js",
     "webpack": "webpack"
   },
   "repository": "git+https://github.com/OneraHub/XDSMjs.git",

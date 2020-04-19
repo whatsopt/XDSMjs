@@ -13,3 +13,9 @@
 /xdsm-editor.html
 
 /build/*.map
+
+# Python
+dist/
+*egg-info
+**/__pycache__
+.pytest_cache

@@ -4,8 +4,18 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="fontello.css">
-    <link rel="stylesheet" href="xdsm.css">
-    <script src="build/xdsm.bundle.js"></script>
+    <link rel="stylesheet" href="xdsmjs.css">
+    <script type="text/javascript" src="build/xdsmjs.js"></script>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', () => {
+            xdsmjs.XDSMjs().createXdsm();
+
+            // Example with configuration and mdo data
+            // let mdo = {nodes: ..., edges: ...}
+            // let config = { labelizer: { showNbLinkOnly: true } };
+            // xdsmjs.XDSMjs(config).createXdsm(mdo);
+        });
+    </script>
 </head>
 
 <body>

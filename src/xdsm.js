@@ -40,7 +40,6 @@ function Xdsm(graph, svgid, config) {
   this.edges = [];
   this.svgid = svgid;
 
-  // TODO: Find better javascript way to do configuration.
   this.default_config = {
     labelizer: {
       ellipsis: 5,
@@ -52,26 +51,14 @@ function Xdsm(graph, svgid, config) {
       cellsize: { w: CELL_W, h: CELL_H },
       padding: PADDING,
     },
-    titleTooltip: false, // allow to use external tooltip mechanism
+    noTitleTooltip: false, // allow to use external tooltip
   };
-
-  this.config = this.default_config;
-  if (config && config.labelizer) {
-    this.config.labelizer.ellipsis = config.labelizer.ellipsis;
-    this.config.labelizer.subSupScript = config.labelizer.subSupScript;
-    this.config.labelizer.showLinkNbOnly = config.labelizer.showLinkNbOnly;
-  }
-  if (config && config.layout) {
-    this.config.layout.origin.x = config.layout.origin.x;
-    this.config.layout.origin.y = config.layout.origin.y;
-    this.config.layout.cellsize.w = config.layout.cellsize.w;
-    this.config.layout.cellsize.h = config.layout.cellsize.h;
-    this.config.layout.padding = config.layout.padding;
-  }
-  this.config.titleTooltip = config.titleTooltip;
+  this.config = { ...this.default_config, ...config };
+  this.config.labelizer = { ...this.default_config.labelizer, ...config.labelizer };
+  this.config.layout = { ...this.default_config.layout, ...config.layout };
 
   // Xdsm built-in tooltip for variable connexions
-  if (!this.config.titleTooltip) {
+  if (this.config.noTitleTooltip) {
     this.tooltip = select('body').append('div').attr('class', 'xdsm-tooltip')
       .style('opacity', 0);
   }
@@ -383,18 +370,18 @@ Xdsm.prototype._customTrapz = function _customTrapz(edge, dat, i, offset) {
       const w = grid[d.row][d.col].width;
       const h = grid[d.row][d.col].height;
       const topleft = `${-pad - w / 2 + offset
-      }, ${
+        }, ${
         -pad - h * (2 / 3) - offset
-      } `;
+        } `;
       const topright = `${w / 2 + pad + offset + 5}, ${
         -pad - h * (2 / 3) - offset
-      } `;
+        } `;
       const botright = `${w / 2 + pad + offset - 5 + 5}, ${
         pad + h / 3 - offset
-      } `;
+        } `;
       const botleft = `${-pad - w / 2 + offset - 5}, ${
         pad + h / 3 - offset
-      } `;
+        } `;
       const tpz = [topleft, topright, botright, botleft].join(' ');
       return tpz;
     });

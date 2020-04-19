@@ -49,7 +49,7 @@ Node.prototype.getSubXdsmId = function getSubXdsmId() {
       return this.subxdsm;
     }
     console.log(`${'Warning: Sub XDSM id not found. '
-        + 'Bad type or name for node: '}${JSON.stringify(this)}`);
+      + 'Bad type or name for node: '}${JSON.stringify(this)}`);
   }
   return null;
 };
