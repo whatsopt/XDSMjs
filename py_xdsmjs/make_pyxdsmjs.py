@@ -1,7 +1,7 @@
 from shutil import copy
 import json
 
-PACKAGE_VERSION_NUMBER = None
+PACKAGE_RELEASE_NUMBER = None
 
 # copy assets
 copy("../build/xdsmjs.js", "xdsmjs/dist/")
@@ -14,14 +14,14 @@ with open("../package.json") as pkg:
     package = json.load(pkg)
     version = package["version"]
 
-if PACKAGE_VERSION_NUMBER:
-    version += ".{}".format(PACKAGE_VERSION_NUMBER)
+if PACKAGE_RELEASE_NUMBER:
+    version += ".{}".format(PACKAGE_RELEASE_NUMBER)
 
 init = []
 with open("xdsmjs/__init__.py") as f:
     init = f.readlines()
 
-init[0] = '__version__ = "{}"\n'.format(version)
+init[0] = '__version__ = "{}"'.format(version)
 
 with open("xdsmjs/__init__.py", "w") as f:
     f.writelines(init)
