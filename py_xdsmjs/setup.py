@@ -30,6 +30,6 @@ setup(
     license="Apache License, Version 2.0",
     classifiers=[_f for _f in CLASSIFIERS.split("\n") if _f],
     packages=["xdsmjs"],
-    package_data={"xdsmjs": ["dist/xdsm.bundle.js", "dist/xdsm.css"]},
+    package_data={"xdsmjs": ["dist/xdsmjs.js", "dist/xdsmjs.css"]},
     url="https://github.com/OneraHub/XDSMjs",
 )
