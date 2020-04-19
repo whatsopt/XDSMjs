@@ -19,4 +19,4 @@ def bundlejs():
 
 
 def css():
-    return read("xdsm.css")
+    return "{}\n{}".format(read("fontello.css"), read("xdsm.css"))

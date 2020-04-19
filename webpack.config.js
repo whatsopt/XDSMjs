@@ -4,7 +4,8 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 module.exports = {
   mode: 'development',
   entry: {
-    'xdsm': './src/xdsm-factory.js',
+    xdsm: './src/xdsm-factory.js',
+    'xdsm-main': './src/xdsm-main.js',
     'xdsm-test': './test/xdsm-test.js',
   },
   output: {

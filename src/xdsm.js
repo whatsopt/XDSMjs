@@ -40,7 +40,6 @@ function Xdsm(graph, svgid, config) {
   this.edges = [];
   this.svgid = svgid;
 
-  // TODO: Find better javascript way to do configuration.
   this.default_config = {
     labelizer: {
       ellipsis: 5,
@@ -52,23 +51,16 @@ function Xdsm(graph, svgid, config) {
       cellsize: { w: CELL_W, h: CELL_H },
       padding: PADDING,
     },
-    titleTooltip: false, // allow to use external tooltip mechanism
+    titleTooltip: false, // allow to use external tooltip mechanism when false
   };
-
   this.config = this.default_config;
   if (config && config.labelizer) {
-    this.config.labelizer.ellipsis = config.labelizer.ellipsis;
-    this.config.labelizer.subSupScript = config.labelizer.subSupScript;
-    this.config.labelizer.showLinkNbOnly = config.labelizer.showLinkNbOnly;
+    this.config.labelizer = { ...config.labelizer, ...this.default_config.labelizer };
   }
   if (config && config.layout) {
-    this.config.layout.origin.x = config.layout.origin.x;
-    this.config.layout.origin.y = config.layout.origin.y;
-    this.config.layout.cellsize.w = config.layout.cellsize.w;
-    this.config.layout.cellsize.h = config.layout.cellsize.h;
-    this.config.layout.padding = config.layout.padding;
+    this.config.layout = { ...config.layout, ...this.default_config.labelizer };
   }
-  this.config.titleTooltip = config.titleTooltip;
+  this.config.titleTooltip = !!config.titleTooltip;
 
   // Xdsm built-in tooltip for variable connexions
   if (!this.config.titleTooltip) {
