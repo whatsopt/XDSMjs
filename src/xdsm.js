@@ -51,14 +51,14 @@ function Xdsm(graph, svgid, config) {
       cellsize: { w: CELL_W, h: CELL_H },
       padding: PADDING,
     },
-    noTitleTooltip: false, // allow to use external tooltip
+    withTitleTooltip: true, // allow to use external tooltip
   };
   this.config = { ...this.default_config, ...config };
   this.config.labelizer = { ...this.default_config.labelizer, ...config.labelizer };
   this.config.layout = { ...this.default_config.layout, ...config.layout };
 
   // Xdsm built-in tooltip for variable connexions
-  if (this.config.noTitleTooltip) {
+  if (this.config.withTitleTooltip) {
     this.tooltip = select('body').append('div').attr('class', 'xdsm-tooltip')
       .style('opacity', 0);
   }
