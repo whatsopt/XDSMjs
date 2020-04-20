@@ -369,19 +369,10 @@ Xdsm.prototype._customTrapz = function _customTrapz(edge, dat, i, offset) {
       const pad = 5;
       const w = grid[d.row][d.col].width;
       const h = grid[d.row][d.col].height;
-      const topleft = `${-pad - w / 2 + offset
-        }, ${
-        -pad - h * (2 / 3) - offset
-        } `;
-      const topright = `${w / 2 + pad + offset + 5}, ${
-        -pad - h * (2 / 3) - offset
-        } `;
-      const botright = `${w / 2 + pad + offset - 5 + 5}, ${
-        pad + h / 3 - offset
-        } `;
-      const botleft = `${-pad - w / 2 + offset - 5}, ${
-        pad + h / 3 - offset
-        } `;
+      const topleft = `${-pad - w / 2 + offset}, ${-pad - h * (2 / 3) - offset} `;
+      const topright = `${w / 2 + pad + offset + 5}, ${-pad - h * (2 / 3) - offset} `;
+      const botright = `${w / 2 + pad + offset - 5 + 5}, ${pad + h / 3 - offset} `;
+      const botleft = `${-pad - w / 2 + offset - 5}, ${pad + h / 3 - offset} `;
       const tpz = [topleft, topright, botright, botleft].join(' ');
       return tpz;
     });

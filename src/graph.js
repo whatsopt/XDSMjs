@@ -135,9 +135,9 @@ Edge.prototype.removeVar = function removeVar(nameOrId) {
 // *** Graph ******************************************************************
 function Graph(mdo, refname, withDefaultDriver) {
   // withDefaultDriver = true by default
-  withDefaultDriver = withDefaultDriver === undefined ? true : withDefaultDriver
+  const addDefaultDriver = withDefaultDriver === undefined ? true : withDefaultDriver;
   this.nodes = [];
-  if (withDefaultDriver) {
+  if (addDefaultDriver) {
     this.nodes = [new Node(UID, UNAME, 'driver')];
   }
 
