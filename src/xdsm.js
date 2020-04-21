@@ -398,7 +398,7 @@ Xdsm.prototype._createTitle = function _createTitle() {
     .attr('height', bbox.height);
 
   ref.attr('transform',
-    `translate(${self.config.layout.origin.x}, ${self.config.layout.origin.y + bbox.height})`);
+    `translate(${self.config.layout.origin.x}, ${self.config.layout.origin.y - 5})`);
 };
 
 Xdsm.prototype._createBorder = function _createBorder() {

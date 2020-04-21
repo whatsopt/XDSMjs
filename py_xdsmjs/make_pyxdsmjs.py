@@ -1,7 +1,7 @@
 from shutil import copy
 import json
 
-PACKAGE_RELEASE_NUMBER = 1
+PACKAGE_RELEASE_NUMBER = 2
 
 # copy assets
 copy("../build/xdsmjs.js", "xdsmjs/dist/")

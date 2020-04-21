@@ -44,10 +44,10 @@ class XdsmFactory {
   }
 
   _createXdsm(mdo, version) {
-    const scenarioKeys = XdsmFactory._orderedList(mdo);
+    const xdsmNames = XdsmFactory._orderedList(mdo);
 
     // Optimization problem display setup
-    select('body').selectAll('optpb').data(scenarioKeys).enter()
+    select('body').selectAll('optpb').data(xdsmNames).enter()
       .append('div')
       .filter((d) => mdo[d].optpb)
       .attr('class', (d) => `optpb ${d}`)
@@ -63,14 +63,14 @@ class XdsmFactory {
 
     const xdsms = {};
 
-    if (scenarioKeys.indexOf('root') === -1) {
+    if (xdsmNames.indexOf('root') === -1) {
       // old format: mono xdsm
       const graph = new Graph(mdo, 'root', this._config.withDefaultDriver);
       xdsms.root = new Xdsm(graph, 'root', this._config);
       xdsms.root.draw();
     } else {
       // new format managing several XDSM
-      scenarioKeys.forEach((k) => {
+      xdsmNames.forEach((k) => {
         if (Object.prototype.hasOwnProperty.call(mdo, k)) {
           const graph = new Graph(mdo[k], k, this._config.withDefaultDriver);
           xdsms[k] = new Xdsm(graph, k, this._config);
@@ -107,13 +107,13 @@ class XdsmFactory {
     const roo = root || 'root';
     const lev = level || 0;
     if (xdsms[roo]) {
-      const nodes = xdsms[roo].nodes
+      const subxdsms = xdsms[roo].nodes
         .map((n) => n.subxdsm)
         .filter((n) => n);
       let acc = [roo];
-      if (nodes.length > 0) {
-        for (let i = 0; i < nodes.length; i += 1) {
-          acc = acc.concat(XdsmFactory._orderedList(xdsms, nodes[i], lev + 1));
+      if (subxdsms.length > 0) {
+        for (let i = 0; i < subxdsms.length; i += 1) {
+          acc = acc.concat(XdsmFactory._orderedList(xdsms, subxdsms[i], lev + 1));
         }
       }
       return acc;

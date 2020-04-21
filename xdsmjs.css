@@ -72,7 +72,7 @@
 .xdsm g.title text {
   display: block;
   margin: 0.67em 0;
-  font-size: 2em;
+  font-size: 1em;
   font-weight: bold;
 }
 .xdsm g.title rect {
@@ -182,7 +182,7 @@
 .xdsm2 g.title text {
   display: block;
   margin: 0.67em 0; 
-  font-size: 2em;
+  font-size: 1em;
   font-weight: bold;
 }
 .xdsm2 g.title rect {
