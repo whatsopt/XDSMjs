@@ -11,16 +11,9 @@ import Xdsm, { VERSION1, VERSION2 } from './xdsm';
 import Animation from './animation';
 import Controls from './controls';
 
-function _detectVersion() {
-  if (select(`.${VERSION1}`).empty()) {
-    return VERSION2;
-  }
-  return VERSION1;
-}
-
 class XdsmFactory {
   constructor(config) {
-    this._version = _detectVersion() || VERSION2;
+    this._version = XdsmFactory._detectVersion() || VERSION2;
     this._config = config || {
       labelizer: {
         ellipsis: 5,
@@ -51,7 +44,7 @@ class XdsmFactory {
   }
 
   _createXdsm(mdo, version) {
-    const scenarioKeys = Object.keys(mdo).sort();
+    const scenarioKeys = XdsmFactory._orderedList(mdo);
 
     // Optimization problem display setup
     select('body').selectAll('optpb').data(scenarioKeys).enter()
@@ -101,6 +94,35 @@ class XdsmFactory {
       const ctrls = new Controls(anim, version); // eslint-disable-line no-unused-vars
     }
     anim.renderNodeStatuses();
+  }
+
+  static _detectVersion() {
+    if (select(`.${VERSION1}`).empty()) {
+      return VERSION2;
+    }
+    return VERSION1;
+  }
+
+  static _orderedList(xdsms, root, level) {
+    const roo = root || 'root';
+    const lev = level || 0;
+    if (xdsms[roo]) {
+      const nodes = xdsms[roo].nodes
+        .map((n) => n.subxdsm)
+        .filter((n) => n);
+      let acc = [roo];
+      if (nodes.length > 0) {
+        for (let i = 0; i < nodes.length; i += 1) {
+          acc = acc.concat(XdsmFactory._orderedList(xdsms, nodes[i], lev + 1));
+        }
+      }
+      return acc;
+    }
+    if (lev === 0) {
+      // level 0 no root : return lexicographic order
+      return Object.keys(xdsms).sort();
+    }
+    throw new Error(`sub-XDSM '${roo}' not found among ${Object.keys(xdsms)}`);
   }
 }
 
