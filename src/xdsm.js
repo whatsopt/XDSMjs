@@ -33,7 +33,7 @@ function Xdsm(graph, svgid, config) {
   this.svg = container.append('svg')
     .attr('width', WIDTH)
     .attr('height', HEIGHT)
-    .attr('class', svgid);
+    .attr('id', svgid);
 
   this.grid = [];
   this.nodes = [];
@@ -146,9 +146,9 @@ Xdsm.prototype._createTextGroup = function _createTextGroup(kind, group, decorat
         klass = 'dataIO';
       }
       return `id${d.id} ${kind} ${klass}`;
-    }).each(function makeLabel(/* d, i */) {
+    }).each(function makeLabel(d) {
       const that = select(this); // eslint-disable-line no-invalid-this
-      that.call(labelize); // eslint-disable-line no-invalid-this
+      that.call(labelize.subXdsmLink(d.subxdsm)); // eslint-disable-line no-invalid-this
     })
     .each(function makeLine(d1, i) {
       const { grid } = self;
@@ -386,19 +386,12 @@ Xdsm.prototype._createTitle = function _createTitle() {
     .enter()
     .append('g')
     .classed('title', true)
+    .append('a')
+    .attr('id', self.graph.refname)
     .append('text')
-    .text(self.graph.refname === 'root' ? '' : self.graph.refname);
-
-  const bbox = ref.nodes()[0].getBBox();
-
-  ref.insert('rect', 'text')
-    .attr('x', bbox.x)
-    .attr('y', bbox.y)
-    .attr('width', bbox.width)
-    .attr('height', bbox.height);
-
-  ref.attr('transform',
-    `translate(${self.config.layout.origin.x}, ${self.config.layout.origin.y - 5})`);
+    .text(self.graph.refname === 'root' ? '' : self.graph.refname)
+    .attr('transform',
+      `translate(${self.config.layout.origin.x}, ${self.config.layout.origin.y - 5})`);
 };
 
 Xdsm.prototype._createBorder = function _createBorder() {

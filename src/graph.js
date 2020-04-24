@@ -14,7 +14,7 @@ const STATUS = {
 // *** Node *******************************************************************
 function Node(id, pname, ptype, pstatus, psubxdsm) {
   const name = pname || id;
-  const type = ptype || 'analysis';
+  const type = ptype || 'function';
   const status = pstatus || STATUS.UNKNOWN;
   if (typeof STATUS[status] === 'undefined') {
     throw Error(`Unknown status '${status}' for node ${name}(id=${id})`);

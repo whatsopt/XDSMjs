@@ -301,7 +301,7 @@ test('Graph.findEdgesOf(nodeIdx) returns edges to remove and edges to delete in 
 test('Graph.addNode()', (t) => {
   const g = makeGraph();
   t.equal(g.nodes.length, 6);
-  g.addNode({ id: 'F', name: 'F', kind: 'analysis' });
+  g.addNode({ id: 'F', name: 'F', kind: 'function' });
   t.equal(g.nodes.length, 7);
   t.end();
 });

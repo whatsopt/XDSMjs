@@ -1,0 +1,55 @@
+{
+  "root": {
+    "nodes": [
+      {
+        "id": "233",
+        "name": "NewInner",
+        "type": "group",
+        "subxdsm": "NewInner"
+      },
+      {
+        "id": "236",
+        "name": "Disc3",
+        "type": "function"
+      }
+    ],
+    "edges": [
+      {
+        "from": "_U_",
+        "to": "233",
+        "name": "t"
+      },
+      {
+        "from": "233",
+        "to": "_U_",
+        "name": "z"
+      },
+      {
+        "from": "233",
+        "to": "236",
+        "name": "z"
+      }
+    ]
+  },
+  "NewInner": {
+    "nodes": [
+      {
+        "id": "235",
+        "name": "Disc2",
+        "type": "function"
+      }
+    ],
+    "edges": [
+      {
+        "from": "_U_",
+        "to": "235",
+        "name": "t"
+      },
+      {
+        "from": "235",
+        "to": "_U_",
+        "name": "z"
+      }
+    ]
+  }
+}
