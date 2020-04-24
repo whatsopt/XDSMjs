@@ -67,7 +67,6 @@
   fill: #FFFCCC;
 }
 
-
 /* Title */
 .xdsm g.title text {
   display: block;
@@ -78,7 +77,6 @@
 .xdsm g.title rect {
   fill: none;
 }
-
 
 /* Text Default */
 .xdsm text {
@@ -292,4 +290,8 @@ select#xdsm-version-toggle {
 }
 .edge text {
   font-size: small;
+}
+
+.subxdsm-link:hover {
+  text-decoration: underline;
 }

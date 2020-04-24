@@ -44,7 +44,7 @@ Labelizer.strParse = function strParse(str, subSupScript) {
 };
 
 Labelizer._createVarListLabel = function _createVarListLabel(
-  selection, name, text, ellipsis, subSupScript,
+  selection, name, text, ellipsis, subSupScript, subXdsmLink,
 ) {
   const tokens = Labelizer.strParse(name, subSupScript);
 
@@ -52,7 +52,12 @@ Labelizer._createVarListLabel = function _createVarListLabel(
     let offsetSub = 0;
     let offsetSup = 0;
     if (ellipsis < 1 || (i < 5 && text.nodes()[0].getBBox().width < 100)) {
-      text.append('tspan').html(token.base);
+      text.append('tspan').html(() => {
+        if (subXdsmLink) {
+          return `<a class='subxdsm-link' href="#${subXdsmLink}">${token.base}</a>`;
+        }
+        return token.base;
+      });
       if (token.sub) {
         offsetSub = 10;
         text.append('tspan')
@@ -100,6 +105,7 @@ Labelizer.labelize = function labelize() {
   let subSupScript = true;
   let linkNbOnly = false;
   let labelKind = 'node';
+  let subXdsmLink = false;
 
   function createLabel(selection) {
     selection.each((d) => {
@@ -107,7 +113,7 @@ Labelizer.labelize = function labelize() {
       if (linkNbOnly && labelKind !== 'node') { // show connexion nb
         Labelizer._createLinkNbLabel(selection, d.name, text);
       } else {
-        Labelizer._createVarListLabel(selection, d.name, text, ellipsis, subSupScript);
+        Labelizer._createVarListLabel(selection, d.name, text, ellipsis, subSupScript, subXdsmLink);
       }
     });
   }
@@ -141,6 +147,14 @@ Labelizer.labelize = function labelize() {
       return labelKind;
     }
     labelKind = value;
+    return createLabel;
+  };
+
+  createLabel.subXdsmLink = function subxdsmlink(value) {
+    if (!arguments.length) {
+      return subXdsmLink;
+    }
+    subXdsmLink = value;
     return createLabel;
   };
 
