@@ -7,7 +7,7 @@
         "name": "DisciplineOptimization_i"
       },
       {
-        "type": "analysis",
+        "type": "function",
         "id": "Dis1",
         "name": "Analysis_i"
       },
