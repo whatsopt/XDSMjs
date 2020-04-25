@@ -71,8 +71,6 @@ Animation.prototype._step = function _step(dir) {
   const { nodesByStep } = graph;
   const incr = backward ? -1 : 1;
 
-  // console.log("*************************************** STEP "+self.rootId);
-
   if ((!backward && self.done())
     || (backward && self.ready())) {
     return;
@@ -181,7 +179,7 @@ Animation.prototype._notifyObservers = function _notifyObservers() {
 
 Animation.prototype._pulse = function _pulse(delay, toBeSelected, easeInOut, color) {
   const colour = color || RUNNING_COLOR;
-  let sel = select(`svg.${this.rootId}`)
+  let sel = select(`svg#${this.rootId}`)
     .selectAll(toBeSelected)
     .transition().delay(delay);
   if (easeInOut !== 'out') {
@@ -216,9 +214,9 @@ Animation.prototype._pulseLink = function _pulseLink(delay, fromId, toId) {
 };
 
 Animation.prototype._onAnimationStart = function _onAnimationStart(delay) {
-  const title = select(`svg.${this.rootId}`).select('g.title');
+  const title = select(`svg#${this.rootId}`).select('g.title');
   title.select('text').transition().delay(delay).style('fill', RUNNING_COLOR);
-  select(`svg.${this.rootId}`).select('rect.border')
+  select(`svg#${this.rootId}`).select('rect.border')
     .transition().delay(delay)
     .style('stroke-width', '5px')
     .duration(200)
@@ -230,7 +228,7 @@ Animation.prototype._onAnimationStart = function _onAnimationStart(delay) {
 
 Animation.prototype._onAnimationDone = function _onAnimationDone(delay) {
   const self = this;
-  const title = select(`svg.${this.rootId}`).select('g.title');
+  const title = select(`svg#${this.rootId}`).select('g.title');
   title.select('text').transition()
     .delay(delay)
     .style('fill', null)
@@ -241,7 +239,7 @@ Animation.prototype._onAnimationDone = function _onAnimationDone(delay) {
 
 Animation.prototype._isSubXdsm = function _isSubXdsm(nodeId) {
   const gnode = `g.id${nodeId}`;
-  const nodeSel = select(`svg.${this.rootId}`).select(gnode);
+  const nodeSel = select(`svg#${this.rootId}`).select(gnode);
   return nodeSel.classed('mdo') || nodeSel.classed('sub-optimization')
     || nodeSel.classed('group') || nodeSel.classed('implicit-group');
 };
@@ -290,7 +288,7 @@ Animation.prototype._scheduleAnimation = function _scheduleAnimation() {
 };
 
 Animation.prototype._reset = function _reset(all) {
-  let svg = select(`svg.${this.rootId}`);
+  let svg = select(`svg#${this.rootId}`);
   if (all) {
     svg = selectAll('svg');
   }
