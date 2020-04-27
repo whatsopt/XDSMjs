@@ -43,8 +43,8 @@ As of 0.6.0 version, to use XDSMjs in your web page, you can :
 * include the following declarations in your header :
 
 ```html
-  <link rel="stylesheet" href="xdsm.css">
-  <script type="text/javascript" src="build/xdsm.bundle.js"></script>
+  <link rel="stylesheet" href="xdsmjs.css">
+  <script type="text/javascript" src="dist/xdsmjs.js"></script>
 ```
 
 * add the place-holder div element that will contain the XDSM diagram :
@@ -72,7 +72,7 @@ As of 0.7.0, you can use XDSM v2 notation by using <code>xdsm2</code> class inst
   <div class="xdsm2"></div>
 ```
 
-As of 0.8.0, you can specify configuration and MDO data directly from the <script> element in the html file.
+As of 0.8.0, you can specify configuration and MDO data directly from the <code><script></code> element in the html file.
 <pre>
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', () => {
