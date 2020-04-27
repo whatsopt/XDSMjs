@@ -1,10 +1,11 @@
 {
   "name": "xdsmjs",
-  "version": "0.8.1-rc3",
+  "version": "0.8.1-rc4",
   "description": "XDSM diagram generator",
   "main": "src/index.js",
   "files": [
     "dist/**/*.js",
+    "dist/**/*.js.map",
     "src/**/*.js",
     "*.css"
   ],
