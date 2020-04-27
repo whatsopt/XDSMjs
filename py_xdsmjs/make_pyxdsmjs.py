@@ -1,10 +1,14 @@
+import os
 from shutil import copy
 import json
 
 PACKAGE_RELEASE_NUMBER = None
 
+if not os.path.exists("xdsmjs/dist"):
+    os.makedirs("xdsmjs/dist")
+
 # copy assets
-copy("../build/xdsmjs.js", "xdsmjs/dist/")
+copy("../dist/xdsmjs.js", "xdsmjs/dist/")
 copy("../fontello.css", "xdsmjs/dist/")
 copy("../xdsmjs.css", "xdsmjs/dist/")
 
