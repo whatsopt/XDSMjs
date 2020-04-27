@@ -7,14 +7,33 @@ import { select, event } from 'd3-selection';
 import Graph from './graph';
 import Xdsm, { VERSION1, VERSION2 } from './xdsm';
 
-
+import Selectable from './selectable';
 import Animation from './animation';
 import Controls from './controls';
+
+class SelectableXdsm {
+  constructor(mdo, callback, config) {
+    const graph = new Graph(mdo, config.withDefaultDriver);
+    this.xdsm = new Xdsm(graph, 'root', config);
+    this.xdsm.draw();
+    this.selectable = new Selectable(this.xdsm, callback);
+    this.selectable.enable();
+  }
+
+  updateMdo(mdo) {
+    this.xdsm.updateMdo(mdo);
+    this.selectable.enable();
+  }
+
+  setSelection(filter) {
+    this.selectable.setFilter(filter);
+  }
+}
 
 class XdsmFactory {
   constructor(config) {
     this._version = XdsmFactory._detectVersion() || VERSION2;
-    this._config = config || {
+    this.default_config = {
       labelizer: {
         ellipsis: 5,
         subSupScript: true,
@@ -22,7 +41,15 @@ class XdsmFactory {
       },
       withDefaultDriver: true,
     };
-    this._withDefaultDriver = this._config.withDefaultDriver;
+    this._config = { ...this.default_config, ...config };
+  }
+
+  static get XDSM_V1() {
+    return VERSION1;
+  }
+
+  static get XDSM_V2() {
+    return VERSION2;
   }
 
   createXdsm(mdo) {
@@ -41,6 +68,10 @@ class XdsmFactory {
         json(filename).then((mdoFromFile) => this._createXdsm(mdoFromFile, version));
       }
     }
+  }
+
+  createSelectableXdsm(mdo, callback) {
+    return new SelectableXdsm(mdo, callback, this._config);
   }
 
   _createXdsm(mdo, version) {
@@ -65,14 +96,14 @@ class XdsmFactory {
 
     if (xdsmNames.indexOf('root') === -1) {
       // old format: mono xdsm
-      const graph = new Graph(mdo, 'root', this._config.withDefaultDriver);
-      xdsms.root = new Xdsm(graph, 'root', this._config);
+      const graph = new Graph(mdo, this._config.withDefaultDriver);
+      xdsms.root = new Xdsm(graph, this._config);
       xdsms.root.draw();
     } else {
       // new format managing several XDSM
       xdsmNames.forEach((k) => {
         if (Object.prototype.hasOwnProperty.call(mdo, k)) {
-          const graph = new Graph(mdo[k], k, this._config.withDefaultDriver);
+          const graph = new Graph(mdo[k], this._config.withDefaultDriver);
           xdsms[k] = new Xdsm(graph, k, this._config);
           xdsms[k].draw();
           xdsms[k].svg.select('.optimization').on(

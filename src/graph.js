@@ -133,7 +133,7 @@ Edge.prototype.removeVar = function removeVar(nameOrId) {
 };
 
 // *** Graph ******************************************************************
-function Graph(mdo, refname, withDefaultDriver) {
+function Graph(mdo, withDefaultDriver) {
   // withDefaultDriver = true by default
   const addDefaultDriver = withDefaultDriver === undefined ? true : withDefaultDriver;
   this.nodes = [];
@@ -143,7 +143,6 @@ function Graph(mdo, refname, withDefaultDriver) {
 
   this.edges = [];
   this.chains = [];
-  this.refname = refname || '';
 
   const numbering = Graph.number(mdo.workflow);
   const numPrefixes = numbering.toNum;

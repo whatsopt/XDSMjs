@@ -1,8 +1,8 @@
 {
   "name": "xdsmjs",
-  "version": "0.8.0",
+  "version": "0.8.1-rc2",
   "description": "XDSM diagram generator",
-  "main": "src/xdsm-factory.js",
+  "main": "src/index.js",
   "directories": {
     "example": "examples"
   },

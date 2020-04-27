@@ -1,6 +1,7 @@
 
 import { select, selectAll, event } from 'd3-selection';
 import 'd3-transition';
+import Graph from './graph';
 import Labelizer from './labelizer';
 
 export const VERSION1 = 'xdsm';
@@ -51,6 +52,7 @@ function Xdsm(graph, svgid, config) {
       cellsize: { w: CELL_W, h: CELL_H },
       padding: PADDING,
     },
+    withDefaultDriver: true,
     withTitleTooltip: true, // allow to use external tooltip
   };
   this.config = { ...this.default_config, ...config };
@@ -86,11 +88,14 @@ Xdsm.prototype.hasWorkflow = function hasWorkflow() {
 Xdsm.prototype._initialize = function _initialize() {
   const self = this;
 
-  if (self.graph.refname) {
-    self._createTitle();
-  }
+  self._createTitle();
   self.nodeGroup = self.svg.append('g').attr('class', 'nodes');
   self.edgeGroup = self.svg.append('g').attr('class', 'edges');
+};
+
+Xdsm.prototype.updateMdo = function updateMda(mdo) {
+  this.graph = new Graph(mdo, this.config.withDefaultDriver);
+  this.refresh();
 };
 
 Xdsm.prototype.refresh = function refresh() {
@@ -381,15 +386,15 @@ Xdsm.prototype._customTrapz = function _customTrapz(edge, dat, i, offset) {
 Xdsm.prototype._createTitle = function _createTitle() {
   const self = this;
   // do not display title if it is 'root'
-  const ref = self.svg.selectAll('.title')
-    .data([self.graph.refname])
+  self.svg.selectAll('.title')
+    .data([self.svgid])
     .enter()
     .append('g')
     .classed('title', true)
     .append('a')
-    .attr('id', self.graph.refname)
+    .attr('id', self.svgid)
     .append('text')
-    .text(self.graph.refname === 'root' ? '' : self.graph.refname)
+    .text(self.svgid === 'root' ? '' : self.svgid)
     .attr('transform',
       `translate(${self.config.layout.origin.x}, ${self.config.layout.origin.y - 5})`);
 };

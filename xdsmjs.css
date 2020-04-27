@@ -82,7 +82,6 @@
 .xdsm text {
   fill: black;
   stroke: none;
-  font-size: large;
   font-family: Arial, sans-serif;
 }
 .xdsm tspan.sub {
@@ -191,7 +190,6 @@
 .xdsm2 text {
   fill: black;
   stroke: none;
-  font-size: large;
   font-family: Arial, sans-serif;
 }
 .xdsm2 tspan.sub {

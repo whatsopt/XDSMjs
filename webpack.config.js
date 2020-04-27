@@ -11,6 +11,7 @@ module.exports = {
     path: path.resolve(__dirname, 'build'),
     filename: '[name].js',
     library: 'xdsmjs',
+    libraryTarget: 'umd',
   },
   devtool: 'source-map',
   module: {
