@@ -15,7 +15,7 @@
 /build/*.map
 
 # Python
-dist/
+py_xdsmjs/**/dist
 *egg-info
 **/__pycache__
 .pytest_cache

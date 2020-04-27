@@ -4,3 +4,6 @@ import XdsmFactory from './xdsm-factory';
 export function XDSMjs(config) {
   return new XdsmFactory(config);
 }
+
+export const { XDSM_V1 } = XdsmFactory;
+export const { XDSM_V2 } = XdsmFactory;
