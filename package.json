@@ -1,6 +1,6 @@
 {
   "name": "xdsmjs",
-  "version": "0.8.1-rc4",
+  "version": "0.8.1",
   "description": "XDSM diagram generator",
   "main": "src/index.js",
   "files": [
@@ -41,6 +41,9 @@
     "babel-tape-runner": "^3.0.0",
     "eslint": "^6.2.0",
     "eslint-config-airbnb": "^18.0.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.19.0",
     "faucet": "0.0.1",
     "tape": "^4.9.1",
     "uglify-js": "^3.4.9",

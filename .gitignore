@@ -3,16 +3,11 @@
 
 # npm
 /node_modules
-/build/xdsm-test-bundle.js
 
 # gems execution
 *.pdf
 *.h5
 *.xml
-
-/xdsm-editor.html
-
-/build/*.map
 
 # Python
 py_xdsmjs/**/dist

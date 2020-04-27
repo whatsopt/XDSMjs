@@ -8,7 +8,7 @@ module.exports = {
     'xdsmjs-test': './test/xdsmjs-test.js',
   },
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     library: 'xdsmjs',
     libraryTarget: 'umd',
