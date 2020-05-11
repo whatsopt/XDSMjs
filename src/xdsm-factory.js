@@ -42,6 +42,7 @@ class XdsmFactory {
       withDefaultDriver: true,
     };
     this._config = { ...this.default_config, ...config };
+    this._config.version = this._version; // sure to ignore any version in config
   }
 
   static get XDSM_V1() {
@@ -97,7 +98,7 @@ class XdsmFactory {
     if (xdsmNames.indexOf('root') === -1) {
       // old format: mono xdsm
       const graph = new Graph(mdo, this._config.withDefaultDriver);
-      xdsms.root = new Xdsm(graph, this._config);
+      xdsms.root = new Xdsm(graph, 'root', this._config);
       xdsms.root.draw();
     } else {
       // new format managing several XDSM
