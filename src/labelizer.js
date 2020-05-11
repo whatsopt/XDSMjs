@@ -54,7 +54,7 @@ Labelizer._createVarListLabel = function _createVarListLabel(
     if (ellipsis < 1 || (i < 5 && text.nodes()[0].getBBox().width < 100)) {
       text.append('tspan').html(() => {
         if (subXdsmLink) {
-          return `<a class='subxdsm-link' href="/#${subXdsmLink}">${token.base}</a>`;
+          return `<a class='subxdsm-link' href="#${subXdsmLink}">${token.base}</a>`;
         }
         return token.base;
       });
