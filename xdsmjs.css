@@ -17,26 +17,27 @@
 
 /** XDSM v1 */
 .xdsm .optimization {
-  fill: #CCCCFF;
+  fill: #ccccff;
 }
+
 .xdsm .lp_optimization {
-  fill: #CCCCFF;
+  fill: #ccccff;
 }
 
 .xdsm .analysis {
-  fill: #CCFFCC;
+  fill: #ccffcc;
 }
 /* Forward compatibility */
 .xdsm .implicit_analysis {
-  fill: #9FCCC9;
+  fill: #9fccc9;
 }
 
 .xdsm .mdo {
-  fill: #FFCCCC;
+  fill: #ffcccc;
 }
 /* Forward compatibility */
 .xdsm .sub-optimization {
-  fill: #FFCCCC;
+  fill: #ffcccc;
 }
 
 .xdsm .function {
@@ -48,23 +49,23 @@
 }
 
 .xdsm .mda {
-  fill: #FFE5CC;
+  fill: #ffe5cc;
 }
 /* Forward compatibility */
 .xdsm .group {
-  fill: #FFE5CC;
+  fill: #ffe5cc;
 }
 /* Forward compatibility */
 .xdsm .implicit-group {
-  fill: #FFE5CC;
+  fill: #ffe5cc;
 }
 
 .xdsm .metamodel {
-  fill: #FFFCCC;
+  fill: #fffccc;
 }
 
 .xdsm .doe {
-  fill: #FFFCCC;
+  fill: #fffccc;
 }
 
 /* Title */
@@ -84,9 +85,11 @@
   stroke: none;
   font-family: Arial, sans-serif;
 }
+
 .xdsm tspan.sub {
   font-size: small;
 }
+
 .xdsm tspan.sup {
   font-size: small;
 }
@@ -137,10 +140,13 @@
 }
 
 /* Deprecated: use optimization */
+
 .xdsm2 .lp_optimization {
   fill: #A0CBE8;
 }
+
 /* Deprecated: use sub-optimization */
+
 .xdsm2 .mdo {
   fill: #A0CBE8;
 }
@@ -241,7 +247,7 @@ div.xdsm-tooltip {
 div.optpb {
   position: absolute;
   padding: 10px;
-  background: #CCCCFF;
+  background: #ccccff;
   border: 0px;
   border-radius: 8px;
   font-size: 150%;
