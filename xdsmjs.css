@@ -259,7 +259,7 @@ div.xdsm-tooltip {
   text-align: center;
   padding: 10px;
   background: lightsteelblue;
-  border: 0px;
+  border: 0;
   border-radius: 8px;
   pointer-events: none;
 }
@@ -301,11 +301,12 @@ sub {
 
 /* Version button */
 label#xdsm-version-label {
-  margin: 0 5px 0px 50px;
+  margin: 0 5px 0 50px;
   font-weight: bolder;
   font-size: 24px;
   font-family: Arial, sans-serif;
 }
+
 select#xdsm-version-toggle {
   display: table-cell;
   vertical-align: top;
