@@ -17,15 +17,15 @@
 
 /** XDSM v1 */
 .xdsm .optimization {
-  fill: #ccccff;
+  fill: #ccf;
 }
 
 .xdsm .lp_optimization {
-  fill: #ccccff;
+  fill: #ccf;
 }
 
 .xdsm .analysis {
-  fill: #ccffcc;
+  fill: #cfc;
 }
 /* Forward compatibility */
 .xdsm .implicit_analysis {
@@ -33,19 +33,19 @@
 }
 
 .xdsm .mdo {
-  fill: #ffcccc;
+  fill: #fcc;
 }
 /* Forward compatibility */
 .xdsm .sub-optimization {
-  fill: #ffcccc;
+  fill: #fcc;
 }
 
 .xdsm .function {
-  fill: #F2CCD9;
+  fill: #f2ccd9;
 }
 /* Forward compatibility */
 .xdsm .implicit-function {
-  fill: #F2CCD9;
+  fill: #f2ccd9;
 }
 
 .xdsm .mda {
@@ -68,6 +68,13 @@
   fill: #fffccc;
 }
 
+/* Text Default */
+.xdsm text {
+  fill: black;
+  stroke: none;
+  font-family: Arial, sans-serif;
+}
+
 /* Title */
 .xdsm g.title text {
   display: block;
@@ -77,13 +84,6 @@
 }
 .xdsm g.title rect {
   fill: none;
-}
-
-/* Text Default */
-.xdsm text {
-  fill: black;
-  stroke: none;
-  font-family: Arial, sans-serif;
 }
 
 .xdsm tspan.sub {
@@ -96,13 +96,13 @@
 
 /* Data */
 .xdsm .dataInter polygon {
-  fill: #E5E5E5;
+  fill: #e5e5e5;
   stroke: black;
   stroke-width: 1px;
 }
 
 .xdsm .dataIO polygon {
-  fill: #FFFFFF;
+  fill: #ffffff;
   stroke: black;
   stroke-width: 1px;
 }
@@ -133,38 +133,40 @@
 }
 
 .xdsm2 .optimization {
-  fill: #A0CBE8;
+  fill: #a0cbe8;
 }
+
 .xdsm2 .sub-optimization {
-  fill: #A0CBE8;
+  fill: #a0cbe8;
 }
 
 /* Deprecated: use optimization */
 
 .xdsm2 .lp_optimization {
-  fill: #A0CBE8;
+  fill: #a0cbe8;
 }
 
 /* Deprecated: use sub-optimization */
 
 .xdsm2 .mdo {
-  fill: #A0CBE8;
+  fill: #a0cbe8;
 }
 
 .xdsm2 .doe {
-  fill: #A0CBE8;
+  fill: #a0cbe8;
 }
 
 .xdsm2 .function {
-  fill: #8CD17D;
+  fill: #8cd17d;
 }
+
 .xdsm2 .implicit-function {
-  fill: #FF9D9A;
+  fill: #ff9d9a;
 }
 
 /* Deprecated: use function */
 .xdsm2 .analysis {
-  fill: #8CD17D;
+  fill: #8cd17d;
 }
 
 .xdsm2 .mda {
@@ -175,10 +177,11 @@
 }
 
 .xdsm2 .group {
-  fill: #8CD17D;
+  fill: #8cd17d;
 }
+
 .xdsm2 .implicit-group {
-  fill: #FF9D9A;
+  fill: #ff9d9a;
 }
 
 /* Title */
@@ -198,22 +201,24 @@
   stroke: none;
   font-family: Arial, sans-serif;
 }
+
 .xdsm2 tspan.sub {
   font-size: small;
 }
+
 .xdsm2 tspan.sup {
   font-size: small;
 }
 
 /* Data */
 .xdsm2 .dataInter polygon {
-  fill: #E5E5E5;
+  fill: #e5e5e5;
   stroke: black;
   stroke-width: 1px;
 }
 
 .xdsm2 .dataIO polygon {
-  fill: #FFFFFF;
+  fill: #ffffff;
   stroke: black;
   stroke-width: 1px;
 }
@@ -247,7 +252,7 @@ div.xdsm-tooltip {
 div.optpb {
   position: absolute;
   padding: 10px;
-  background: #ccccff;
+  background: #ccf;
   border: 0px;
   border-radius: 8px;
   font-size: 150%;
@@ -292,6 +297,7 @@ select#xdsm-version-toggle {
 .node text {
   font-size: medium;
 }
+
 .edge text {
   font-size: small;
 }
