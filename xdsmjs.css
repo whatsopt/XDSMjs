@@ -3,6 +3,14 @@
  * Copyright 2016-2020 Rémi Lafage
  */
 
+.node text {
+  font-size: medium;
+}
+
+.edge text {
+  font-size: small;
+}
+
 /** XDSM v1 ***************************************************/
 
 /* Special hidden first component */
@@ -191,23 +199,23 @@
   fill: #ff9d9a;
 }
 
+/* Text Default */
+.xdsm2 text {
+  fill: black;
+  stroke: none;
+  font-family: Arial, sans-serif;
+}
+
 /* Title */
 .xdsm2 g.title text {
   display: block;
-  margin: 0.67em 0; 
+  margin: 0.67em 0;
   font-size: 1em;
   font-weight: bold;
 }
 
 .xdsm2 g.title rect {
   fill: none;
-}
-
-/* Text Default */
-.xdsm2 text {
-  fill: black;
-  stroke: none;
-  font-family: Arial, sans-serif;
 }
 
 .xdsm2 tspan.sub {
@@ -261,18 +269,22 @@ div.optpb {
   position: absolute;
   padding: 10px;
   background: #ccf;
-  border: 0px;
+  border: 0;
   border-radius: 8px;
   font-size: 150%;
 }
 
-sub, sup {
+sub,
+sup {
   /* Specified in % so that the sup/sup is the right size relative to the surrounding text */
   font-size: 75%;
+
   /* Zero out the line-height so that it doesn't interfere with the positioning that follows */
   line-height: 0;
+
   /* Where the magic happens: makes all browsers position the sup/sup properly, relative to the surrounding text */
   position: relative;
+
   /* Note that if you're using Eric Meyer's reset.css, this is already set and you can remove this rule */
   vertical-align: baseline;
 }
@@ -289,7 +301,7 @@ sub {
 
 /* Version button */
 label#xdsm-version-label {
-  margin: 0px 5px 0px 50px;
+  margin: 0 5px 0px 50px;
   font-weight: bolder;
   font-size: 24px;
   font-family: Arial, sans-serif;
@@ -300,14 +312,6 @@ select#xdsm-version-toggle {
   font-weight: bolder;
   font-size: 20px;
   font-family: Arial, sans-serif;
-}
-
-.node text {
-  font-size: medium;
-}
-
-.edge text {
-  font-size: small;
 }
 
 .subxdsm-link:hover {
