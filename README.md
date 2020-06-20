@@ -24,8 +24,7 @@ As of 0.7.0, XDSMjs supports also [XDSM v2](https://github.com/mdolab/pyXDSM/rel
 ![](gallery/xdsm_v1_v2.gif)
 
 ## Citation
-If you happen to find XDSMjs useful for research and include diagrams generated with it, it will be appreciated if you cite the following paper which describes the project that lead to XDSMjs development:
-> Rémi  Lafage,  Sébastien  Defoort,  and  Thierry  Lefèbvre. Whatsopt: a web application for multidisciplinary design analysis and optimization. In 20th AIAA/ISSMO Multidisciplinary Analysis and Optimization Conference, Dallas, United States, 2019
+If you happen to find XDSMjs useful for research and include diagrams generated with it, it will be appreciated if you cite [the paper which describes the WhatsOpt project that led to XDSMjs development](https://github.com/OneraHub/WhatsOpt#citation)
 
 ## Usage
 
