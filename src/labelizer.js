@@ -1,4 +1,3 @@
-
 function Labelizer() { }
 
 Labelizer.strParse = function strParse(str, subSupScript) {

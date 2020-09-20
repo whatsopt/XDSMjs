@@ -3,7 +3,7 @@
  * Copyright 2016-2020 Rémi Lafage
  */
 import { json } from 'd3-fetch';
-import { select, event } from 'd3-selection';
+import { select } from 'd3-selection';
 import Graph from './graph';
 import Xdsm, { VERSION1, VERSION2 } from './xdsm';
 
@@ -109,7 +109,7 @@ class XdsmFactory {
           xdsms[k].draw();
           xdsms[k].svg.select('.optimization').on(
             'click',
-            () => {
+            (event) => {
               const info = select(`.optpb.${k}`);
               info.style('opacity', 0.9);
               info.style('left', `${event.pageX}px`).style('top',

@@ -1,4 +1,3 @@
-
 const UID = '_U_';
 const UNAME = 'User';
 const MULTI_TYPE = '_multi';

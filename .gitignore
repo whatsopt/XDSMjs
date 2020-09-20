@@ -14,3 +14,6 @@ py_xdsmjs/**/dist
 *egg-info
 **/__pycache__
 .pytest_cache
+
+#safe-buffer licensing
+dist/xdsmjs-test.js.LICENSE.txt

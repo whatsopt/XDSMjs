@@ -1,5 +1,4 @@
-
-import { select, selectAll, event } from 'd3-selection';
+import { select, selectAll } from 'd3-selection';
 import 'd3-transition';
 import Graph from './graph';
 import Labelizer from './labelizer';
@@ -188,7 +187,7 @@ Xdsm.prototype._createTextGroup = function _createTextGroup(kind, group, decorat
   selection.exit().remove(); // EXIT
 
   if (self.tooltip) {
-    selectAll('.ellipsized').on('mouseover', (d) => {
+    selectAll('.ellipsized').on('mouseover', (event, d) => {
       self.tooltip.transition().duration(200).style('opacity', 0.9);
       const tooltipize = Labelizer.tooltipize()
         .subSupScript(self.config.labelizer.subSupScript)
