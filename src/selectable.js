@@ -1,4 +1,3 @@
-
 import { select, selectAll } from 'd3-selection';
 
 function Selectable(xdsm, callback) {

@@ -1,4 +1,3 @@
-
 import { select } from 'd3-selection';
 import Animation from './animation';
 import { VERSION1, VERSION2 } from './xdsm';
@@ -27,7 +26,6 @@ function Controls(animation, defaultVersion) {
     .attr('id', 'xdsm-version-label');
   buttonGroup.append('select')
     .attr('id', 'xdsm-version-toggle');
-
 
   this.startButton = select('button#start');
   this.stopButton = select('button#stop');

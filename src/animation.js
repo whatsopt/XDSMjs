@@ -1,4 +1,3 @@
-
 import { select, selectAll } from 'd3-selection';
 import { rgb } from 'd3-color';
 import Graph from './graph';
