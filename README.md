@@ -88,10 +88,6 @@ The corresponding [xdsm.json](./examples/bliss.json) file is available in the ex
 
 ![](gallery/xdsm_bliss_anim.gif)
 
-## Troubleshooting
-* If you don't see the diagram, may be you need to serve the files with your favourite HTTP server ('same origin' policy of your browser). An example with Python HTTP simple server:
-
-
 ## Licence
  Copyright 2020 Rémi Lafage
 
