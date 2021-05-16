@@ -1,7 +1,7 @@
 # XDSMjs
 XDSM diagram generator written in javascript.
 
-[![Build Status](https://travis-ci.org/OneraHub/XDSMjs.svg?branch=master)](https://travis-ci.org/OneraHub/XDSMjs)
+[![Tests](https://github.com/OneraHub/XDSMjs/workflows/Tests/badge.svg)](https://github.com/OneraHub/XDSMjs/actions?query=workflow%3ATests)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/1c585602c2d942408a28cd6404587f68)](https://www.codacy.com/gh/OneraHub/XDSMjs/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=OneraHub/XDSMjs&amp;utm_campaign=Badge_Grade)
 
 ## XDSM
