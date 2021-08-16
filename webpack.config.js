@@ -28,11 +28,15 @@ module.exports = {
       },
     ],
   },
-  node: {
-    fs: 'empty',
+  resolve: {
+    fallback: {
+      fs: false,
+      path: false,
+      stream: false
+    }
   },
   optimization: {
     minimize: true,
     minimizer: [new TerserPlugin()],
-  },
+  }
 };
