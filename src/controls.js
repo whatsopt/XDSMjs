@@ -1,6 +1,6 @@
 import { select } from 'd3-selection';
-import Animation from './animation';
-import { VERSION1, VERSION2 } from './xdsm';
+import Animation from './animation.js';
+import { VERSION1, VERSION2 } from './xdsm.js';
 
 function Controls(animation, defaultVersion) {
   this.animation = animation;

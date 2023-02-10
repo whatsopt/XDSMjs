@@ -4,12 +4,12 @@
  */
 import { json } from 'd3-fetch';
 import { select } from 'd3-selection';
-import Graph from './graph';
-import Xdsm, { VERSION1, VERSION2 } from './xdsm';
+import Graph from './graph.js';
+import Xdsm, { VERSION1, VERSION2 } from './xdsm.js';
 
-import Selectable from './selectable';
-import Animation from './animation';
-import Controls from './controls';
+import Selectable from './selectable.js';
+import Animation from './animation.js';
+import Controls from './controls.js';
 
 class SelectableXdsm {
   constructor(mdo, callback, config) {
