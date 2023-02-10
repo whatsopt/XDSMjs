@@ -32,11 +32,13 @@ module.exports = {
     fallback: {
       fs: false,
       path: false,
-      stream: false
-    }
+      stream: false,
+    },
   },
   optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin()],
-  }
+    minimizer: [new TerserPlugin({
+      extractComments: false,
+    })],
+  },
 };
