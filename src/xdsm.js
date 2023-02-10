@@ -33,6 +33,7 @@ function Xdsm(graph, svgid, config) {
   this.svg = container.append('svg')
     .attr('width', WIDTH)
     .attr('height', HEIGHT)
+    .attr('viewBox', `0 0 ${WIDTH} ${HEIGHT}`)
     .attr('id', svgid);
 
   this.grid = [];
@@ -123,7 +124,7 @@ Xdsm.prototype.draw = function draw() {
   // update size
   const w = self.config.layout.cellsize.w * (self.graph.nodes.length + 1);
   const h = self.config.layout.cellsize.h * (self.graph.nodes.length + 1);
-  self.svg.attr('width', w).attr('height', h);
+  self.svg.attr('width', w).attr('height', h).attr('viewBox', `0 0 ${w} ${h}`);
   self.svg.selectAll('.border')
     .attr('height', h - BORDER_PADDING)
     .attr('width', w - BORDER_PADDING);
