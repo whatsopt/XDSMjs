@@ -1,8 +1,8 @@
-import Labelizer from '../src/labelizer';
-import Graph from '../src/graph';
-import XdsmFactory from '../src/xdsm-factory';
+import Labelizer from '../src/labelizer.js';
+import Graph from '../src/graph.js';
+import XdsmFactory from '../src/xdsm-factory.js';
 
-const test = require('tape');
+import test from 'tape';
 
 test("Labelizer.strParse('') returns [{'base':'', 'sub':undefined, 'sup':undefined}]", (t) => {
   t.deepEqual(Labelizer.strParse(''), [{ base: '', sub: undefined, sup: undefined }]);

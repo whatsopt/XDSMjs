@@ -1,7 +1,7 @@
 import { select, selectAll } from 'd3-selection';
 import 'd3-transition';
-import Graph from './graph';
-import Labelizer from './labelizer';
+import Graph from './graph.js';
+import Labelizer from './labelizer.js';
 
 export const VERSION1 = 'xdsm';
 export const VERSION2 = 'xdsm2';

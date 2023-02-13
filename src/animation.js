@@ -1,6 +1,6 @@
 import { select, selectAll } from 'd3-selection';
 import { rgb } from 'd3-color';
-import Graph from './graph';
+import Graph from './graph.js';
 
 const PULSE_DURATION = 700;
 const SUB_ANIM_DELAY = 200;

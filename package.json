@@ -15,11 +15,10 @@
   "scripts": {
     "lint": "eslint ./src/* || true",
     "lintfix": "eslint --fix ./src/* || true",
-    "build": "webpack --progress --mode=production --config webpack.config.js",
+    "build": "webpack --progress --mode=production --config webpack.config.cjs",
     "watch": "webpack --progress --watch",
     "server": "webpack-dev-server --open",
-    "test": "babel-tape-runner test/xdsmjs-test.js | faucet",
-    "test2": "babel-tape-runner test/xdsmjs-test.js",
+    "test": "npx tape test/xdsmjs-test.mjs | faucet",
     "webpack": "webpack"
   },
   "repository": "git+https://github.com/OneraHub/XDSMjs.git",
@@ -29,6 +28,7 @@
   ],
   "author": "Remi Lafage",
   "license": "Apache-2.0",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/OneraHub/XDSMjs/issues"
   },
@@ -36,26 +36,27 @@
   "devDependencies": {
     "@babel/core": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
+    "@babel/register": "^7.18.9",
     "babel-core": "^7.0.0-bridge",
     "babel-loader": "^8.0.0",
-    "babel-tape-runner": "^3.0.0",
-    "eslint": "^7.9.0",
-    "eslint-config-airbnb": "^18.0.1",
+    "eslint": "^8.33.0",
+    "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "faucet": "0.0.1",
-    "tape": "^5.0.0",
+    "faucet": "0.0.4",
+    "tape": "^5.6.3",
+    "terser-webpack-plugin": "^5.3.6",
     "webpack": "^5.50.0",
-    "webpack-cli": "^4.8.0",
-    "webpack-dev-server": "^3.1.10"
+    "webpack-cli": "5.0.1",
+    "webpack-dev-server": "^4.11.1"
   },
   "dependencies": {
-    "d3-color": "^2.0.0",
-    "d3-fetch": "^2.0.0",
-    "d3-selection": "^2.0.0",
-    "d3-transition": "^2.0.0"
+    "d3-color": "^3.1.0",
+    "d3-fetch": "^3.0.1",
+    "d3-selection": "^3.0.0",
+    "d3-transition": "^3.0.1"
   },
   "eslintConfig": {
     "extends": [
