@@ -9,7 +9,7 @@ if PKG_VERSION_NUMBER:
     version += ".{}".format(PKG_VERSION_NUMBER)
 
 CLASSIFIERS = """
-Development Status :: 4 - Beta
+Development Status :: 5 - Production/Stable
 Intended Audience :: Science/Research
 Intended Audience :: Developers
 License :: OSI Approved :: Apache Software License
