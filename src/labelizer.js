@@ -42,9 +42,7 @@ Labelizer.strParse = function strParse(str, subSupScript) {
   return res;
 };
 
-Labelizer._createVarListLabel = function _createVarListLabel(
-  selection, name, text, ellipsis, subSupScript, subXdsmLink,
-) {
+Labelizer._createVarListLabel = function _createVarListLabel(selection, name, text, ellipsis, subSupScript, subXdsmLink) {
   const tokens = Labelizer.strParse(name, subSupScript);
 
   tokens.every((token, i, ary) => {

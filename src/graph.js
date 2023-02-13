@@ -149,8 +149,13 @@ function Graph(mdo, withDefaultDriver) {
 
   mdo.nodes.forEach((item) => {
     const num = numPrefixes[item.id];
-    this.nodes.push(new Node(item.id, num ? `${num}:${item.name}` : item.name,
-      item.type, item.status, item.subxdsm));
+    this.nodes.push(new Node(
+      item.id,
+      num ? `${num}:${item.name}` : item.name,
+      item.type,
+      item.status,
+      item.subxdsm,
+    ));
   }, this);
   this.uid = this.nodes[0].id;
 
