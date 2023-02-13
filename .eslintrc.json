@@ -26,6 +26,7 @@
         "linebreak-style": "off",
         "max-classes-per-file": "off",
         "import/no-unresolved": "off",
-        "react/no-this-in-sfc": "off"
+        "react/no-this-in-sfc": "off",
+        "import/extensions": "off"
     }
 }

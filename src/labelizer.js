@@ -42,6 +42,7 @@ Labelizer.strParse = function strParse(str, subSupScript) {
   return res;
 };
 
+// eslint-disable-next-line max-len
 Labelizer._createVarListLabel = function _createVarListLabel(selection, name, text, ellipsis, subSupScript, subXdsmLink) {
   const tokens = Labelizer.strParse(name, subSupScript);
 
