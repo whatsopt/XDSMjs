@@ -13,8 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Update dependencies: d3 v7
-- Use `viewBox` attribute to make the svg really scalable in the container element
-- Declare `xdsmjs` an ESM module only (`type: 'module'` in `package.json`, ie require node `v12+`)  
+- Use `viewBox` attribute to make the `svg` really scalable in its container element
+- Declare `xdsmjs` an ESM module only (`type: 'module'` in `package.json`, ie require `node v12+`)  
 
 
 ## [1.0.0] - 2020-09-23
@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix XDSMjs API :  add `createSelectableXdsm(xdsmFormat, callback)`
 
 
-## [0.8.0] - 2019-12-05
+## [0.8.0] - 2019-04-25
 
 ### Added
 
@@ -63,9 +63,9 @@ This version is embedded in [OpenMDAO 2.6](https://github.com/OpenMDAO/OpenMDAO)
 
 ### Added
 
-- Support utf-8 characters as variable names (see #2)
-- Allow to specify json data through data attributes (see #4)
-- Embed fontello icons (see #6)
+- Support utf-8 characters as variable names
+- Allow to specify json data through data attributes
+- Embed fontello icons
  
 
 ## [0.5.0] - 2018-12-07
@@ -73,5 +73,5 @@ This version is embedded in [OpenMDAO 2.6](https://github.com/OpenMDAO/OpenMDAO)
 ### Added
 
 - Add XDSMjs display configuration : `config.labelizer` and `config.layout`
-- Manage optional node status: vPENDING`, `RUNNING`, `FAILED`, `DONE`
+- Manage optional node status: `PENDING`, `RUNNING`, `FAILED`, `DONE`
 - Basic XDSM edition (undocumented, experimental) 
