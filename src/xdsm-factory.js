@@ -112,8 +112,10 @@ class XdsmFactory {
             (event) => {
               const info = select(`.optpb.${k}`);
               info.style('opacity', 0.9);
-              info.style('left', `${event.pageX}px`).style('top',
-                `${event.pageY - 28}px`);
+              info.style('left', `${event.pageX}px`).style(
+                'top',
+                `${event.pageY - 28}px`,
+              );
               info.style('pointer-events', 'auto');
             },
           );

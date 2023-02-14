@@ -134,8 +134,10 @@ Xdsm.prototype._createTextGroup = function _createTextGroup(kind, group, decorat
   const self = this;
 
   const selection = group.selectAll(`.${kind}`)
-    .data(this.graph[`${kind}s`], // DATA JOIN
-      (d) => d.id);
+    .data(
+      this.graph[`${kind}s`], // DATA JOIN
+      (d) => d.id,
+    );
 
   const labelize = Labelizer.labelize()
     .labelKind(kind)
@@ -395,8 +397,10 @@ Xdsm.prototype._createTitle = function _createTitle() {
     .attr('id', self.svgid)
     .append('text')
     .text(self.svgid === 'root' ? '' : self.svgid)
-    .attr('transform',
-      `translate(${self.config.layout.origin.x}, ${self.config.layout.origin.y - 5})`);
+    .attr(
+      'transform',
+      `translate(${self.config.layout.origin.x}, ${self.config.layout.origin.y - 5})`,
+    );
 };
 
 Xdsm.prototype._createBorder = function _createBorder() {
