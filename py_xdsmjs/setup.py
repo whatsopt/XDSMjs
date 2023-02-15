@@ -25,6 +25,7 @@ setup(
     name="xdsmjs",
     version=version,
     description="XDSMjs Python module",
+    long_description="Python module to distribute [XDSMjs](https://github.com/OneraHub/XDSMjs#xdsmjs) js/css resources",
     author="Rémi Lafage",
     author_email="remi.lafage@onera.fr",
     license="Apache License, Version 2.0",
