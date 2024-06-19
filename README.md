@@ -2,7 +2,7 @@
 XDSM diagram generator written in javascript.
 
 [![Tests](https://github.com/OneraHub/XDSMjs/workflows/Tests/badge.svg)](https://github.com/OneraHub/XDSMjs/actions?query=workflow%3ATests)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/1c585602c2d942408a28cd6404587f68)](https://www.codacy.com/gh/OneraHub/XDSMjs/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=OneraHub/XDSMjs&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ccda60bee3ce4eea8a7a685416fdc4d2)](https://app.codacy.com/gh/whatsopt/XDSMjs/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 ## XDSM
 The XDSM (eXtended Design Structure Matrix) is a notation used to visualize MDO processes.
