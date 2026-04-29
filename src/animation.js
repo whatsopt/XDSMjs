@@ -267,7 +267,6 @@ Animation.prototype._scheduleAnimation = function _scheduleAnimation() {
 
       if (n > 0) {
         nodesByStep[n - 1].forEach((prevNodeId) => {
-          // eslint-disable-line space-infix-ops
           self._pulseLink(elapsed, prevNodeId, nodeId);
         });
 

@@ -10,27 +10,35 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      YARN_NODE_LINKER: node-modules
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [20.x, 22.x]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@4.14.1 --activate
+          corepack yarn --version
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
+          cache: yarn
       - name: Install dependencies
-        run: npm install
+        run: corepack yarn install --immutable
       - name: Lint
-        run: npm run lint
+        run: corepack yarn lint
       - name: Format check
-        run: npm run format:check
+        run: corepack yarn format:check
       - name: Build
-        run: npm run build
+        run: corepack yarn build
       - name: Test
-        run: npm test
+        run: corepack yarn test
       - name: Coverage
-        run: npm run test:coverage:check
+        run: corepack yarn test:coverage:check
       - name: Package smoke check
-        run: npm run pack:check
+        run: corepack yarn pack:check

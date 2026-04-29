@@ -159,17 +159,17 @@ Xdsm.prototype._createTextGroup = function _createTextGroup(kind, group, decorat
       return `id${d.id} ${kind} ${klass}`;
     })
     .each(function makeLabel(d) {
-      const that = select(this); // eslint-disable-line no-invalid-this
-      that.call(labelize.subXdsmLink(d.subxdsm)); // eslint-disable-line no-invalid-this
+      const that = select(this);
+      that.call(labelize.subXdsmLink(d.subxdsm));
     })
     .each(function makeLine(d1, i) {
       const { grid } = self;
-      const item = select(this); // eslint-disable-line no-invalid-this
+      const item = select(this);
       if (grid[i] === undefined) {
         grid[i] = new Array(self.graph.nodes.length);
       }
       item.select('text').each(function makeCell(d2, j) {
-        const that = select(this); // eslint-disable-line no-invalid-this
+        const that = select(this);
         const data = item.data()[0];
         const m = data.row === undefined ? i : data.row;
         const n = data.col === undefined ? i : data.col;
@@ -183,7 +183,7 @@ Xdsm.prototype._createTextGroup = function _createTextGroup(kind, group, decorat
       });
     })
     .each(function makeDecoration(d, i) {
-      const that = select(this); // eslint-disable-line no-invalid-this
+      const that = select(this);
       that.call(decorate.bind(self), d, i, 0);
       if (d.isMulti) {
         that.call(decorate.bind(self), d, i, 1 * Number(MULTI_OFFSET));

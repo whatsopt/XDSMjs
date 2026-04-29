@@ -90,12 +90,7 @@ class XdsmFactory {
       .attr('class', (d) => `optpb ${d}`)
       .style('opacity', 0)
       .on('click', function makeTransition() {
-        select(this)
-          .transition()
-          .duration(500) // eslint-disable-line
-          // no-invalid-this
-          .style('opacity', 0)
-          .style('pointer-events', 'none');
+        select(this).transition().duration(500).style('opacity', 0).style('pointer-events', 'none');
       })
       .append('pre')
       .html((d) => mdo[d].optpb);
@@ -121,7 +116,7 @@ class XdsmFactory {
             info.style('pointer-events', 'auto');
           });
         }
-      }, this); // eslint-disable-line no-invalid-this
+      }, this);
     }
 
     const anim = new Animation(xdsms);
