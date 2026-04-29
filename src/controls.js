@@ -6,26 +6,13 @@ function Controls(animation, defaultVersion) {
   this.animation = animation;
   this.defaultVersion = defaultVersion || VERSION2;
 
-  const buttonGroup = select('.xdsm-toolbar')
-    .append('div')
-    .classed('button_group', true);
-  buttonGroup.append('button')
-    .attr('id', 'start')
-    .append('i').attr('class', 'icon-start');
-  buttonGroup.append('button')
-    .attr('id', 'stop')
-    .append('i').attr('class', 'icon-stop');
-  buttonGroup.append('button')
-    .attr('id', 'step-prev')
-    .append('i').attr('class', 'icon-step-prev');
-  buttonGroup.append('button')
-    .attr('id', 'step-next')
-    .append('i').attr('class', 'icon-step-next');
-  buttonGroup.append('label')
-    .text('XDSM')
-    .attr('id', 'xdsm-version-label');
-  buttonGroup.append('select')
-    .attr('id', 'xdsm-version-toggle');
+  const buttonGroup = select('.xdsm-toolbar').append('div').classed('button_group', true);
+  buttonGroup.append('button').attr('id', 'start').append('i').attr('class', 'icon-start');
+  buttonGroup.append('button').attr('id', 'stop').append('i').attr('class', 'icon-stop');
+  buttonGroup.append('button').attr('id', 'step-prev').append('i').attr('class', 'icon-step-prev');
+  buttonGroup.append('button').attr('id', 'step-next').append('i').attr('class', 'icon-step-next');
+  buttonGroup.append('label').text('XDSM').attr('id', 'xdsm-version-label');
+  buttonGroup.append('select').attr('id', 'xdsm-version-toggle');
 
   this.startButton = select('button#start');
   this.stopButton = select('button#stop');
@@ -60,13 +47,11 @@ function Controls(animation, defaultVersion) {
     let xdsm = select(`.${selectVersion}`);
     if (xdsm.empty() && selectVersion === VERSION1) {
       xdsm = select(`.${VERSION2}`);
-      xdsm.classed(VERSION2, false)
-        .classed(VERSION1, true);
+      xdsm.classed(VERSION2, false).classed(VERSION1, true);
     }
     if (xdsm.empty() && selectVersion === VERSION2) {
       xdsm = select(`.${VERSION1}`);
-      xdsm.classed(VERSION1, false)
-        .classed(VERSION2, true);
+      xdsm.classed(VERSION1, false).classed(VERSION2, true);
     }
     this.animation.setXdsmVersion(selectVersion);
   });

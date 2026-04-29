@@ -21,8 +21,7 @@ Selectable.prototype._addEventHandler = function _addEventHandler(klass) {
     self._unselect(prevSelection);
 
     const selection = select(this); // eslint-disable-line no-invalid-this
-    if (prevSelection.empty()
-      || prevSelection.data()[0].id !== selection.data()[0].id) {
+    if (prevSelection.empty() || prevSelection.data()[0].id !== selection.data()[0].id) {
       self._select(selection);
     }
     self._callback(self.getFilter());
@@ -31,14 +30,12 @@ Selectable.prototype._addEventHandler = function _addEventHandler(klass) {
 
 Selectable.prototype._select = function _select(selection) {
   selection.attr('data-xdsm-selected', true);
-  selection.select('.shape')
-    .transition().duration(100).style('stroke-width', '4px');
+  selection.select('.shape').transition().duration(100).style('stroke-width', '4px');
 };
 
 Selectable.prototype._unselect = function _unselect(selection) {
   selection.attr('data-xdsm-selected', null);
-  selection.select('.shape')
-    .transition().duration(100).style('stroke-width', null);
+  selection.select('.shape').transition().duration(100).style('stroke-width', null);
 };
 
 Selectable.prototype.getFilter = function getFilter() {
@@ -49,10 +46,12 @@ Selectable.prototype.getFilter = function getFilter() {
   const selection = select('[data-xdsm-selected="true"]');
   if (!selection.empty()) {
     const selected = selection.data()[0];
-    if (selected.iotype) { // edge
+    if (selected.iotype) {
+      // edge
       filter.fr = this._xdsm.graph.getNodeFromIndex(selected.row).id;
       filter.to = this._xdsm.graph.getNodeFromIndex(selected.col).id;
-    } else { // node
+    } else {
+      // node
       filter.fr = selected.id;
       filter.to = selected.id;
     }
@@ -73,8 +72,11 @@ Selectable.prototype.setFilter = function setFilter(filter) {
     selection = select(`.idlink_${filter.fr}_${filter.to}`);
     self._select(selection);
   }
-  if (!selection || selection.empty()
-    || (!prevSelection.empty() && prevSelection.data()[0].id !== selection.data()[0].id)) {
+  if (
+    !selection ||
+    selection.empty() ||
+    (!prevSelection.empty() && prevSelection.data()[0].id !== selection.data()[0].id)
+  ) {
     self._unselect(prevSelection);
   }
 };

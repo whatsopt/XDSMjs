@@ -9,11 +9,15 @@ test("Labelizer.strParse('') returns [{'base':'', 'sub':undefined, 'sup':undefin
   t.end();
 });
 test("Labelizer.strParse('+A') throws an error", (t) => {
-  t.throws(() => { Labelizer.strParse('+'); }, 'should throw an error');
+  t.throws(() => {
+    Labelizer.strParse('+');
+  }, 'should throw an error');
   t.end();
 });
 test("Labelizer.strParse('ConvCheck') returns [{'base':'ConvCheck', 'sub':undefined, 'sup':undefined}]", (t) => {
-  t.deepEqual(Labelizer.strParse('ConvCheck'), [{ base: 'ConvCheck', sub: undefined, sup: undefined }]);
+  t.deepEqual(Labelizer.strParse('ConvCheck'), [
+    { base: 'ConvCheck', sub: undefined, sup: undefined },
+  ]);
   t.end();
 });
 test("Labelizer.strParse('x') returns [{'base':'x', 'sub':undefined, 'sup':undefined}]", (t) => {
@@ -24,17 +28,26 @@ test("Labelizer.strParse('&#x03BB') returns [{'base':'&#x03BB', 'sub':undefined,
   t.deepEqual(Labelizer.strParse('&#x03BB'), [{ base: '&#x03BB', sub: undefined, sup: undefined }]);
   t.end();
 });
-test("Labelizer.strParse('&#x03BB_&#x03BB^&#x03BB') "
-  + "returns [{'base':'&#x03BB', 'sub':'&#x03BB', 'sup':'&#x03BB'}]", (t) => {
-    t.deepEqual(Labelizer.strParse('&#x03BB_&#x03BB^&#x03BB'),
-      [{ base: '&#x03BB', sub: '&#x03BB', sup: '&#x03BB' }]);
+test(
+  "Labelizer.strParse('&#x03BB_&#x03BB^&#x03BB') " +
+    "returns [{'base':'&#x03BB', 'sub':'&#x03BB', 'sup':'&#x03BB'}]",
+  (t) => {
+    t.deepEqual(Labelizer.strParse('&#x03BB_&#x03BB^&#x03BB'), [
+      { base: '&#x03BB', sub: '&#x03BB', sup: '&#x03BB' },
+    ]);
     t.end();
-  });
-test("Labelizer.strParse('Optimization') "
-  + "returns [{'base':'Optimization', 'sub':undefined, 'sup':undefined}]", (t) => {
-    t.deepEqual(Labelizer.strParse('Optimization'), [{ base: 'Optimization', sub: undefined, sup: undefined }]);
+  }
+);
+test(
+  "Labelizer.strParse('Optimization') " +
+    "returns [{'base':'Optimization', 'sub':undefined, 'sup':undefined}]",
+  (t) => {
+    t.deepEqual(Labelizer.strParse('Optimization'), [
+      { base: 'Optimization', sub: undefined, sup: undefined },
+    ]);
     t.end();
-  });
+  }
+);
 
 test("Labelizer.strParse('x_12') returns [{'base':'x', 'sub': '12', 'sup':undefined}]", (t) => {
   t.deepEqual(Labelizer.strParse('x_12'), [{ base: 'x', sub: '12', sup: undefined }]);
@@ -45,22 +58,31 @@ test("Labelizer.strParse('x_13^{(0)}') returns [{'base':'x', 'sub': '13', 'sup':
   t.deepEqual(Labelizer.strParse('x_13^{(0)}'), [{ base: 'x', sub: '13', sup: '{(0)}' }]);
   t.end();
 });
-test("Labelizer.strParse('x_13^0, y_1^{*}') returns [{'base': 'x', 'sub': '13', 'sup': '{*}'}, "
-  + "{'base':'y', 'sub': '1', 'sup': '*'}]", (t) => {
-    t.deepEqual(Labelizer.strParse('x_13^{(0)}, y_1^{*}'), [{ base: 'x', sub: '13', sup: '{(0)}' },
-    { base: 'y', sub: '1', sup: '{*}' }]);
+test(
+  "Labelizer.strParse('x_13^0, y_1^{*}') returns [{'base': 'x', 'sub': '13', 'sup': '{*}'}, " +
+    "{'base':'y', 'sub': '1', 'sup': '*'}]",
+  (t) => {
+    t.deepEqual(Labelizer.strParse('x_13^{(0)}, y_1^{*}'), [
+      { base: 'x', sub: '13', sup: '{(0)}' },
+      { base: 'y', sub: '1', sup: '{*}' },
+    ]);
     t.end();
-  });
+  }
+);
 test("Labelizer.strParse('1:Opt') returns [{'base':'1:Opt', 'sub':undefined, 'sup':undefined}]", (t) => {
   t.deepEqual(Labelizer.strParse('1:Opt'), [{ base: '1:Opt', sub: undefined, sup: undefined }]);
   t.end();
 });
 test("Labelizer.strParse('1:L-BFGS-B') returns [{'base':'1:L-BFGS-B', 'sub':undefined, 'sup':undefined}]", (t) => {
-  t.deepEqual(Labelizer.strParse('1:L-BFGS-B'), [{ base: '1:L-BFGS-B', sub: undefined, sup: undefined }]);
+  t.deepEqual(Labelizer.strParse('1:L-BFGS-B'), [
+    { base: '1:L-BFGS-B', sub: undefined, sup: undefined },
+  ]);
   t.end();
 });
 test("Labelizer.strParse('y_12_y_34') returns [{'base':'y_12_y_34', 'sub':undefined, 'sup':undefined}]", (t) => {
-  t.deepEqual(Labelizer.strParse('y_12_y_34'), [{ base: 'y_12_y_34', sub: undefined, sup: undefined }]);
+  t.deepEqual(Labelizer.strParse('y_12_y_34'), [
+    { base: 'y_12_y_34', sub: undefined, sup: undefined },
+  ]);
   t.end();
 });
 test("Labelizer.strParse('y_12_y_34^*') returns [{'base':'y_12_y_34', 'sub':undefined, 'sup':'*'}]", (t) => {
@@ -112,102 +134,170 @@ test("Graph.expand(['a', ['b1', 'b2'], 'c']) returns [['a', 'b1', 'b2', 'a', 'c'
   t.end();
 });
 test("Graph.expand(['a0', ['b1', 'b2', 'b3'], 'c3']) returns [['a0', 'b1', 'b2', 'b3', 'a0', 'c3']]", (t) => {
-  t.deepEqual(Graph.expand(['a0', ['b1', 'b2', 'b3'], 'c3']), [['a0', 'b1', 'b2', 'b3', 'a0', 'c3']]);
+  t.deepEqual(Graph.expand(['a0', ['b1', 'b2', 'b3'], 'c3']), [
+    ['a0', 'b1', 'b2', 'b3', 'a0', 'c3'],
+  ]);
   t.end();
 });
 test("Graph.expand(['opt', ['mda', ['d1', 'd2', 'd3'],'func']]) returns [['opt', 'mda', 'd1', 'd2', 'd3', 'mda','func', 'opt']]", (t) => {
-  t.deepEqual(Graph.expand(['opt', ['mda', ['d1', 'd2', 'd3'], 'func']]),
-    [['opt', 'mda', 'd1', 'd2', 'd3', 'mda', 'func', 'opt']]);
+  t.deepEqual(Graph.expand(['opt', ['mda', ['d1', 'd2', 'd3'], 'func']]), [
+    ['opt', 'mda', 'd1', 'd2', 'd3', 'mda', 'func', 'opt'],
+  ]);
   t.end();
 });
 test("Graph.expand([{parallel: ['d1', 'd2']}]) returns [[d1], [d2]]", (t) => {
-  t.deepEqual(Graph.expand([{ parallel: ['d1', 'd2'] }]),
-    [['d1'], ['d2']]);
+  t.deepEqual(Graph.expand([{ parallel: ['d1', 'd2'] }]), [['d1'], ['d2']]);
   t.end();
 });
 test("Graph.expand([{parallel: ['d1', 'd2']}]) returns [[d1], [d2]]", (t) => {
-  t.deepEqual(Graph.expand([{ parallel: ['d1', 'd2'] }]),
-    [['d1'], ['d2']]);
+  t.deepEqual(Graph.expand([{ parallel: ['d1', 'd2'] }]), [['d1'], ['d2']]);
   t.end();
 });
 test("Graph.expand(['opt', {parallel: ['d1', 'd2', 'd3']}]) returns [['opt', 'd1'], ['opt', 'd2'], ['opt', 'd3']]", (t) => {
-  t.deepEqual(Graph.expand(['opt', { parallel: ['d1', 'd2', 'd3'] }]),
-    [['opt', 'd1'], ['opt', 'd2'], ['opt', 'd3']]);
+  t.deepEqual(Graph.expand(['opt', { parallel: ['d1', 'd2', 'd3'] }]), [
+    ['opt', 'd1'],
+    ['opt', 'd2'],
+    ['opt', 'd3'],
+  ]);
   t.end();
 });
 test("Graph.expand(['opt', [{parallel: ['d1', 'd2', 'd3']}]]) returns [['opt', 'd1', 'opt'], ['opt', 'd2', 'opt'], ['opt', 'd3', 'opt']]", (t) => {
-  t.deepEqual(Graph.expand(['opt', [{ parallel: ['d1', 'd2', 'd3'] }]]),
-    [['opt', 'd1', 'opt'], ['opt', 'd2', 'opt'], ['opt', 'd3', 'opt']]);
+  t.deepEqual(Graph.expand(['opt', [{ parallel: ['d1', 'd2', 'd3'] }]]), [
+    ['opt', 'd1', 'opt'],
+    ['opt', 'd2', 'opt'],
+    ['opt', 'd3', 'opt'],
+  ]);
   t.end();
 });
 test("Graph.expand(['mda', {parallel: ['d1', 'd2', 'd3']}, 'd4']) returns [['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4']]", (t) => {
-  t.deepEqual(Graph.expand(['mda', { parallel: ['d1', 'd2', 'd3'] }, 'd4']),
-    [['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4']]);
+  t.deepEqual(Graph.expand(['mda', { parallel: ['d1', 'd2', 'd3'] }, 'd4']), [
+    ['mda', 'd1', 'd4'],
+    ['mda', 'd2', 'd4'],
+    ['mda', 'd3', 'd4'],
+  ]);
   t.end();
 });
 test("Graph.expand(['opt', 'mda', {parallel: ['d1', 'd2', 'd3']}, 'd4']]) returns [['opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4']]", (t) => {
-  t.deepEqual(Graph.expand(['opt', 'mda', { parallel: ['d1', 'd2', 'd3'] }, 'd4']),
-    [['opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4']]);
+  t.deepEqual(Graph.expand(['opt', 'mda', { parallel: ['d1', 'd2', 'd3'] }, 'd4']), [
+    ['opt', 'mda'],
+    ['mda', 'd1', 'd4'],
+    ['mda', 'd2', 'd4'],
+    ['mda', 'd3', 'd4'],
+  ]);
   t.end();
 });
 test("Graph.expand(['opt', ['mda', {parallel: ['d1', 'd2', 'd3']}, 'd4']]) returns [['opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4'], ['d4', 'opt']]", (t) => {
-  t.deepEqual(Graph.expand(['opt', ['mda', { parallel: ['d1', 'd2', 'd3'] }, 'd4']]),
-    [['opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4'], ['d4', 'opt']]);
+  t.deepEqual(Graph.expand(['opt', ['mda', { parallel: ['d1', 'd2', 'd3'] }, 'd4']]), [
+    ['opt', 'mda'],
+    ['mda', 'd1', 'd4'],
+    ['mda', 'd2', 'd4'],
+    ['mda', 'd3', 'd4'],
+    ['d4', 'opt'],
+  ]);
   t.end();
 });
 test("Graph.expand((['_U_', ['opt', ['mda', {parallel: ['d1', 'd2', 'd3']}, 'd4']]]) returns [['_U_', 'opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4'], ['d4', 'opt', '_U_']]", (t) => {
-  t.deepEqual(Graph.expand(['_U_', ['opt', ['mda', { parallel: ['d1', 'd2', 'd3'] }, 'd4']]]),
-    [['_U_', 'opt', 'mda'], ['mda', 'd1', 'd4'], ['mda', 'd2', 'd4'], ['mda', 'd3', 'd4'], ['d4', 'opt', '_U_']]);
+  t.deepEqual(Graph.expand(['_U_', ['opt', ['mda', { parallel: ['d1', 'd2', 'd3'] }, 'd4']]]), [
+    ['_U_', 'opt', 'mda'],
+    ['mda', 'd1', 'd4'],
+    ['mda', 'd2', 'd4'],
+    ['mda', 'd3', 'd4'],
+    ['d4', 'opt', '_U_'],
+  ]);
   t.end();
 });
 test("Graph.expand((['_U_', ['opt', ['mda', ['d1', 'd2']]]]) returns [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda', 'opt', '_U_']]", (t) => {
-  t.deepEqual(Graph.expand(['_U_', ['opt', ['mda', ['d1', 'd2']]]]),
-    [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda', 'opt', '_U_']]);
+  t.deepEqual(Graph.expand(['_U_', ['opt', ['mda', ['d1', 'd2']]]]), [
+    ['_U_', 'opt', 'mda', 'd1', 'd2', 'mda', 'opt', '_U_'],
+  ]);
   t.end();
 });
 test("Graph.expand((['_U_', ['opt', ['mda', ['d1', 'd2'], 'mda', ['d1', 'd2']]]]) returns [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda', 'mda', 'd1', 'd2', 'mda', 'opt', '_U_']]", (t) => {
-  t.deepEqual(Graph.expand(['_U_', ['opt', ['mda', ['d1', 'd2'], 'mda', ['d1', 'd2']]]]),
-    [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda', 'mda', 'd1', 'd2', 'mda', 'opt', '_U_']]);
+  t.deepEqual(Graph.expand(['_U_', ['opt', ['mda', ['d1', 'd2'], 'mda', ['d1', 'd2']]]]), [
+    ['_U_', 'opt', 'mda', 'd1', 'd2', 'mda', 'mda', 'd1', 'd2', 'mda', 'opt', '_U_'],
+  ]);
   t.end();
 });
 test("Graph.expand((['_U_', ['opt', ['mda', ['d1', 'd2'], {parallel: ['sc1', 'sc2']},'mda', ['d1', 'd2']]]]) returns [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda'], ['mda', 'sc1', 'mda'], ['mda', 'sc2', 'mda'], ['mda', 'd1', 'd2', 'mda', 'opt', '_U_']]", (t) => {
-  t.deepEqual(Graph.expand(['_U_', ['opt', ['mda', ['d1', 'd2'], { parallel: ['sc1', 'sc2'] }, 'mda', ['d1', 'd2']]]]),
-    [['_U_', 'opt', 'mda', 'd1', 'd2', 'mda'], ['mda', 'sc1', 'mda'], ['mda', 'sc2', 'mda'], ['mda', 'd1', 'd2', 'mda', 'opt', '_U_']]);
+  t.deepEqual(
+    Graph.expand([
+      '_U_',
+      ['opt', ['mda', ['d1', 'd2'], { parallel: ['sc1', 'sc2'] }, 'mda', ['d1', 'd2']]],
+    ]),
+    [
+      ['_U_', 'opt', 'mda', 'd1', 'd2', 'mda'],
+      ['mda', 'sc1', 'mda'],
+      ['mda', 'sc2', 'mda'],
+      ['mda', 'd1', 'd2', 'mda', 'opt', '_U_'],
+    ]
+  );
   t.end();
 });
 test("Graph.expand((['d1', {parallel: ['sc1', 'sc2']}, 'd2']) returns [['d1', 'sc1', 'd2'], ['d1', 'sc2', 'd2']]", (t) => {
-  t.deepEqual(Graph.expand(['d1', { parallel: ['sc1', 'sc2'] }, 'd2']), [['d1', 'sc1', 'd2'], ['d1', 'sc2', 'd2']]);
+  t.deepEqual(Graph.expand(['d1', { parallel: ['sc1', 'sc2'] }, 'd2']), [
+    ['d1', 'sc1', 'd2'],
+    ['d1', 'sc2', 'd2'],
+  ]);
   t.end();
 });
 test("Graph.expand((['opt', ['d1', {parallel: ['sc1', 'sc2']}]]) returns [['opt', 'd1'] ['d1', 'sc1', 'opt'], ['d1', 'sc2', 'opt']]", (t) => {
-  t.deepEqual(Graph.expand(['opt', ['d1', { parallel: ['sc1', 'sc2'] }]]), [['opt', 'd1'], ['d1', 'sc1', 'opt'], ['d1', 'sc2', 'opt'], ['opt', 'opt']]);
+  t.deepEqual(Graph.expand(['opt', ['d1', { parallel: ['sc1', 'sc2'] }]]), [
+    ['opt', 'd1'],
+    ['d1', 'sc1', 'opt'],
+    ['d1', 'sc2', 'opt'],
+    ['opt', 'opt'],
+  ]);
   t.end();
 });
 test('Graph.chains should expand as list of index couples', (t) => {
   const g = new Graph({
-    nodes: [{ id: 'Opt', name: 'Opt' },
-    { id: 'MDA', name: 'MDA' },
-    { id: 'DA1', name: 'DA1' },
-    { id: 'DA2', name: 'DA2' },
-    { id: 'DA3', name: 'DA3' },
-    { id: 'Func', name: 'Func' }],
+    nodes: [
+      { id: 'Opt', name: 'Opt' },
+      { id: 'MDA', name: 'MDA' },
+      { id: 'DA1', name: 'DA1' },
+      { id: 'DA2', name: 'DA2' },
+      { id: 'DA3', name: 'DA3' },
+      { id: 'Func', name: 'Func' },
+    ],
     edges: [],
     workflow: ['Opt', ['MDA', ['DA1', 'DA2', 'DA3'], 'Func']],
   });
-  t.deepEqual(g.chains, [[[1, 2], [2, 3], [3, 4], [4, 5], [5, 2], [2, 6], [6, 1]]]);
+  t.deepEqual(g.chains, [
+    [
+      [1, 2],
+      [2, 3],
+      [3, 4],
+      [4, 5],
+      [5, 2],
+      [2, 6],
+      [6, 1],
+    ],
+  ]);
   t.end();
 });
 test('Graph.chains should expand as list of index couples', (t) => {
   const g = new Graph({
-    nodes: [{ id: 'Opt', name: 'Opt' },
-    { id: 'DA1', name: 'DA1' },
-    { id: 'DA2', name: 'DA2' },
-    { id: 'DA3', name: 'DA3' },
-    { id: 'Func', name: 'Func' }],
+    nodes: [
+      { id: 'Opt', name: 'Opt' },
+      { id: 'DA1', name: 'DA1' },
+      { id: 'DA2', name: 'DA2' },
+      { id: 'DA3', name: 'DA3' },
+      { id: 'Func', name: 'Func' },
+    ],
     edges: [],
     workflow: [['Opt', ['DA1'], 'Opt', ['DA2'], 'Opt', ['DA3'], 'Func']],
   });
-  t.deepEqual(g.chains, [[[1, 2], [2, 1], [1, 3], [3, 1], [1, 4], [4, 1], [1, 5]]]);
+  t.deepEqual(g.chains, [
+    [
+      [1, 2],
+      [2, 1],
+      [1, 3],
+      [3, 1],
+      [1, 4],
+      [4, 1],
+      [1, 5],
+    ],
+  ]);
   t.end();
 });
 test("Graph.number(['d1']) returns {'toNum':{d1: '0'}, 'toNodes':[['d1']])", (t) => {
@@ -234,44 +324,72 @@ test("Graph.number(['mda', 'd1']) returns {'toNum':{mda:'0', d1: '1'}, 'toNode':
 });
 test("Graph.number(['mda', 'd1', 'd2', 'd3']) returns {mda: '0', d1: '1', d2: '2', d3: '3'})", (t) => {
   t.deepEqual(Graph.number(['mda', 'd1', 'd2', 'd3']).toNum, {
-    mda: '0', d1: '1', d2: '2', d3: '3',
+    mda: '0',
+    d1: '1',
+    d2: '2',
+    d3: '3',
   });
   t.end();
 });
 test("Graph.number(['mda', ['d1', 'd2', 'd3']]) returns {mda: '0,4-1', d1: '1', d2: '2', d3: '3'} )", (t) => {
   t.deepEqual(Graph.number(['mda', ['d1', 'd2', 'd3']]).toNum, {
-    mda: '0,4-1', d1: '1', d2: '2', d3: '3',
+    mda: '0,4-1',
+    d1: '1',
+    d2: '2',
+    d3: '3',
   });
   t.end();
 });
 test("Graph.number(['mda', {parallel:['d1', 'd2', 'd3']}]) returns {'mda': '0', 'd1': '1', 'd2': '1', 'd3': '1'})", (t) => {
   t.deepEqual(Graph.number(['mda', { parallel: ['d1', 'd2', 'd3'] }]).toNum, {
-    mda: '0', d1: '1', d2: '1', d3: '1',
+    mda: '0',
+    d1: '1',
+    d2: '1',
+    d3: '1',
   });
   t.end();
 });
 test("Graph.number(['mda', [{parallel:['d1', 'd2', 'd3']}]]) returns {'toNum':{'mda': '0,2-1', 'd1': '1', 'd2': '1', 'd3': '1'}, 'toNode':[['mda'], ['d1','d2','d3']]})", (t) => {
   t.deepEqual(Graph.number(['mda', [{ parallel: ['d1', 'd2', 'd3'] }]]).toNum, {
-    mda: '0,2-1', d1: '1', d2: '1', d3: '1',
+    mda: '0,2-1',
+    d1: '1',
+    d2: '1',
+    d3: '1',
   });
-  t.deepEqual(Graph.number(['mda', [{ parallel: ['d1', 'd2', 'd3'] }]]).toNode, [['mda'], ['d1', 'd2', 'd3'], ['mda']]);
+  t.deepEqual(Graph.number(['mda', [{ parallel: ['d1', 'd2', 'd3'] }]]).toNode, [
+    ['mda'],
+    ['d1', 'd2', 'd3'],
+    ['mda'],
+  ]);
   t.end();
 });
 test("Graph.number(['opt', 'mda', ['d1', 'd2', 'd3']]) returns {'opt': '0', 'mda': '1,5-2', 'd1': '2', 'd2': '3', 'd3': '4'})", (t) => {
   t.deepEqual(Graph.number(['opt', 'mda', ['d1', 'd2', 'd3']]).toNum, {
-    opt: '0', mda: '1,5-2', d1: '2', d2: '3', d3: '4',
+    opt: '0',
+    mda: '1,5-2',
+    d1: '2',
+    d2: '3',
+    d3: '4',
   });
   t.end();
 });
 test("Graph.number([['opt', ['mda', ['d1', 'd2', 'd3']]], 'd4']) returns {'opt': '0,6-1', 'mda': '1,5-2', 'd1': '2', 'd2': '3', 'd3': '4', 'd4': '7'})", (t) => {
   t.deepEqual(Graph.number([['opt', ['mda', ['d1', 'd2', 'd3']]], 'd4']).toNum, {
-    opt: '0,6-1', mda: '1,5-2', d1: '2', d2: '3', d3: '4', d4: '7',
+    opt: '0,6-1',
+    mda: '1,5-2',
+    d1: '2',
+    d2: '3',
+    d3: '4',
+    d4: '7',
   });
   t.end();
 });
 test("Graph.number([['Opt', ['mda', ['d1'], 's1']]]) returns {'Opt': '0,5-1', 'mda': '1,3-2', 'd1': '2', 's1': '4'})", (t) => {
   t.deepEqual(Graph.number([['Opt', ['mda', ['d1'], 's1']]]).toNum, {
-    Opt: '0,5-1', mda: '1,3-2', d1: '2', s1: '4',
+    Opt: '0,5-1',
+    mda: '1,3-2',
+    d1: '2',
+    s1: '4',
   });
   t.end();
 });
@@ -279,11 +397,13 @@ test("Graph.number([['Opt', ['mda', ['d1'], 's1']]]) returns {'Opt': '0,5-1', 'm
 function makeGraph() {
   const mdo = {
     nodes: [{ id: 'A' }, { id: 'B' }, { id: 'C' }, { id: 'D' }, { id: 'E' }],
-    edges: [{ from: 'A', to: 'B', name: 'a, b' },
-    { from: 'C', to: 'A', name: 'CA' },
-    { from: 'C', to: 'B', name: 'CB' },
-    { from: 'C', to: 'D', name: 'CD' },
-    { from: 'E', to: 'A', name: 'EA' }],
+    edges: [
+      { from: 'A', to: 'B', name: 'a, b' },
+      { from: 'C', to: 'A', name: 'CA' },
+      { from: 'C', to: 'B', name: 'CB' },
+      { from: 'C', to: 'D', name: 'CD' },
+      { from: 'E', to: 'A', name: 'EA' },
+    ],
     workflow: [],
   };
   return new Graph(mdo);
@@ -291,11 +411,20 @@ function makeGraph() {
 test('Graph.findEdgesOf(nodeIdx) returns edges to remove and edges to delete in case of node removal', (t) => {
   const g = makeGraph();
   // find edges if A removed
-  t.deepEqual(g.findEdgesOf(1), { toRemove: [g.edges[0], g.edges[1], g.edges[4]], toShift: [g.edges[2], g.edges[3]] });
+  t.deepEqual(g.findEdgesOf(1), {
+    toRemove: [g.edges[0], g.edges[1], g.edges[4]],
+    toShift: [g.edges[2], g.edges[3]],
+  });
   // find edges if C removed
-  t.deepEqual(g.findEdgesOf(3), { toRemove: [g.edges[1], g.edges[2], g.edges[3]], toShift: [g.edges[4]] });
+  t.deepEqual(g.findEdgesOf(3), {
+    toRemove: [g.edges[1], g.edges[2], g.edges[3]],
+    toShift: [g.edges[4]],
+  });
   // find edges if D removed
-  t.deepEqual(g.findEdgesOf(4), { toRemove: [g.edges[3]], toShift: [g.edges[4]] });
+  t.deepEqual(g.findEdgesOf(4), {
+    toRemove: [g.edges[3]],
+    toShift: [g.edges[4]],
+  });
   t.end();
 });
 test('Graph.addNode()', (t) => {
@@ -339,10 +468,11 @@ test('Graph nodes have a status UNKNOWN by default', (t) => {
 });
 test('Graph nodes can be to a given status PENDING, RUNNING, DONE or FAILED', (t) => {
   const g = new Graph({
-    nodes: [{ id: 'A', status: 'PENDING' },
-    { id: 'B', status: 'RUNNING' },
-    { id: 'C', status: 'DONE' },
-    { id: 'D', status: 'FAILED' },
+    nodes: [
+      { id: 'A', status: 'PENDING' },
+      { id: 'B', status: 'RUNNING' },
+      { id: 'C', status: 'DONE' },
+      { id: 'D', status: 'FAILED' },
     ],
   });
   t.deepEqual(g.getNode('A').status, Graph.NODE_STATUS.PENDING);
@@ -367,11 +497,13 @@ test('Graph edge can have vars infos id/names from name', (t) => {
 function makeGraph2() {
   const mdo = {
     nodes: [{ id: 'A' }, { id: 'B' }, { id: 'C' }, { id: 'D' }, { id: 'E' }],
-    edges: [{ from: 'A', to: 'B', vars: { 1: 'a', 2: 'b' } },
-    { from: 'C', to: 'A', vars: { 1: 'a', 3: 'c' } },
-    { from: 'C', to: 'B', vars: { 3: 'c', 2: 'b' } },
-    { from: 'C', to: 'D', vars: { 3: 'c', 4: 'd' } },
-    { from: 'E', to: 'A', vars: { 5: 'e', 1: 'a' } }],
+    edges: [
+      { from: 'A', to: 'B', vars: { 1: 'a', 2: 'b' } },
+      { from: 'C', to: 'A', vars: { 1: 'a', 3: 'c' } },
+      { from: 'C', to: 'B', vars: { 3: 'c', 2: 'b' } },
+      { from: 'C', to: 'D', vars: { 3: 'c', 4: 'd' } },
+      { from: 'E', to: 'A', vars: { 5: 'e', 1: 'a' } },
+    ],
     workflow: [],
   };
   return new Graph(mdo);
@@ -450,24 +582,41 @@ test('Remove edge all vars between two given nodes', (t) => {
   t.end();
 });
 test('find XDSMs order list', (t) => {
-  t.deepEqual(XdsmFactory._orderedList({
-    C: { nodes: [] },
-    B: { nodes: [] },
-    root: { nodes: [{ name: 'a', subxdsm: 'A' }] },
-    A: { nodes: [{ name: 'c', subxdsm: 'C' }, { name: 'b', subxdsm: 'B' }] },
-  }, 'root'), ['root', 'A', 'C', 'B']);
+  t.deepEqual(
+    XdsmFactory._orderedList(
+      {
+        C: { nodes: [] },
+        B: { nodes: [] },
+        root: { nodes: [{ name: 'a', subxdsm: 'A' }] },
+        A: {
+          nodes: [
+            { name: 'c', subxdsm: 'C' },
+            { name: 'b', subxdsm: 'B' },
+          ],
+        },
+      },
+      'root'
+    ),
+    ['root', 'A', 'C', 'B']
+  );
   t.end();
 });
 test('find XDSMs list of single', (t) => {
-  t.deepEqual(XdsmFactory._orderedList({
-    root: { nodes: [{ name: 'a', subxdsm: 'A' }] },
-    A: { nodes: [{ name: 'c' }, { name: 'b' }] },
-  }), ['root', 'A']);
+  t.deepEqual(
+    XdsmFactory._orderedList({
+      root: { nodes: [{ name: 'a', subxdsm: 'A' }] },
+      A: { nodes: [{ name: 'c' }, { name: 'b' }] },
+    }),
+    ['root', 'A']
+  );
   t.end();
 });
 test('find XDSMs list of empty xdsms', (t) => {
-  t.deepEqual(XdsmFactory._orderedList({
-    root: { nodes: [] },
-  }), ['root']);
+  t.deepEqual(
+    XdsmFactory._orderedList({
+      root: { nodes: [] },
+    }),
+    ['root']
+  );
   t.end();
 });

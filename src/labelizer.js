@@ -1,4 +1,4 @@
-function Labelizer() { }
+function Labelizer() {}
 
 Labelizer.strParse = function strParse(str, subSupScript) {
   if (str === '') {
@@ -43,7 +43,14 @@ Labelizer.strParse = function strParse(str, subSupScript) {
 };
 
 // eslint-disable-next-line max-len
-Labelizer._createVarListLabel = function _createVarListLabel(selection, name, text, ellipsis, subSupScript, subXdsmLink) {
+Labelizer._createVarListLabel = function _createVarListLabel(
+  selection,
+  name,
+  text,
+  ellipsis,
+  subSupScript,
+  subXdsmLink
+) {
   const tokens = Labelizer.strParse(name, subSupScript);
 
   tokens.every((token, i, ary) => {
@@ -58,14 +65,12 @@ Labelizer._createVarListLabel = function _createVarListLabel(selection, name, te
       });
       if (token.sub) {
         offsetSub = 10;
-        text.append('tspan')
-          .attr('class', 'sub')
-          .attr('dy', offsetSub)
-          .html(token.sub);
+        text.append('tspan').attr('class', 'sub').attr('dy', offsetSub).html(token.sub);
       }
       if (token.sup) {
         offsetSup = -10;
-        text.append('tspan')
+        text
+          .append('tspan')
           .attr('class', 'sup')
           .attr('dx', -5)
           .attr('dy', -offsetSub + offsetSup)
@@ -73,14 +78,16 @@ Labelizer._createVarListLabel = function _createVarListLabel(selection, name, te
         offsetSub = 0;
       }
     } else {
-      text.append('tspan')
+      text
+        .append('tspan')
         .attr('dy', -offsetSub - offsetSup)
         .html('...');
       selection.classed('ellipsized', true);
       return false;
     }
     if (i < ary.length - 1) {
-      text.append('tspan')
+      text
+        .append('tspan')
         .attr('dy', -offsetSub - offsetSup)
         .html(', ');
     }
@@ -108,7 +115,8 @@ Labelizer.labelize = function labelize() {
   function createLabel(selection) {
     selection.each((d) => {
       const text = selection.append('text');
-      if (linkNbOnly && labelKind !== 'node') { // show connexion nb
+      if (linkNbOnly && labelKind !== 'node') {
+        // show connexion nb
         Labelizer._createLinkNbLabel(selection, d.name, text);
       } else {
         Labelizer._createVarListLabel(selection, d.name, text, ellipsis, subSupScript, subXdsmLink);

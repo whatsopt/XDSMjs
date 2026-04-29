@@ -90,12 +90,7 @@
         "Opt",
         [
           {
-            "parallel": [
-              "Dis1",
-              "Dis2",
-              "Dis3",
-              "Dis4"
-            ]
+            "parallel": ["Dis1", "Dis2", "Dis3", "Dis4"]
           }
         ]
       ]

@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update dependencies: d3 v7
 - Use `viewBox` attribute to make the `svg` really scalable in its container element
-- Declare `xdsmjs` an ESM module only (`type: 'module'` in `package.json`, ie require `node v12+`)  
+- Declare `xdsmjs` an ESM module only (`type: 'module'` in `package.json`, ie require `node v12+`)
 
 ## 1.0.0 - 2020-09-23
 
@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix packaging to publish on npm
-- Fix XDSMjs API :  add `createSelectableXdsm(xdsmFormat, callback)`
+- Fix XDSMjs API : add `createSelectableXdsm(xdsmFormat, callback)`
 
 ## 0.8.0 - 2019-04-25
 
@@ -47,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support XDSM v2
 - Add eslint airbnb config
 
-### Changed 
+### Changed
 
 - Upgrade dependencies
 
@@ -67,4 +67,4 @@ This version is embedded in [OpenMDAO 2.6](https://github.com/OpenMDAO/OpenMDAO)
 
 - Add XDSMjs display configuration : `config.labelizer` and `config.layout`
 - Manage optional node status: `PENDING`, `RUNNING`, `FAILED`, `DONE`
-- Basic XDSM edition (undocumented, experimental) 
+- Basic XDSM edition (undocumented, experimental)

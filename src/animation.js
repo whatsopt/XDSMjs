@@ -11,7 +11,7 @@ const DONE_COLOR = rgb('darkcyan');
 
 function Animation(xdsms, rootId, delay) {
   this.rootId = rootId;
-  if (typeof (rootId) === 'undefined') {
+  if (typeof rootId === 'undefined') {
     this.rootId = 'root';
   }
   this.root = xdsms[this.rootId];
@@ -64,14 +64,13 @@ Animation.prototype.setXdsmVersion = function setXdsmVersion(version) {
 };
 
 Animation.prototype._step = function _step(dir) {
-  const backward = (dir === 'prev');
+  const backward = dir === 'prev';
   const self = this;
   const { graph } = self.xdsms[self.rootId];
   const { nodesByStep } = graph;
   const incr = backward ? -1 : 1;
 
-  if ((!backward && self.done())
-    || (backward && self.ready())) {
+  if ((!backward && self.done()) || (backward && self.ready())) {
     return;
   }
 
@@ -178,11 +177,11 @@ Animation.prototype._notifyObservers = function _notifyObservers() {
 
 Animation.prototype._pulse = function _pulse(delay, toBeSelected, easeInOut, color) {
   const colour = color || RUNNING_COLOR;
-  let sel = select(`svg#${this.rootId}`)
-    .selectAll(toBeSelected)
-    .transition().delay(delay);
+  let sel = select(`svg#${this.rootId}`).selectAll(toBeSelected).transition().delay(delay);
   if (easeInOut !== 'out') {
-    sel = sel.transition().duration(200)
+    sel = sel
+      .transition()
+      .duration(200)
       .style('stroke-width', '8px')
       .style('stroke', colour)
       .style('fill', (d) => {
@@ -193,7 +192,9 @@ Animation.prototype._pulse = function _pulse(delay, toBeSelected, easeInOut, col
       });
   }
   if (easeInOut !== 'in') {
-    sel.transition().duration(3 * PULSE_DURATION)
+    sel
+      .transition()
+      .duration(3 * PULSE_DURATION)
       .style('stroke-width', null)
       .style('stroke', null)
       .style('fill', null);
@@ -215,8 +216,10 @@ Animation.prototype._pulseLink = function _pulseLink(delay, fromId, toId) {
 Animation.prototype._onAnimationStart = function _onAnimationStart(delay) {
   const title = select(`svg#${this.rootId}`).select('g.title');
   title.select('text').transition().delay(delay).style('fill', RUNNING_COLOR);
-  select(`svg#${this.rootId}`).select('rect.border')
-    .transition().delay(delay)
+  select(`svg#${this.rootId}`)
+    .select('rect.border')
+    .transition()
+    .delay(delay)
     .style('stroke-width', '5px')
     .duration(200)
     .transition()
@@ -228,7 +231,9 @@ Animation.prototype._onAnimationStart = function _onAnimationStart(delay) {
 Animation.prototype._onAnimationDone = function _onAnimationDone(delay) {
   const self = this;
   const title = select(`svg#${this.rootId}`).select('g.title');
-  title.select('text').transition()
+  title
+    .select('text')
+    .transition()
     .delay(delay)
     .style('fill', null)
     .on('end', () => {
@@ -239,8 +244,12 @@ Animation.prototype._onAnimationDone = function _onAnimationDone(delay) {
 Animation.prototype._isSubXdsm = function _isSubXdsm(nodeId) {
   const gnode = `g.id${nodeId}`;
   const nodeSel = select(`svg#${this.rootId}`).select(gnode);
-  return nodeSel.classed('mdo') || nodeSel.classed('sub-optimization')
-    || nodeSel.classed('group') || nodeSel.classed('implicit-group');
+  return (
+    nodeSel.classed('mdo') ||
+    nodeSel.classed('sub-optimization') ||
+    nodeSel.classed('group') ||
+    nodeSel.classed('implicit-group')
+  );
 };
 
 Animation.prototype._scheduleAnimation = function _scheduleAnimation() {
@@ -257,7 +266,8 @@ Animation.prototype._scheduleAnimation = function _scheduleAnimation() {
       const elapsed = delay + n * PULSE_DURATION;
 
       if (n > 0) {
-        nodesByStep[n - 1].forEach((prevNodeId) => { // eslint-disable-line space-infix-ops
+        nodesByStep[n - 1].forEach((prevNodeId) => {
+          // eslint-disable-line space-infix-ops
           self._pulseLink(elapsed, prevNodeId, nodeId);
         });
 
@@ -291,24 +301,33 @@ Animation.prototype._reset = function _reset(all) {
   if (all) {
     svg = selectAll('svg');
   }
-  svg.selectAll('rect').transition().duration(0)
+  svg.selectAll('rect').transition().duration(0).style('stroke-width', null).style('stroke', null);
+  svg
+    .selectAll('polygon')
+    .transition()
+    .duration(0)
     .style('stroke-width', null)
     .style('stroke', null);
-  svg.selectAll('polygon').transition().duration(0)
-    .style('stroke-width', null)
-    .style('stroke', null);
-  svg.selectAll('.title > text').transition().duration(0)
-    .style('fill', null);
+  svg.selectAll('.title > text').transition().duration(0).style('fill', null);
 
-  svg.selectAll('.node > rect').transition().duration(0)
+  svg
+    .selectAll('.node > rect')
+    .transition()
+    .duration(0)
     .style('stroke-width', null)
     .style('stroke', null)
     .style('fill', null);
-  svg.selectAll('.node > polygon').transition().duration(0)
+  svg
+    .selectAll('.node > polygon')
+    .transition()
+    .duration(0)
     .style('stroke-width', null)
     .style('stroke', null)
     .style('fill', null);
-  svg.selectAll('path').transition().duration(0)
+  svg
+    .selectAll('path')
+    .transition()
+    .duration(0)
     .style('stroke-width', null)
     .style('stroke', null)
     .style('fill', null);

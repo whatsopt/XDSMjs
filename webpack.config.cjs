@@ -4,7 +4,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 module.exports = {
   mode: 'development',
   entry: {
-    xdsmjs: './src/index.js'
+    xdsmjs: './src/index.js',
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -35,8 +35,10 @@ module.exports = {
   },
   optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin({
-      extractComments: false,
-    })],
+    minimizer: [
+      new TerserPlugin({
+        extractComments: false,
+      }),
+    ],
   },
 };
