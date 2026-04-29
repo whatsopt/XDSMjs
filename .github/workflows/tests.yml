@@ -32,3 +32,5 @@ jobs:
         run: npm test
       - name: Coverage
         run: npm run test:coverage:check
+      - name: Package smoke check
+        run: npm run pack:check
