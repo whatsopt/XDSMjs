@@ -12,28 +12,31 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
+        node-version: [20.19.x, 22.13.x]
 
     steps:
       - uses: actions/checkout@v6
-      - name: Enable Corepack
-        run: corepack enable
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: yarn
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@4.14.1 --activate
+          corepack yarn --version
       - name: Install dependencies
-        run: yarn install --immutable
+        run: corepack yarn install --immutable
       - name: Lint
-        run: yarn lint
+        run: corepack yarn lint
       - name: Format check
-        run: yarn format:check
+        run: corepack yarn format:check
       - name: Build
-        run: yarn build
+        run: corepack yarn build
       - name: Test
-        run: yarn test
+        run: corepack yarn test
       - name: Coverage
-        run: yarn test:coverage:check
+        run: corepack yarn test:coverage:check
       - name: Package smoke check
-        run: yarn pack:check
+        run: corepack yarn pack:check
