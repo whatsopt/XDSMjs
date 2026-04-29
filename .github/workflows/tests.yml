@@ -8,20 +8,27 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    timeout-minutes: 20
     strategy:
       matrix:
-        node-version: [16.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version: [18.x, 20.x, 22.x]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm install
-    - run: npm run build
-    - run: npm test
+    - name: Install dependencies
+      run: npm install
+    - name: Lint
+      run: npm run lint
+    - name: Format check
+      run: npm run format:check
+    - name: Build
+      run: npm run build
+    - name: Test
+      run: npm test
+    - name: Coverage
+      run: npm run test:coverage
