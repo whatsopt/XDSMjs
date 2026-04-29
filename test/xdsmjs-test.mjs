@@ -1,6 +1,10 @@
 import Labelizer from '../src/labelizer.js';
 import Graph from '../src/graph.js';
 import XdsmFactory from '../src/xdsm-factory.js';
+import Controls from '../src/controls.js';
+import Selectable from '../src/selectable.js';
+import { select } from 'd3-selection';
+import { JSDOM } from 'jsdom';
 
 import test from 'tape';
 
@@ -617,6 +621,111 @@ test('find XDSMs list of empty xdsms', (t) => {
       root: { nodes: [] },
     }),
     ['root']
+  );
+  t.end();
+});
+
+function withDom(html, run) {
+  const dom = new JSDOM(html);
+  const prevWindow = global.window;
+  const prevDocument = global.document;
+  global.window = dom.window;
+  global.document = dom.window.document;
+  try {
+    run(dom.window);
+  } finally {
+    dom.window.close();
+    global.window = prevWindow;
+    global.document = prevDocument;
+  }
+}
+
+test('Controls wires toolbar actions to animation methods', (t) => {
+  withDom('<div class="xdsm-toolbar"></div><div class="xdsm2"></div>', (window) => {
+    const calls = {
+      start: 0,
+      stop: 0,
+      stepPrev: 0,
+      stepNext: 0,
+      setXdsmVersion: [],
+      addObserver: 0,
+      reset: 0,
+    };
+    const animation = {
+      status: 'ready',
+      start: () => {
+        calls.start += 1;
+      },
+      stop: () => {
+        calls.stop += 1;
+      },
+      stepPrev: () => {
+        calls.stepPrev += 1;
+      },
+      stepNext: () => {
+        calls.stepNext += 1;
+      },
+      setXdsmVersion: (version) => {
+        calls.setXdsmVersion.push(version);
+      },
+      addObserver: () => {
+        calls.addObserver += 1;
+      },
+      reset: () => {
+        calls.reset += 1;
+      },
+    };
+
+    const controls = new Controls(animation, 'xdsm2');
+
+    controls.startButton.node().dispatchEvent(new window.Event('click', { bubbles: true }));
+    controls.stopButton.node().dispatchEvent(new window.Event('click', { bubbles: true }));
+    controls.stepPrevButton.node().dispatchEvent(new window.Event('click', { bubbles: true }));
+    controls.stepNextButton.node().dispatchEvent(new window.Event('click', { bubbles: true }));
+
+    controls.toggleVersionButton.property('value', 'xdsm2');
+    controls.toggleVersionButton.node().dispatchEvent(new window.Event('change', { bubbles: true }));
+
+    t.equal(calls.addObserver, 1);
+    t.equal(calls.start, 1);
+    t.equal(calls.stop, 1);
+    t.equal(calls.stepPrev, 1);
+    t.equal(calls.stepNext, 1);
+    t.deepEqual(calls.setXdsmVersion, ['xdsm2']);
+  });
+  t.end();
+});
+
+test('Selectable updates filter for node and edge click', (t) => {
+  withDom(
+    '<svg id="root">'
+      + '<g class="node idA"><rect class="shape"></rect></g>'
+      + '<g class="edge idlink_A_B"><rect class="shape"></rect></g>'
+      + '</svg>',
+    (window) => {
+      const filters = [];
+      const xdsm = {
+        graph: {
+          getNodeFromIndex: (idx) => ({ id: idx === 1 ? 'A' : 'B' }),
+        },
+      };
+
+      select('.node.idA').datum({ id: 'A' });
+      select('.edge.idlink_A_B').datum({ id: 'link_A_B', iotype: 'out', row: 1, col: 2 });
+
+      const selectable = new Selectable(xdsm, (filter) => {
+        filters.push({ ...filter });
+      });
+
+      select('.node.idA').node().dispatchEvent(new window.Event('click', { bubbles: true }));
+      t.deepEqual(selectable.getFilter(), { fr: 'A', to: 'A' });
+
+      select('.edge.idlink_A_B').node().dispatchEvent(new window.Event('click', { bubbles: true }));
+      t.deepEqual(selectable.getFilter(), { fr: 'A', to: 'B' });
+
+      t.deepEqual(filters[0], { fr: 'A', to: 'A' });
+      t.deepEqual(filters[1], { fr: 'A', to: 'B' });
+    }
   );
   t.end();
 });
