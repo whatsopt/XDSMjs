@@ -3,7 +3,11 @@
     "browser": true,
     "es6": true
   },
-  "extends": ["eslint:recommended", "airbnb-base", "prettier"],
+  "extends": [
+    "eslint:recommended",
+    "airbnb-base",
+    "prettier"
+  ],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
@@ -22,6 +26,7 @@
     "linebreak-style": "off",
     "max-classes-per-file": "off",
     "import/no-unresolved": "off",
-    "import/extensions": "off"
+    "import/extensions": "off",
+    "import/no-extraneous-dependencies": "off"
   }
 }

@@ -1,12 +1,12 @@
+import { select } from 'd3-selection';
+import { JSDOM } from 'jsdom';
+import test from 'tape';
 import Labelizer from '../src/labelizer.js';
 import Graph from '../src/graph.js';
 import XdsmFactory from '../src/xdsm-factory.js';
 import Controls from '../src/controls.js';
 import Selectable from '../src/selectable.js';
-import { select } from 'd3-selection';
-import { JSDOM } from 'jsdom';
 
-import test from 'tape';
 
 test("Labelizer.strParse('') returns [{'base':'', 'sub':undefined, 'sup':undefined}]", (t) => {
   t.deepEqual(Labelizer.strParse(''), [{ base: '', sub: undefined, sup: undefined }]);
