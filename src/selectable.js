@@ -20,7 +20,7 @@ Selectable.prototype._addEventHandler = function _addEventHandler(klass) {
     const prevSelection = select('[data-xdsm-selected="true"]');
     self._unselect(prevSelection);
 
-    const selection = select(this); // eslint-disable-line no-invalid-this
+    const selection = select(this);
     if (prevSelection.empty() || prevSelection.data()[0].id !== selection.data()[0].id) {
       self._select(selection);
     }
