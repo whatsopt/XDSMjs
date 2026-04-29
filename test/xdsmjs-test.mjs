@@ -684,7 +684,9 @@ test('Controls wires toolbar actions to animation methods', (t) => {
     controls.stepNextButton.node().dispatchEvent(new window.Event('click', { bubbles: true }));
 
     controls.toggleVersionButton.property('value', 'xdsm2');
-    controls.toggleVersionButton.node().dispatchEvent(new window.Event('change', { bubbles: true }));
+    controls.toggleVersionButton
+      .node()
+      .dispatchEvent(new window.Event('change', { bubbles: true }));
 
     t.equal(calls.addObserver, 1);
     t.equal(calls.start, 1);
@@ -698,10 +700,10 @@ test('Controls wires toolbar actions to animation methods', (t) => {
 
 test('Selectable updates filter for node and edge click', (t) => {
   withDom(
-    '<svg id="root">'
-      + '<g class="node idA"><rect class="shape"></rect></g>'
-      + '<g class="edge idlink_A_B"><rect class="shape"></rect></g>'
-      + '</svg>',
+    '<svg id="root">' +
+      '<g class="node idA"><rect class="shape"></rect></g>' +
+      '<g class="edge idlink_A_B"><rect class="shape"></rect></g>' +
+      '</svg>',
     (window) => {
       const filters = [];
       const xdsm = {
@@ -717,10 +719,14 @@ test('Selectable updates filter for node and edge click', (t) => {
         filters.push({ ...filter });
       });
 
-      select('.node.idA').node().dispatchEvent(new window.Event('click', { bubbles: true }));
+      select('.node.idA')
+        .node()
+        .dispatchEvent(new window.Event('click', { bubbles: true }));
       t.deepEqual(selectable.getFilter(), { fr: 'A', to: 'A' });
 
-      select('.edge.idlink_A_B').node().dispatchEvent(new window.Event('click', { bubbles: true }));
+      select('.edge.idlink_A_B')
+        .node()
+        .dispatchEvent(new window.Event('click', { bubbles: true }));
       t.deepEqual(selectable.getFilter(), { fr: 'A', to: 'B' });
 
       t.deepEqual(filters[0], { fr: 'A', to: 'A' });
