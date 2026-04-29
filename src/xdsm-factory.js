@@ -57,7 +57,9 @@ class XdsmFactory {
     const version = this._version;
     const elt = select(`.${version}`);
     if (elt.empty()) {
-      console.log(`No element of ${version} class. Please add <div class="${version}"></div> in your HTML.`);
+      console.log(
+        `No element of ${version} class. Please add <div class="${version}"></div> in your HTML.`
+      );
     } else if (mdo) {
       this._createXdsm(mdo, version);
     } else {
@@ -79,13 +81,18 @@ class XdsmFactory {
     const xdsmNames = XdsmFactory._orderedList(mdo);
 
     // Optimization problem display setup
-    select('body').selectAll('optpb').data(xdsmNames).enter()
+    select('body')
+      .selectAll('optpb')
+      .data(xdsmNames)
+      .enter()
       .append('div')
       .filter((d) => mdo[d].optpb)
       .attr('class', (d) => `optpb ${d}`)
       .style('opacity', 0)
       .on('click', function makeTransition() {
-        select(this).transition().duration(500) // eslint-disable-line
+        select(this)
+          .transition()
+          .duration(500) // eslint-disable-line
           // no-invalid-this
           .style('opacity', 0)
           .style('pointer-events', 'none');
@@ -107,24 +114,19 @@ class XdsmFactory {
           const graph = new Graph(mdo[k], this._config.withDefaultDriver);
           xdsms[k] = new Xdsm(graph, k, this._config);
           xdsms[k].draw();
-          xdsms[k].svg.select('.optimization').on(
-            'click',
-            (event) => {
-              const info = select(`.optpb.${k}`);
-              info.style('opacity', 0.9);
-              info.style('left', `${event.pageX}px`).style(
-                'top',
-                `${event.pageY - 28}px`,
-              );
-              info.style('pointer-events', 'auto');
-            },
-          );
+          xdsms[k].svg.select('.optimization').on('click', (event) => {
+            const info = select(`.optpb.${k}`);
+            info.style('opacity', 0.9);
+            info.style('left', `${event.pageX}px`).style('top', `${event.pageY - 28}px`);
+            info.style('pointer-events', 'auto');
+          });
         }
       }, this); // eslint-disable-line no-invalid-this
     }
 
     const anim = new Animation(xdsms);
-    if (xdsms.root.hasWorkflow()) { // workflow is optional
+    if (xdsms.root.hasWorkflow()) {
+      // workflow is optional
       const ctrls = new Controls(anim, version); // eslint-disable-line no-unused-vars
     }
     anim.renderNodeStatuses();
@@ -141,9 +143,7 @@ class XdsmFactory {
     const roo = root || 'root';
     const lev = level || 0;
     if (xdsms[roo]) {
-      const subxdsms = xdsms[roo].nodes
-        .map((n) => n.subxdsm)
-        .filter((n) => n);
+      const subxdsms = xdsms[roo].nodes.map((n) => n.subxdsm).filter((n) => n);
       let acc = [roo];
       if (subxdsms.length > 0) {
         for (let i = 0; i < subxdsms.length; i += 1) {

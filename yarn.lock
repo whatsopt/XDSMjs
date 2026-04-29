@@ -1833,6 +1833,7 @@ __metadata:
     d3-transition: "npm:^3.0.1"
     eslint: "npm:^8.33.0"
     eslint-config-airbnb: "npm:^19.0.4"
+    eslint-config-prettier: "npm:^9.1.2"
     eslint-plugin-import: "npm:^2.20.2"
     eslint-plugin-jsx-a11y: "npm:^6.2.3"
     eslint-plugin-react: "npm:^7.19.0"
@@ -3373,6 +3374,17 @@ __metadata:
     eslint-plugin-react: ^7.28.0
     eslint-plugin-react-hooks: ^4.3.0
   checksum: 10c0/867feeda45c4b480b1b8eff8fabc1bb107e837da8b48e5039e0c175ae6ad34af383b1924fc163bbfcef24a324e6651b1515e5bd12cbcbb19535a8838e2544a02
+  languageName: node
+  linkType: hard
+
+"eslint-config-prettier@npm:^9.1.2":
+  version: 9.1.2
+  resolution: "eslint-config-prettier@npm:9.1.2"
+  peerDependencies:
+    eslint: ">=7.0.0"
+  bin:
+    eslint-config-prettier: bin/cli.js
+  checksum: 10c0/d2e9dc913b1677764a4732433d83d258f40820458c65d0274cb9e3eaf6559b39f2136446f310c05abed065a4b3c2e901807ccf583dff76c6227eaebf4132c39a
   languageName: node
   linkType: hard
 

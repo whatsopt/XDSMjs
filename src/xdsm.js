@@ -30,7 +30,8 @@ function Xdsm(graph, svgid, config) {
   this.version = config.version || VERSION2;
 
   const container = select(`.${this.version}`);
-  this.svg = container.append('svg')
+  this.svg = container
+    .append('svg')
     .attr('width', WIDTH)
     .attr('height', HEIGHT)
     .attr('viewBox', `0 0 ${WIDTH} ${HEIGHT}`)
@@ -56,13 +57,15 @@ function Xdsm(graph, svgid, config) {
     withTitleTooltip: true, // allow to use external tooltip
   };
   this.config = { ...this.default_config, ...config };
-  this.config.labelizer = { ...this.default_config.labelizer, ...config.labelizer };
+  this.config.labelizer = {
+    ...this.default_config.labelizer,
+    ...config.labelizer,
+  };
   this.config.layout = { ...this.default_config.layout, ...config.layout };
 
   // Xdsm built-in tooltip for variable connexions
   if (this.config.withTitleTooltip) {
-    this.tooltip = select('body').append('div').attr('class', 'xdsm-tooltip')
-      .style('opacity', 0);
+    this.tooltip = select('body').append('div').attr('class', 'xdsm-tooltip').style('opacity', 0);
   }
   this._initialize();
 }
@@ -125,7 +128,8 @@ Xdsm.prototype.draw = function draw() {
   const w = self.config.layout.cellsize.w * (self.graph.nodes.length + 1);
   const h = self.config.layout.cellsize.h * (self.graph.nodes.length + 1);
   self.svg.attr('width', w).attr('height', h).attr('viewBox', `0 0 ${w} ${h}`);
-  self.svg.selectAll('.border')
+  self.svg
+    .selectAll('.border')
     .attr('height', h - BORDER_PADDING)
     .attr('width', w - BORDER_PADDING);
 };
@@ -133,11 +137,10 @@ Xdsm.prototype.draw = function draw() {
 Xdsm.prototype._createTextGroup = function _createTextGroup(kind, group, decorate) {
   const self = this;
 
-  const selection = group.selectAll(`.${kind}`)
-    .data(
-      this.graph[`${kind}s`], // DATA JOIN
-      (d) => d.id,
-    );
+  const selection = group.selectAll(`.${kind}`).data(
+    this.graph[`${kind}s`], // DATA JOIN
+    (d) => d.id
+  );
 
   const labelize = Labelizer.labelize()
     .labelKind(kind)
@@ -147,13 +150,15 @@ Xdsm.prototype._createTextGroup = function _createTextGroup(kind, group, decorat
 
   const textGroups = selection
     .enter() // ENTER
-    .append('g').attr('class', (d) => {
+    .append('g')
+    .attr('class', (d) => {
       let klass = kind === 'node' ? d.type : 'dataInter';
       if (klass === 'dataInter' && (d.row === 0 || d.col === 0)) {
         klass = 'dataIO';
       }
       return `id${d.id} ${kind} ${klass}`;
-    }).each(function makeLabel(d) {
+    })
+    .each(function makeLabel(d) {
       const that = select(this); // eslint-disable-line no-invalid-this
       that.call(labelize.subXdsmLink(d.subxdsm)); // eslint-disable-line no-invalid-this
     })
@@ -166,8 +171,8 @@ Xdsm.prototype._createTextGroup = function _createTextGroup(kind, group, decorat
       item.select('text').each(function makeCell(d2, j) {
         const that = select(this); // eslint-disable-line no-invalid-this
         const data = item.data()[0];
-        const m = (data.row === undefined) ? i : data.row;
-        const n = (data.col === undefined) ? i : data.col;
+        const m = data.row === undefined ? i : data.row;
+        const n = data.col === undefined ? i : data.col;
         const bbox = that.nodes()[j].getBBox();
         grid[m][n] = new Cell(-bbox.width / 2, 0, bbox.width, bbox.height);
         that
@@ -190,45 +195,52 @@ Xdsm.prototype._createTextGroup = function _createTextGroup(kind, group, decorat
   selection.exit().remove(); // EXIT
 
   if (self.tooltip) {
-    selectAll('.ellipsized').on('mouseover', (event, d) => {
-      self.tooltip.transition().duration(200).style('opacity', 0.9);
-      const tooltipize = Labelizer.tooltipize()
-        .subSupScript(self.config.labelizer.subSupScript)
-        .text(d.name);
-      self.tooltip.call(tooltipize)
-        .style('width', `${TOOLTIP_WIDTH}px`)
-        .style('left', `${event.pageX}px`)
-        .style('top', `${event.pageY - 28}px`);
-    }).on('mouseout', () => {
-      self.tooltip.transition().duration(500).style('opacity', 0);
-    });
-  } else {
     selectAll('.ellipsized')
-      .attr('title', (d) => d.name.split(',').join(', '));
+      .on('mouseover', (event, d) => {
+        self.tooltip.transition().duration(200).style('opacity', 0.9);
+        const tooltipize = Labelizer.tooltipize()
+          .subSupScript(self.config.labelizer.subSupScript)
+          .text(d.name);
+        self.tooltip
+          .call(tooltipize)
+          .style('width', `${TOOLTIP_WIDTH}px`)
+          .style('left', `${event.pageX}px`)
+          .style('top', `${event.pageY - 28}px`);
+      })
+      .on('mouseout', () => {
+        self.tooltip.transition().duration(500).style('opacity', 0);
+      });
+  } else {
+    selectAll('.ellipsized').attr('title', (d) => d.name.split(',').join(', '));
   }
   self._layoutText(textGroups, decorate, selection.empty() ? 0 : ANIM_DURATION);
 };
 
 Xdsm.prototype._layoutText = function _layoutText(items, decorate, delay) {
   const self = this;
-  items.transition().duration(delay).attr('transform', (d, i) => {
-    const m = (d.col === undefined) ? i : d.col;
-    const n = (d.row === undefined) ? i : d.row;
-    const w = self.config.layout.cellsize.w * m + self.config.layout.origin.x;
-    const h = self.config.layout.cellsize.h * n + self.config.layout.origin.y;
-    return `translate(${self.config.layout.origin.x + w},${self.config.layout.origin.y + h})`;
-  });
+  items
+    .transition()
+    .duration(delay)
+    .attr('transform', (d, i) => {
+      const m = d.col === undefined ? i : d.col;
+      const n = d.row === undefined ? i : d.row;
+      const w = self.config.layout.cellsize.w * m + self.config.layout.origin.x;
+      const h = self.config.layout.cellsize.h * n + self.config.layout.origin.y;
+      return `translate(${self.config.layout.origin.x + w},${self.config.layout.origin.y + h})`;
+    });
 };
 
 Xdsm.prototype._createWorkflow = function _createWorkflow() {
   const self = this;
-  const workflow = this.svg.selectAll('.workflow')
+  const workflow = this.svg
+    .selectAll('.workflow')
     .data([self.graph])
     .enter()
     .insert('g', ':first-child')
     .attr('class', 'workflow');
 
-  workflow.selectAll('g')
+  workflow
+    .selectAll('g')
     .data(self.graph.chains)
     .enter()
     .insert('g')
@@ -279,23 +291,27 @@ Xdsm.prototype._createWorkflow = function _createWorkflow() {
 
 Xdsm.prototype._createDataflow = function _createDataflow() {
   const self = this;
-  self.svg.selectAll('.dataflow')
+  self.svg
+    .selectAll('.dataflow')
     .data([self])
     .enter()
     .insert('g', ':first-child')
     .attr('class', 'dataflow');
 
-  const selection = self.svg.select('.dataflow').selectAll('path')
+  const selection = self.svg
+    .select('.dataflow')
+    .selectAll('path')
     .data(self.graph.edges, (d) => d.id);
 
-  selection.enter()
+  selection
+    .enter()
     .append('path')
     .merge(selection)
     .transition()
     .duration(selection.empty() ? 0 : ANIM_DURATION)
     .attr('transform', (d, i) => {
-      const m = (d.col === undefined) ? i : d.col;
-      const n = (d.row === undefined) ? i : d.row;
+      const m = d.col === undefined ? i : d.col;
+      const n = d.row === undefined ? i : d.row;
       const w = self.config.layout.cellsize.w * m + self.config.layout.origin.x;
       const h = self.config.layout.cellsize.h * n + self.config.layout.origin.y;
       return `translate(${self.config.layout.origin.x + w},${self.config.layout.origin.y + h})`;
@@ -329,48 +345,46 @@ Xdsm.prototype._createDataflow = function _createDataflow() {
 Xdsm.prototype._customRect = function _customRect(node, d, i, offset) {
   const self = this;
   const { grid } = self;
-  if (this.version === VERSION2
-    && (d.type === 'group'
-      || d.type === 'implicit-group'
-      || d.type === 'sub-optimization'
-      || d.type === 'mdo')) {
+  if (
+    this.version === VERSION2 &&
+    (d.type === 'group' ||
+      d.type === 'implicit-group' ||
+      d.type === 'sub-optimization' ||
+      d.type === 'mdo')
+  ) {
     const x0 = grid[i][i].x + offset - self.config.layout.padding;
     const y0 = -grid[i][i].height * (2 / 3) - self.config.layout.padding - offset;
     const x1 = grid[i][i].x + offset + self.config.layout.padding + grid[i][i].width;
-    const y1 = -grid[i][i].height * (2 / 3) + self.config.layout.padding
-      - offset + grid[i][i].height;
+    const y1 =
+      -grid[i][i].height * (2 / 3) + self.config.layout.padding - offset + grid[i][i].height;
     const ch = 10;
     const points = `${x0 + ch},${y0} ${x1 - ch},${y0} ${x1},${y0 + ch} ${x1},${y1 - ch} ${x1 - ch},${y1} ${x0 + ch},${y1} ${x0},${y1 - ch} ${x0},${y0 + ch}`;
-    node.insert('polygon', ':first-child')
-      .classed('shape', true)
-      .attr('points', points);
+    node.insert('polygon', ':first-child').classed('shape', true).attr('points', points);
   } else {
-    node.insert('rect', ':first-child')
+    node
+      .insert('rect', ':first-child')
       .classed('shape', true)
       .attr('x', () => grid[i][i].x + offset - self.config.layout.padding)
       .attr('y', () => -grid[i][i].height * (2 / 3) - self.config.layout.padding - offset)
-      .attr('width', () => grid[i][i].width + (self.config.layout.padding * 2))
-      .attr('height', () => grid[i][i].height + (self.config.layout.padding * 2))
+      .attr('width', () => grid[i][i].width + self.config.layout.padding * 2)
+      .attr('height', () => grid[i][i].height + self.config.layout.padding * 2)
       .attr('rx', () => {
-        const rounded = d.type === 'driver'
-          || d.type === 'optimization'
-          || d.type === 'mda'
-          || d.type === 'doe';
-        return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
+        const rounded =
+          d.type === 'driver' || d.type === 'optimization' || d.type === 'mda' || d.type === 'doe';
+        return rounded ? (grid[i][i].height + self.config.layout.padding * 2) / 2 : 0;
       })
       .attr('ry', () => {
-        const rounded = d.type === 'driver'
-          || d.type === 'optimization'
-          || d.type === 'mda'
-          || d.type === 'doe';
-        return rounded ? (grid[i][i].height + (self.config.layout.padding * 2)) / 2 : 0;
+        const rounded =
+          d.type === 'driver' || d.type === 'optimization' || d.type === 'mda' || d.type === 'doe';
+        return rounded ? (grid[i][i].height + self.config.layout.padding * 2) / 2 : 0;
       });
   }
 };
 
 Xdsm.prototype._customTrapz = function _customTrapz(edge, dat, i, offset) {
   const { grid } = this;
-  edge.insert('polygon', ':first-child')
+  edge
+    .insert('polygon', ':first-child')
     .classed('shape', true)
     .attr('points', (d) => {
       const pad = 5;
@@ -388,7 +402,8 @@ Xdsm.prototype._customTrapz = function _customTrapz(edge, dat, i, offset) {
 Xdsm.prototype._createTitle = function _createTitle() {
   const self = this;
   // do not display title if it is 'root'
-  self.svg.selectAll('.title')
+  self.svg
+    .selectAll('.title')
     .data([self.svgid])
     .enter()
     .append('g')
@@ -399,14 +414,15 @@ Xdsm.prototype._createTitle = function _createTitle() {
     .text(self.svgid === 'root' ? '' : self.svgid)
     .attr(
       'transform',
-      `translate(${self.config.layout.origin.x}, ${self.config.layout.origin.y - 5})`,
+      `translate(${self.config.layout.origin.x}, ${self.config.layout.origin.y - 5})`
     );
 };
 
 Xdsm.prototype._createBorder = function _createBorder() {
   const self = this;
   const bordercolor = 'black';
-  self.svg.selectAll('.border')
+  self.svg
+    .selectAll('.border')
     .data([self])
     .enter()
     .append('rect')

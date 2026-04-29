@@ -20,16 +20,19 @@ function Node(id, pname, ptype, pstatus, psubxdsm) {
   }
   this.id = id;
   this.name = name;
-  this.isMulti = (type.search(/_multi$/) >= 0);
-  this.type = this.isMulti ? type.substr(0, type.length - MULTI_TYPE.length)
-    : type;
+  this.isMulti = type.search(/_multi$/) >= 0;
+  this.type = this.isMulti ? type.substr(0, type.length - MULTI_TYPE.length) : type;
   this.status = status;
   this.subxdsm = psubxdsm;
 }
 
 Node.prototype.isComposite = function isComposite() {
-  return this.type === 'mdo' || this.type === 'sub-optimization'
-    || this.type === 'group' || this.type === 'implicit-group';
+  return (
+    this.type === 'mdo' ||
+    this.type === 'sub-optimization' ||
+    this.type === 'group' ||
+    this.type === 'implicit-group'
+  );
 };
 
 Node.prototype.getSubXdsmId = function getSubXdsmId() {
@@ -40,15 +43,18 @@ Node.prototype.getSubXdsmId = function getSubXdsmId() {
       // console.log(`${'Warning: MDO Scenario not found. '
       //   + 'Bad type or name for node: '}${JSON.stringify(this)}`);
     } else {
-      console.log("Use of <name>_scn-<id> pattern in node.name to detect sub scenario 'scn-<id>'"
-        + ' is deprecated. Use node.subxdsm property instead (i.e. node.subxdsm = <id>)');
+      console.log(
+        "Use of <name>_scn-<id> pattern in node.name to detect sub scenario 'scn-<id>'" +
+          ' is deprecated. Use node.subxdsm property instead (i.e. node.subxdsm = <id>)'
+      );
       return this.name.substr(idxscn + 1);
     }
     if (this.subxdsm) {
       return this.subxdsm;
     }
-    console.log(`${'Warning: Sub XDSM id not found. '
-      + 'Bad type or name for node: '}${JSON.stringify(this)}`);
+    console.log(
+      `Warning: Sub XDSM id not found. Bad type or name for node: ${JSON.stringify(this)}`
+    );
   }
   return null;
 };
@@ -56,12 +62,15 @@ Node.prototype.getSubXdsmId = function getSubXdsmId() {
 // *** Edge *******************************************************************
 function Edge(from, to, nameOrVars, row, col, isMulti) {
   this.id = `link_${from}_${to}`;
-  if (typeof (nameOrVars) === 'string') {
+  if (typeof nameOrVars === 'string') {
     this.name = nameOrVars;
     this.vars = {};
     const vars = this.name.split(',');
-    vars.forEach((n, i) => { this.vars[i] = n.trim(); });
-  } else { // vars = {id: name, ...}
+    vars.forEach((n, i) => {
+      this.vars[i] = n.trim();
+    });
+  } else {
+    // vars = {id: name, ...}
     this.vars = nameOrVars;
     const names = [];
     for (const k in this.vars) {
@@ -78,7 +87,7 @@ function Edge(from, to, nameOrVars, row, col, isMulti) {
 }
 
 Edge.prototype.addVar = function addVar(nameOrVar) {
-  if (typeof (nameOrVar) === 'string') {
+  if (typeof nameOrVar === 'string') {
     if (this.name === '') {
       this.name = nameOrVar;
     } else {
@@ -149,13 +158,15 @@ function Graph(mdo, withDefaultDriver) {
 
   mdo.nodes.forEach((item) => {
     const num = numPrefixes[item.id];
-    this.nodes.push(new Node(
-      item.id,
-      num ? `${num}:${item.name}` : item.name,
-      item.type,
-      item.status,
-      item.subxdsm,
-    ));
+    this.nodes.push(
+      new Node(
+        item.id,
+        num ? `${num}:${item.name}` : item.name,
+        item.type,
+        item.status,
+        item.subxdsm
+      )
+    );
   }, this);
   this.uid = this.nodes[0].id;
 
@@ -222,8 +233,7 @@ Graph.prototype.getNodeFromIndex = function getNodeFromIndex(idx) {
   if (idx >= 0 && idx < this.nodes.length) {
     node = this.nodes[idx];
   } else {
-    throw new Error(`Index out of range : ${idx} not in [0, ${
-      this.nodes.length - 1}]`);
+    throw new Error(`Index out of range : ${idx} not in [0, ${this.nodes.length - 1}]`);
   }
   return node;
 };
@@ -277,8 +287,7 @@ Graph.prototype.addEdge = function addEdge(nodeIdFrom, nodeIdTo, nameOrVar) {
   const idA = this.idxOf(nodeIdFrom);
   const idB = this.idxOf(nodeIdTo);
   const isMulti = this.nodes[idA].isMulti || this.nodes[idB].isMulti;
-  this.edges
-    .push(new Edge(nodeIdFrom, nodeIdTo, nameOrVar, idA, idB, isMulti));
+  this.edges.push(new Edge(nodeIdFrom, nodeIdTo, nameOrVar, idA, idB, isMulti));
 };
 
 Graph.prototype.removeEdge = function removeEdge(nodeIdFrom, nodeIdTo) {
@@ -312,9 +321,9 @@ Graph.prototype.findEdgesOf = function findEdgesOf(nodeIdx) {
   const toRemove = [];
   const toShift = [];
   this.edges.forEach((edge) => {
-    if ((edge.row === nodeIdx) || (edge.col === nodeIdx)) {
+    if (edge.row === nodeIdx || edge.col === nodeIdx) {
       toRemove.push(edge);
-    } else if ((edge.row > nodeIdx) || (edge.col > nodeIdx)) {
+    } else if (edge.row > nodeIdx || edge.col > nodeIdx) {
       toShift.push(edge);
     }
   }, this);
@@ -330,10 +339,13 @@ Graph.prototype.findEdge = function findEdge(nodeIdFrom, nodeIdTo) {
   const idxFrom = this.idxOf(nodeIdFrom);
   const idxTo = this.idxOf(nodeIdTo);
   this.edges.some((edge, i) => {
-    if ((edge.row === idxFrom) && (edge.col === idxTo)) {
+    if (edge.row === idxFrom && edge.col === idxTo) {
       if (element) {
-        throw Error(`edge have be uniq between two nodes, but got: ${
-          JSON.stringify(element)} and ${JSON.stringify(edge)}`);
+        throw Error(
+          `edge have be uniq between two nodes, but got: ${JSON.stringify(
+            element
+          )} and ${JSON.stringify(edge)}`
+        );
       }
       element = edge;
       index = i;
@@ -351,12 +363,13 @@ function _expand(workflow) {
     if (item instanceof Array) {
       if (Object.prototype.hasOwnProperty.call(item[0], 'parallel')) {
         if (prev) {
-          ret = ret.slice(0, ret.length - 1).concat(
-            item[0].parallel.map((elt) => [prev].concat(_expand([elt]), prev)),
-          );
+          ret = ret
+            .slice(0, ret.length - 1)
+            .concat(item[0].parallel.map((elt) => [prev].concat(_expand([elt]), prev)));
         } else {
-          throw new Error('Bad workflow structure : '
-            + 'cannot parallel loop without previous starting point.');
+          throw new Error(
+            'Bad workflow structure : cannot parallel loop without previous starting point.'
+          );
         }
       } else if (prev) {
         ret = ret.concat(_expand(item), prev);
@@ -366,9 +379,9 @@ function _expand(workflow) {
       prev = ret[ret.length - 1];
     } else if (Object.prototype.hasOwnProperty.call(item, 'parallel')) {
       if (prev) {
-        ret = ret.slice(0, ret.length - 1).concat(
-          item.parallel.map((elt) => [prev].concat(_expand([elt]))),
-        );
+        ret = ret
+          .slice(0, ret.length - 1)
+          .concat(item.parallel.map((elt) => [prev].concat(_expand([elt]))));
       } else {
         ret = ret.concat(item.parallel.map((elt) => _expand([elt])));
       }
@@ -376,7 +389,7 @@ function _expand(workflow) {
     } else {
       let i = ret.length - 1;
       let flagParallel = false;
-      while (i >= 0 && (ret[i] instanceof Array)) {
+      while (i >= 0 && ret[i] instanceof Array) {
         ret[i] = ret[i].concat(item);
         i -= 1;
         flagParallel = true;
@@ -447,7 +460,7 @@ Graph.expand = function expand(item) {
 };
 
 Graph.number = function number(workflow, pnum) {
-  let num = (typeof pnum === 'undefined') ? 0 : pnum;
+  let num = typeof pnum === 'undefined' ? 0 : pnum;
   const toNum = {};
   const toNode = [];
 
@@ -493,7 +506,7 @@ Graph.number = function number(workflow, pnum) {
         }
         ret = _number(tail, beg);
       }
-    } else if ((wks instanceof Object) && 'parallel' in wks) {
+    } else if (wks instanceof Object && 'parallel' in wks) {
       const nums = wks.parallel.map((branch) => _number(branch, nb));
       ret = Math.max.apply(null, nums);
     } else {

@@ -1,0 +1,6 @@
+dist
+coverage
+fontello
+node_modules
+.yarn
+.yarnrc.yml

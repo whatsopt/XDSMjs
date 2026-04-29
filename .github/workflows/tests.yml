@@ -2,9 +2,9 @@ name: Tests
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
@@ -15,20 +15,20 @@ jobs:
         node-version: [18.x, 20.x, 22.x]
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: Install dependencies
-      run: npm install
-    - name: Lint
-      run: npm run lint
-    - name: Format check
-      run: npm run format:check
-    - name: Build
-      run: npm run build
-    - name: Test
-      run: npm test
-    - name: Coverage
-      run: npm run test:coverage
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: npm install
+      - name: Lint
+        run: npm run lint
+      - name: Format check
+        run: npm run format:check
+      - name: Build
+        run: npm run build
+      - name: Test
+        run: npm test
+      - name: Coverage
+        run: npm run test:coverage

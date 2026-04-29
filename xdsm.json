@@ -116,11 +116,7 @@
         [
           "Dis1",
           {
-            "parallel": [
-              "Dis2",
-              "Dis3",
-              "Dis4"
-            ]
+            "parallel": ["Dis2", "Dis3", "Dis4"]
           }
         ]
       ]
@@ -294,17 +290,11 @@
         "Dis1",
         [
           "Mda",
-          [
-            "Dis5"
-          ],
+          ["Dis5"],
           "Mdo",
           "Opt",
           {
-            "parallel": [
-              "Dis3",
-              "Dis2",
-              "Dis4"
-            ]
+            "parallel": ["Dis3", "Dis2", "Dis4"]
           },
           "Opt"
         ]
