@@ -22,6 +22,7 @@
     "server": "webpack-dev-server --open",
     "test": "tape test/xdsmjs-test.mjs | faucet",
     "test:coverage": "c8 --reporter=text-summary tape test/xdsmjs-test.mjs",
+    "test:coverage:check": "c8 --reporter=text-summary --check-coverage --branches 85 --functions 20 --lines 40 --statements 40 tape test/xdsmjs-test.mjs",
     "webpack": "webpack"
   },
   "repository": "git+https://github.com/OneraHub/XDSMjs.git",
