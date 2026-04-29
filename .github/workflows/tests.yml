@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        node-version: [20.19.x, 22.13.x]
+        node-version: [20.x, 22.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -23,8 +23,8 @@ jobs:
           cache: yarn
       - name: Enable Corepack
         run: |
-          corepack enable
-          corepack prepare yarn@4.14.1 --activate
+          npm install -g corepack
+          yarn init -2
           yarn --version
       - name: Install dependencies
         run: yarn install --immutable
