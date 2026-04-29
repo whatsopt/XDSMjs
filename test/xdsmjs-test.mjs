@@ -7,7 +7,6 @@ import XdsmFactory from '../src/xdsm-factory.js';
 import Controls from '../src/controls.js';
 import Selectable from '../src/selectable.js';
 
-
 test("Labelizer.strParse('') returns [{'base':'', 'sub':undefined, 'sup':undefined}]", (t) => {
   t.deepEqual(Labelizer.strParse(''), [{ base: '', sub: undefined, sup: undefined }]);
   t.end();
