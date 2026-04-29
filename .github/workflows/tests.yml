@@ -25,18 +25,18 @@ jobs:
         run: |
           corepack enable
           corepack prepare yarn@4.14.1 --activate
-          yarn --version
+          corepack yarn --version
       - name: Install dependencies
-        run: yarn install --immutable
+        run: corepack yarn install --immutable
       - name: Lint
-        run: yarn lint
+        run: corepack yarn lint
       - name: Format check
-        run: yarn format:check
+        run: corepack yarn format:check
       - name: Build
-        run: yarn build
+        run: corepack yarn build
       - name: Test
-        run: yarn test
+        run: corepack yarn test
       - name: Coverage
-        run: yarn test:coverage:check
+        run: corepack yarn test:coverage:check
       - name: Package smoke check
-        run: yarn pack:check
+        run: corepack yarn pack:check
