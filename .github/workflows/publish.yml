@@ -1,0 +1,55 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      YARN_NODE_LINKER: node-modules
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@4.14.1 --activate
+          corepack yarn --version
+
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.x
+          cache: yarn
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: corepack yarn install --immutable
+
+      - name: Lint
+        run: corepack yarn lint
+
+      - name: Build
+        run: corepack yarn build
+
+      - name: Test
+        run: corepack yarn test
+
+      - name: Package smoke check
+        run: corepack yarn pack:check
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
