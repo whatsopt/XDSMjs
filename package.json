@@ -1,5 +1,5 @@
 {
-  "name": "XDSMjs",
+  "name": "xdsmjs",
   "version": "2.0.0",
   "description": "XDSM diagram generator",
   "main": "src/index.js",
