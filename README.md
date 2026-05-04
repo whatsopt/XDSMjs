@@ -21,10 +21,6 @@ XDSMjs is a javascript generator allowing to display a XDSM diagram within a web
 It is based on [D3](https://d3js.org/).
 It uses the <code>xdsm.json</code> file as input which contains required MDO information to generate the XDSM diagram. See the dedicated Wiki page for a description of the [XDSMjs JSON format](https://github.com/OneraHub/XDSMjs/wiki/XDSMjs-JSON-format).
 
-As of 0.6.0, the MDO data can be specified through data attribute.
-
-As of 0.7.0, XDSMjs supports also [XDSM v2](https://github.com/mdolab/pyXDSM/releases/tag/v2.0). See [Upgrade to 0.7.0 notes](https://github.com/OneraHub/XDSMjs/wiki/Upgrade-to-XDSMjs-0.7.0).
-
 ![](gallery/xdsm_v1_v2.gif)
 
 ## Citation
@@ -45,8 +41,6 @@ Open `http://localhost:8020/xdsm.html` in the browser.
 
 To see other diagrams, copy a json example from `examples` directory as xdsm.json and reload the page.
 
-As of 0.6.0 version, to use XDSMjs in your web page, you can :
-
 - include the following declarations in your header :
 
 ```html
@@ -57,30 +51,26 @@ As of 0.6.0 version, to use XDSMjs in your web page, you can :
 - add the place-holder div element that will contain the XDSM diagram :
 
 ```html
-<div class="xdsm"></div>
+<div class="xdsm2"></div>
 ```
+
+alternatively use `class="xdsm"` to get the old XDSM rendering (aka XDSM v1)
 
 You can either use the attribute <code>data-mdo</code> to specify MDO data in the XDSMjs JSON format in an HTML escaped string
 
 ```html
-<div class="xdsm" data-mdo='{"root": {"nodes": [...], "edges": [...], ... }}'></div>
+<div class="xdsm2" data-mdo='{"root": {"nodes": [...], "edges": [...], ... }}'></div>
 ```
 
 or use the attribute <code>data-mdo-file</code> to specify another MDO filename
 
 ```html
-<div class="xdsm" data-mdo-file="examples/mdf.json"></div>
+<div class="xdsm2" data-mdo-file="examples/mdf.json"></div>
 ```
 
 If no data attribute is specified, the default file <code>xdsm.json</code> is expected.
 
-As of 0.7.0, you can use XDSM v2 notation by using <code>xdsm2</code> class instead of <code>xdsm</code>.
-
-```html
-<div class="xdsm2"></div>
-```
-
-As of 0.8.0, you can specify configuration and MDO data directly from the <code><script></code> element in the html file.
+You can also specify configuration and MDO data directly from the <code><script></code> element in the html file.
 
 <pre>
     <script type="text/javascript">
