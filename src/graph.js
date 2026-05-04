@@ -254,11 +254,9 @@ Graph.prototype.removeNode = function removeNode(index) {
   }, this);
   edges.toShift.forEach((edge) => {
     if (edge.row > 1) {
-      // eslint-disable-next-line no-param-reassign
       edge.row -= 1;
     }
     if (edge.col > 1) {
-      // eslint-disable-next-line no-param-reassign
       edge.col -= 1;
     }
   }, this);

@@ -18,7 +18,7 @@ export default [
       browser: true,
       es6: true,
     },
-    extends: ['eslint:recommended', 'airbnb-base', 'prettier'],
+    extends: ['eslint:recommended', 'prettier'],
     globals: {
       Atomics: 'readonly',
       SharedArrayBuffer: 'readonly',
@@ -35,9 +35,6 @@ export default [
       'no-restricted-syntax': 'off',
       'linebreak-style': 'off',
       'max-classes-per-file': 'off',
-      'import/no-unresolved': 'off',
-      'import/extensions': 'off',
-      'import/no-extraneous-dependencies': 'off',
     },
   }),
 ];
