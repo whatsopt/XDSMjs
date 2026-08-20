@@ -43,6 +43,57 @@ function stripBraces(str) {
   return m ? m[1] : str;
 }
 
+// A label token is a base, optionally preceded by a process numbering prefix and
+// followed by a subscript and a superscript. Base, subscript and superscript are made
+// of Unicode letters, combining marks and numbers, plus the characters used by HTML
+// entities (&#x03BB;) and usual separators. Braces and backslashes belong to the base
+// so that anything this subset does not handle stays literal instead of being
+// silently dropped. Each part is matched on its own rather than by one big pattern:
+// an optional group holding a quantifier raises the star height, which ReDoS linters
+// reject, and writing it as an empty alternative only trades one warning for another.
+const baseCharRg = /[&#;\p{L}\p{M}\p{N}\-. {}\\]/u;
+const baseRg = /^[&#;\p{L}\p{M}\p{N}\-. {}\\]+/u;
+const numberingRg = /^[0-9-]+:/u;
+const subRg = /^_(?:\{[^}]*\}|[&#;\p{L}\p{M}\p{N}\-._]+)/u;
+const supRg = /^\^.+/u;
+
+/**
+ * Split one label token into its base, subscript and superscript.
+ *
+ * Leading characters that cannot start a base are skipped, as they were by the
+ * unanchored pattern this replaces. The numbering prefix is only taken when a base
+ * follows it, so a trailing colon stays part of the base.
+ *
+ * @param {string} str One comma separated label token, already accent-folded.
+ * @returns {?{base: string, sub: (string|undefined), sup: (string|undefined)}} The
+ *   parsed token, or null when the token holds no base character at all.
+ */
+function parseToken(str) {
+  const start = str.search(baseCharRg);
+  if (start === -1) {
+    return null;
+  }
+  let rest = str.slice(start);
+  let prefix = '';
+  const numbering = rest.match(numberingRg);
+  if (numbering && baseRg.test(rest.slice(numbering[0].length))) {
+    [prefix] = numbering;
+    rest = rest.slice(prefix.length);
+  }
+  const [base] = rest.match(baseRg);
+  rest = rest.slice(base.length);
+  const sub = rest.match(subRg);
+  if (sub) {
+    rest = rest.slice(sub[0].length);
+  }
+  const sup = rest.match(supRg);
+  return {
+    base: prefix + base,
+    sub: sub ? stripBraces(sub[0].substring(1)) : undefined,
+    sup: sup ? stripBraces(sup[0].substring(1)) : undefined,
+  };
+}
+
 Labelizer.strParse = function strParse(str, subSupScript) {
   if (str === '') {
     return [{ base: '', sub: undefined, sup: undefined }];
@@ -55,22 +106,9 @@ Labelizer.strParse = function strParse(str, subSupScript) {
   }
 
   const underscores = /_/g;
-  // Base, subscript and superscript are made of Unicode letters, combining marks and
-  // numbers, plus the characters used by HTML entities (&#x03BB;) and usual separators.
-  // Braces and backslashes are part of the base so that anything this subset does not
-  // handle stays literal instead of being silently dropped.
-  // The optional groups are written `(x|)` rather than `(x)?` on purpose: a quantifier
-  // nested in an optional group raises the star height, which ReDoS linters flag. The
-  // empty alternative captures '' instead of undefined, which the falsy tests below
-  // handle the same way.
-  const rg =
-    /([0-9-]+:|)([&#;\p{L}\p{M}\p{N}\-. {}\\]+)(_(?:\{[^}]*\}|[&#;\p{L}\p{M}\p{N}\-._]+)|)(\^.+|)/u;
 
   const res = lstr.map((raw) => {
     const s = accentize(raw);
-    let base;
-    let sub;
-    let sup;
 
     if ((s.match(underscores) || []).length > 1) {
       const mu = s.match(/(.+)\^(.+)/);
@@ -79,19 +117,11 @@ Labelizer.strParse = function strParse(str, subSupScript) {
       }
       return { base: s, sub: undefined, sup: undefined };
     }
-    const m = s.match(rg);
-    if (m) {
-      base = (m[1] ? m[1] : '') + m[2];
-      if (m[3]) {
-        sub = stripBraces(m[3].substring(1));
-      }
-      if (m[4]) {
-        sup = stripBraces(m[4].substring(1));
-      }
-    } else {
+    const token = parseToken(s);
+    if (!token) {
       throw new Error(`Labelizer.strParse: Can not parse '${raw}'`);
     }
-    return { base, sub, sup };
+    return token;
   }, this);
 
   return res;
