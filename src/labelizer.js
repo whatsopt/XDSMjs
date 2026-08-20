@@ -10,7 +10,9 @@ Labelizer.strParse = function strParse(str, subSupScript) {
   }
 
   const underscores = /_/g;
-  const rg = /([0-9-]+:)?([&#;A-Za-z0-9-.]+)(_[&#;A-Za-z0-9-._]+)?(\^.+)?/;
+  // Base, subscript and superscript are made of Unicode letters, combining marks and
+  // numbers, plus the characters used by HTML entities (&#x03BB;) and usual separators.
+  const rg = /([0-9-]+:)?([&#;\p{L}\p{M}\p{N}\-.]+)(_[&#;\p{L}\p{M}\p{N}\-._]+)?(\^.+)?/u;
 
   const res = lstr.map((s) => {
     let base;
