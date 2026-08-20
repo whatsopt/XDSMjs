@@ -1,23 +1,23 @@
 function Labelizer() {}
 
-const ACCENT_MARKS = {
+const accentMarks = {
   hat: '\u0302', // combining circumflex accent
   bar: '\u0304', // combining macron
   tilde: '\u0303', // combining tilde
 };
-const ACCENT_RG = /\\(hat|bar|tilde)\{([^}]*)\}/gu;
+const accentRg = /\\(hat|bar|tilde)\{([^}]*)\}/gu;
 
 // LaTeX accents are folded into the base as a combining mark, then normalized:
 // NFC gives the precomposed character when Unicode has one (\hat{y} -> y with
 // circumflex, U+0177) and keeps the combining sequence otherwise (\hat{x}).
 // A multi-character base is accented on its first character.
 function accentize(str) {
-  return str.replace(ACCENT_RG, (match, cmd, content) => {
+  return str.replace(accentRg, (match, cmd, content) => {
     const chars = [...content];
     if (chars.length === 0) {
       return '';
     }
-    return (chars[0] + ACCENT_MARKS[cmd] + chars.slice(1).join('')).normalize('NFC');
+    return (chars[0] + accentMarks[cmd] + chars.slice(1).join('')).normalize('NFC');
   });
 }
 
