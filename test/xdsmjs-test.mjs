@@ -92,6 +92,46 @@ test("Labelizer.strParse('y_12_y_34^*') returns [{'base':'y_12_y_34', 'sub':unde
   t.deepEqual(Labelizer.strParse('y_12_y_34^*'), [{ base: 'y_12_y_34', sub: undefined, sup: '*' }]);
   t.end();
 });
+// Unicode letters, marks and digits in labels
+test("Labelizer.strParse('Aérodynamique') returns the whole accented word as base", (t) => {
+  t.deepEqual(Labelizer.strParse('Aérodynamique'), [
+    { base: 'Aérodynamique', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+test("Labelizer.strParse('λ') returns [{'base':'λ', 'sub':undefined, 'sup':undefined}]", (t) => {
+  t.deepEqual(Labelizer.strParse('λ'), [{ base: 'λ', sub: undefined, sup: undefined }]);
+  t.end();
+});
+test("Labelizer.strParse('Δp_c') returns [{'base':'Δp', 'sub':'c', 'sup':undefined}]", (t) => {
+  t.deepEqual(Labelizer.strParse('Δp_c'), [{ base: 'Δp', sub: 'c', sup: undefined }]);
+  t.end();
+});
+test("Labelizer.strParse('y_aéro') returns [{'base':'y', 'sub':'aéro', 'sup':undefined}]", (t) => {
+  t.deepEqual(Labelizer.strParse('y_aéro'), [{ base: 'y', sub: 'aéro', sup: undefined }]);
+  t.end();
+});
+test("Labelizer.strParse('λ_ρ^Δ') returns [{'base':'λ', 'sub':'ρ', 'sup':'Δ'}]", (t) => {
+  t.deepEqual(Labelizer.strParse('λ_ρ^Δ'), [{ base: 'λ', sub: 'ρ', sup: 'Δ' }]);
+  t.end();
+});
+// Non regression on ASCII labels
+test("Labelizer.strParse('x_1^(0)') returns [{'base':'x', 'sub':'1', 'sup':'(0)'}]", (t) => {
+  t.deepEqual(Labelizer.strParse('x_1^(0)'), [{ base: 'x', sub: '1', sup: '(0)' }]);
+  t.end();
+});
+test("Labelizer.strParse('y_12^*') returns [{'base':'y', 'sub':'12', 'sup':'*'}]", (t) => {
+  t.deepEqual(Labelizer.strParse('y_12^*'), [{ base: 'y', sub: '12', sup: '*' }]);
+  t.end();
+});
+test("Labelizer.strParse('1, 7-2:Optimizer') keeps the process numbering prefix", (t) => {
+  t.deepEqual(Labelizer.strParse('1, 7-2:Optimizer'), [
+    { base: '1', sub: undefined, sup: undefined },
+    { base: '7-2:Optimizer', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+
 test("Graph.expand(['a']) returns [['a']]", (t) => {
   t.deepEqual(Graph.expand(['a']), [['a']]);
   t.end();
@@ -732,5 +772,39 @@ test('Selectable updates filter for node and edge click', (t) => {
       t.deepEqual(filters[1], { fr: 'A', to: 'B' });
     }
   );
+  t.end();
+});
+
+test('Labelizer.labelize renders a Unicode node name in a single tspan', (t) => {
+  withDom('<svg id="root"></svg>', () => {
+    const g = select('#root').append('g').datum({ name: 'Aérodynamique' });
+    g.call(Labelizer.labelize());
+    const tspans = g.selectAll('tspan').nodes();
+    t.equal(tspans.length, 1);
+    t.equal(tspans[0].innerHTML, 'Aérodynamique');
+  });
+  t.end();
+});
+
+test('Labelizer.labelize renders a Unicode subscript in its own tspan', (t) => {
+  withDom('<svg id="root"></svg>', () => {
+    const g = select('#root').append('g').datum({ name: 'Δp_c' });
+    g.call(Labelizer.labelize());
+    const tspans = g.selectAll('tspan').nodes();
+    t.deepEqual(
+      tspans.map((n) => n.innerHTML),
+      ['Δp', 'c']
+    );
+    t.equal(tspans[1].getAttribute('class'), 'sub');
+  });
+  t.end();
+});
+
+test('Labelizer.tooltipize renders Unicode sub/sup as HTML', (t) => {
+  withDom('<div id="tip"></div>', () => {
+    const tip = select('#tip');
+    tip.call(Labelizer.tooltipize().subSupScript(true).text('Δp_c, y_aéro^*'));
+    t.equal(tip.html(), 'Δp<sub>c</sub>, y<sub>aéro</sub><sup>*</sup>');
+  });
   t.end();
 });
