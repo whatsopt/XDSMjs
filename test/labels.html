@@ -1,0 +1,80 @@
+<!doctype html>
+<html class="js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>XDSMjs label rendering samples</title>
+    <link rel="stylesheet" href="../fontello.css" />
+    <link rel="stylesheet" href="../xdsmjs.css" />
+    <script type="text/javascript" src="../dist/xdsmjs.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 2em;
+      }
+      ul {
+        color: #444;
+        line-height: 1.6em;
+      }
+      code {
+        background: #f4f4f4;
+        padding: 0 0.2em;
+      }
+    </style>
+    <script type="text/javascript">
+      // Label samples exercising the parser: Unicode letters, spaces in node
+      // names, LaTeX-like braces and accents, process numbering prefixes.
+      const mdo = {
+        nodes: [
+          { id: 'Opt', name: 'Optimizer', type: 'optimization' },
+          { id: 'MDA', name: 'MDA Gauss-Seidel', type: 'mda' },
+          { id: 'Aero', name: 'Aérodynamique' },
+          { id: 'D1', name: 'Discipline 1' },
+          { id: 'OptD', name: 'Opt. disciplinaires', type: 'optimization' },
+          { id: 'Func', name: 'Fonctions' },
+        ],
+        edges: [
+          { from: 'Opt', to: 'MDA', name: 'x_{13}^{(0)}, x_shared^(0)' },
+          { from: 'MDA', to: 'Aero', name: 'λ, Δp_c' },
+          { from: 'Aero', to: 'D1', name: '\\hat{y}_2^{(0)}, \\bar{x}, \\tilde{z}' },
+          { from: 'D1', to: 'OptD', name: 'y_aéro' },
+          { from: 'OptD', to: 'Func', name: 'y_12^*' },
+          { from: 'Func', to: 'Opt', name: 'f, c_1, c_2' },
+          { from: '_U_', to: 'Opt', name: 'x_1, z' },
+          { from: 'Aero', to: '_U_', name: '&#955;' },
+        ],
+        workflow: ['Opt', [['MDA', ['Aero', 'D1']], 'OptD'], 'Func'],
+      };
+
+      document.addEventListener('DOMContentLoaded', () => {
+        xdsmjs.XDSMjs().createXdsm(mdo);
+      });
+    </script>
+  </head>
+
+  <body>
+    <h1>Label rendering samples</h1>
+    <p>
+      Open this page after <code>npm run build</code>: it renders the samples below through the
+      bundled labelizer.
+    </p>
+    <ul>
+      <li>
+        Unicode letters: <code>Aérodynamique</code>, <code>λ, Δp_c</code>, <code>y_aéro</code>
+      </li>
+      <li>
+        Spaces in node names: <code>MDA Gauss-Seidel</code>, <code>Discipline 1</code>,
+        <code>Opt. disciplinaires</code>
+      </li>
+      <li>
+        LaTeX subset: <code>x_{13}^{(0)}</code>, <code>x_shared^(0)</code>,
+        <code>\hat{y}_2^{(0)}</code>, <code>\bar{x}</code>, <code>\tilde{z}</code>
+      </li>
+      <li>
+        Already supported: <code>y_12^*</code>, <code>&amp;#955;</code>, and the process numbering
+        prefix on <code>Optimizer</code>
+      </li>
+    </ul>
+    <div class="xdsm-toolbar"></div>
+    <div class="xdsm2"></div>
+  </body>
+</html>

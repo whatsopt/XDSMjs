@@ -1,42 +1,127 @@
 function Labelizer() {}
 
+const accentMarks = new Map([
+  ['hat', '\u0302'], // combining circumflex accent
+  ['bar', '\u0304'], // combining macron
+  ['tilde', '\u0303'], // combining tilde
+]);
+const accentRg = /\\(hat|bar|tilde)\{([^}]*)\}/gu;
+
+/**
+ * Fold LaTeX accent commands into their base as a Unicode combining mark.
+ *
+ * The result is normalized to NFC, which yields the precomposed character when
+ * Unicode has one (\hat{y} gives U+0177) and keeps the combining sequence
+ * otherwise (\hat{x}). A multi-character base is accented on its first
+ * character.
+ *
+ * @param {string} str A label segment, possibly holding \hat, \bar or \tilde.
+ * @returns {string} The segment with every accent command replaced.
+ */
+function accentize(str) {
+  return str.replace(accentRg, (match, cmd, content) => {
+    const [first, ...rest] = [...content];
+    if (first === undefined) {
+      return '';
+    }
+    return (first + accentMarks.get(cmd) + rest.join('')).normalize('NFC');
+  });
+}
+
+/**
+ * Remove the braces grouping a subscript or a superscript.
+ *
+ * As in LaTeX the braces group without being displayed, so x^{(0)} and x^(0)
+ * render the same. A string that is not entirely wrapped in braces is returned
+ * unchanged.
+ *
+ * @param {string} str A subscript or superscript content, braces included.
+ * @returns {string} The content without its surrounding braces.
+ */
+function stripBraces(str) {
+  const m = str.match(/^\{([^}]*)\}$/u);
+  return m ? m[1] : str;
+}
+
+// A label token is a base, optionally preceded by a process numbering prefix and
+// followed by a subscript and a superscript. Base, subscript and superscript are made
+// of Unicode letters, combining marks and numbers, plus the characters used by HTML
+// entities (&#x03BB;) and usual separators. Braces and backslashes belong to the base
+// so that anything this subset does not handle stays literal instead of being
+// silently dropped. Each part is matched on its own rather than by one big pattern:
+// an optional group holding a quantifier raises the star height, which ReDoS linters
+// reject, and writing it as an empty alternative only trades one warning for another.
+const baseCharRg = /[&#;\p{L}\p{M}\p{N}\-. {}\\]/u;
+const baseRg = /^[&#;\p{L}\p{M}\p{N}\-. {}\\]+/u;
+const numberingRg = /^[0-9-]+:/u;
+const subRg = /^_(?:\{[^}]*\}|[&#;\p{L}\p{M}\p{N}\-._]+)/u;
+const supRg = /^\^.+/u;
+
+/**
+ * Split one label token into its base, subscript and superscript.
+ *
+ * Leading characters that cannot start a base are skipped, as they were by the
+ * unanchored pattern this replaces. The numbering prefix is only taken when a base
+ * follows it, so a trailing colon stays part of the base.
+ *
+ * @param {string} str One comma separated label token, already accent-folded.
+ * @returns {?{base: string, sub: (string|undefined), sup: (string|undefined)}} The
+ *   parsed token, or null when the token holds no base character at all.
+ */
+function parseToken(str) {
+  const start = str.search(baseCharRg);
+  if (start === -1) {
+    return null;
+  }
+  let rest = str.slice(start);
+  let prefix = '';
+  const numbering = rest.match(numberingRg);
+  if (numbering && baseRg.test(rest.slice(numbering[0].length))) {
+    [prefix] = numbering;
+    rest = rest.slice(prefix.length);
+  }
+  const [base] = rest.match(baseRg);
+  rest = rest.slice(base.length);
+  const sub = rest.match(subRg);
+  if (sub) {
+    rest = rest.slice(sub[0].length);
+  }
+  const sup = rest.match(supRg);
+  return {
+    base: prefix + base,
+    sub: sub ? stripBraces(sub[0].substring(1)) : undefined,
+    sup: sup ? stripBraces(sup[0].substring(1)) : undefined,
+  };
+}
+
 Labelizer.strParse = function strParse(str, subSupScript) {
   if (str === '') {
     return [{ base: '', sub: undefined, sup: undefined }];
   }
-  const lstr = str.split(',');
+  // A label is a comma separated list; the separating space belongs to the
+  // separator, not to the name, and spaces inside a name are kept.
+  const lstr = str.split(',').map((s) => s.trim());
   if (subSupScript === false) {
     return lstr.map((s) => ({ base: s, sub: undefined, sup: undefined }));
   }
 
   const underscores = /_/g;
-  const rg = /([0-9-]+:)?([&#;A-Za-z0-9-.]+)(_[&#;A-Za-z0-9-._]+)?(\^.+)?/;
 
-  const res = lstr.map((s) => {
-    let base;
-    let sub;
-    let sup;
+  const res = lstr.map((raw) => {
+    const s = accentize(raw);
 
     if ((s.match(underscores) || []).length > 1) {
       const mu = s.match(/(.+)\^(.+)/);
       if (mu) {
-        return { base: mu[1], sub: undefined, sup: mu[2] };
+        return { base: mu[1], sub: undefined, sup: stripBraces(mu[2]) };
       }
       return { base: s, sub: undefined, sup: undefined };
     }
-    const m = s.match(rg);
-    if (m) {
-      base = (m[1] ? m[1] : '') + m[2];
-      if (m[3]) {
-        sub = m[3].substring(1);
-      }
-      if (m[4]) {
-        sup = m[4].substring(1);
-      }
-    } else {
-      throw new Error(`Labelizer.strParse: Can not parse '${s}'`);
+    const token = parseToken(s);
+    if (!token) {
+      throw new Error(`Labelizer.strParse: Can not parse '${raw}'`);
     }
-    return { base, sub, sup };
+    return token;
   }, this);
 
   return res;
