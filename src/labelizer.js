@@ -7,10 +7,17 @@ const accentMarks = {
 };
 const accentRg = /\\(hat|bar|tilde)\{([^}]*)\}/gu;
 
-// LaTeX accents are folded into the base as a combining mark, then normalized:
-// NFC gives the precomposed character when Unicode has one (\hat{y} -> y with
-// circumflex, U+0177) and keeps the combining sequence otherwise (\hat{x}).
-// A multi-character base is accented on its first character.
+/**
+ * Fold LaTeX accent commands into their base as a Unicode combining mark.
+ *
+ * The result is normalized to NFC, which yields the precomposed character when
+ * Unicode has one (\hat{y} gives U+0177) and keeps the combining sequence
+ * otherwise (\hat{x}). A multi-character base is accented on its first
+ * character.
+ *
+ * @param {string} str A label segment, possibly holding \hat, \bar or \tilde.
+ * @returns {string} The segment with every accent command replaced.
+ */
 function accentize(str) {
   return str.replace(accentRg, (match, cmd, content) => {
     const chars = [...content];
@@ -21,8 +28,16 @@ function accentize(str) {
   });
 }
 
-// As in LaTeX, braces group a subscript or a superscript without being
-// displayed: x^{(0)} and x^(0) render the same.
+/**
+ * Remove the braces grouping a subscript or a superscript.
+ *
+ * As in LaTeX the braces group without being displayed, so x^{(0)} and x^(0)
+ * render the same. A string that is not entirely wrapped in braces is returned
+ * unchanged.
+ *
+ * @param {string} str A subscript or superscript content, braces included.
+ * @returns {string} The content without its surrounding braces.
+ */
 function stripBraces(str) {
   const m = str.match(/^\{([^}]*)\}$/u);
   return m ? m[1] : str;
