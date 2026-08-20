@@ -132,6 +132,60 @@ test("Labelizer.strParse('1, 7-2:Optimizer') keeps the process numbering prefix"
   t.end();
 });
 
+// Spaces inside a base name
+test("Labelizer.strParse('MDA Gauss-Seidel') keeps the whole name as base", (t) => {
+  t.deepEqual(Labelizer.strParse('MDA Gauss-Seidel'), [
+    { base: 'MDA Gauss-Seidel', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+test("Labelizer.strParse('Discipline 1') keeps the whole name as base", (t) => {
+  t.deepEqual(Labelizer.strParse('Discipline 1'), [
+    { base: 'Discipline 1', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+test("Labelizer.strParse('Opt. disciplinaires') keeps the whole name as base", (t) => {
+  t.deepEqual(Labelizer.strParse('Opt. disciplinaires'), [
+    { base: 'Opt. disciplinaires', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+test("Labelizer.strParse('Opt. disciplinaires_1^(0)') splits a spaced base from sub and sup", (t) => {
+  t.deepEqual(Labelizer.strParse('Opt. disciplinaires_1^(0)'), [
+    { base: 'Opt. disciplinaires', sub: '1', sup: '(0)' },
+  ]);
+  t.end();
+});
+test("Labelizer.strParse('1:MDA Gauss-Seidel') keeps the process numbering prefix", (t) => {
+  t.deepEqual(Labelizer.strParse('1:MDA Gauss-Seidel'), [
+    { base: '1:MDA Gauss-Seidel', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+test("Labelizer.strParse('0, 6-1:MDA Gauss-Seidel') keeps a multi-part numbering prefix", (t) => {
+  t.deepEqual(Labelizer.strParse('0, 6-1:MDA Gauss-Seidel'), [
+    { base: '0', sub: undefined, sup: undefined },
+    { base: '6-1:MDA Gauss-Seidel', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+// Non regression on variable lists: the separating space is still trimmed
+test("Labelizer.strParse('x_1, z') returns one token per variable", (t) => {
+  t.deepEqual(Labelizer.strParse('x_1, z'), [
+    { base: 'x', sub: '1', sup: undefined },
+    { base: 'z', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+test("Labelizer.strParse('f,c') returns one token per variable", (t) => {
+  t.deepEqual(Labelizer.strParse('f,c'), [
+    { base: 'f', sub: undefined, sup: undefined },
+    { base: 'c', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+
 test("Graph.expand(['a']) returns [['a']]", (t) => {
   t.deepEqual(Graph.expand(['a']), [['a']]);
   t.end();
@@ -805,6 +859,26 @@ test('Labelizer.tooltipize renders Unicode sub/sup as HTML', (t) => {
     const tip = select('#tip');
     tip.call(Labelizer.tooltipize().subSupScript(true).text('Δp_c, y_aéro^*'));
     t.equal(tip.html(), 'Δp<sub>c</sub>, y<sub>aéro</sub><sup>*</sup>');
+  });
+  t.end();
+});
+
+test('Labelizer.labelize renders a spaced node name in a single tspan', (t) => {
+  withDom('<svg id="root"></svg>', () => {
+    const g = select('#root').append('g').datum({ name: '1:MDA Gauss-Seidel' });
+    g.call(Labelizer.labelize().labelKind('node'));
+    const tspans = g.selectAll('tspan').nodes();
+    t.equal(tspans.length, 1);
+    t.equal(tspans[0].innerHTML, '1:MDA Gauss-Seidel');
+  });
+  t.end();
+});
+
+test('Labelizer.tooltipize keeps spaces inside a base name', (t) => {
+  withDom('<div id="tip"></div>', () => {
+    const tip = select('#tip');
+    tip.call(Labelizer.tooltipize().subSupScript(true).text('Discipline 1, x_1'));
+    t.equal(tip.html(), 'Discipline 1, x<sub>1</sub>');
   });
   t.end();
 });
