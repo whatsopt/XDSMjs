@@ -1,10 +1,10 @@
 function Labelizer() {}
 
-const accentMarks = {
-  hat: '\u0302', // combining circumflex accent
-  bar: '\u0304', // combining macron
-  tilde: '\u0303', // combining tilde
-};
+const accentMarks = new Map([
+  ['hat', '\u0302'], // combining circumflex accent
+  ['bar', '\u0304'], // combining macron
+  ['tilde', '\u0303'], // combining tilde
+]);
 const accentRg = /\\(hat|bar|tilde)\{([^}]*)\}/gu;
 
 /**
@@ -20,11 +20,11 @@ const accentRg = /\\(hat|bar|tilde)\{([^}]*)\}/gu;
  */
 function accentize(str) {
   return str.replace(accentRg, (match, cmd, content) => {
-    const chars = [...content];
-    if (chars.length === 0) {
+    const [first, ...rest] = [...content];
+    if (first === undefined) {
       return '';
     }
-    return (chars[0] + accentMarks[cmd] + chars.slice(1).join('')).normalize('NFC');
+    return (first + accentMarks.get(cmd) + rest.join('')).normalize('NFC');
   });
 }
 
