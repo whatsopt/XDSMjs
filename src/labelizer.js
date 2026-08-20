@@ -1,5 +1,33 @@
 function Labelizer() {}
 
+const ACCENT_MARKS = {
+  hat: '\u0302', // combining circumflex accent
+  bar: '\u0304', // combining macron
+  tilde: '\u0303', // combining tilde
+};
+const ACCENT_RG = /\\(hat|bar|tilde)\{([^}]*)\}/gu;
+
+// LaTeX accents are folded into the base as a combining mark, then normalized:
+// NFC gives the precomposed character when Unicode has one (\hat{y} -> y with
+// circumflex, U+0177) and keeps the combining sequence otherwise (\hat{x}).
+// A multi-character base is accented on its first character.
+function accentize(str) {
+  return str.replace(ACCENT_RG, (match, cmd, content) => {
+    const chars = [...content];
+    if (chars.length === 0) {
+      return '';
+    }
+    return (chars[0] + ACCENT_MARKS[cmd] + chars.slice(1).join('')).normalize('NFC');
+  });
+}
+
+// As in LaTeX, braces group a subscript or a superscript without being
+// displayed: x^{(0)} and x^(0) render the same.
+function stripBraces(str) {
+  const m = str.match(/^\{([^}]*)\}$/u);
+  return m ? m[1] : str;
+}
+
 Labelizer.strParse = function strParse(str, subSupScript) {
   if (str === '') {
     return [{ base: '', sub: undefined, sup: undefined }];
@@ -14,9 +42,13 @@ Labelizer.strParse = function strParse(str, subSupScript) {
   const underscores = /_/g;
   // Base, subscript and superscript are made of Unicode letters, combining marks and
   // numbers, plus the characters used by HTML entities (&#x03BB;) and usual separators.
-  const rg = /([0-9-]+:)?([&#;\p{L}\p{M}\p{N}\-. ]+)(_[&#;\p{L}\p{M}\p{N}\-._]+)?(\^.+)?/u;
+  // Braces and backslashes are part of the base so that anything this subset does not
+  // handle stays literal instead of being silently dropped.
+  const rg =
+    /([0-9-]+:)?([&#;\p{L}\p{M}\p{N}\-. {}\\]+)(_(?:\{[^}]*\}|[&#;\p{L}\p{M}\p{N}\-._]+))?(\^.+)?/u;
 
-  const res = lstr.map((s) => {
+  const res = lstr.map((raw) => {
+    const s = accentize(raw);
     let base;
     let sub;
     let sup;
@@ -24,7 +56,7 @@ Labelizer.strParse = function strParse(str, subSupScript) {
     if ((s.match(underscores) || []).length > 1) {
       const mu = s.match(/(.+)\^(.+)/);
       if (mu) {
-        return { base: mu[1], sub: undefined, sup: mu[2] };
+        return { base: mu[1], sub: undefined, sup: stripBraces(mu[2]) };
       }
       return { base: s, sub: undefined, sup: undefined };
     }
@@ -32,13 +64,13 @@ Labelizer.strParse = function strParse(str, subSupScript) {
     if (m) {
       base = (m[1] ? m[1] : '') + m[2];
       if (m[3]) {
-        sub = m[3].substring(1);
+        sub = stripBraces(m[3].substring(1));
       }
       if (m[4]) {
-        sup = m[4].substring(1);
+        sup = stripBraces(m[4].substring(1));
       }
     } else {
-      throw new Error(`Labelizer.strParse: Can not parse '${s}'`);
+      throw new Error(`Labelizer.strParse: Can not parse '${raw}'`);
     }
     return { base, sub, sup };
   }, this);
