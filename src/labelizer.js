@@ -4,7 +4,9 @@ Labelizer.strParse = function strParse(str, subSupScript) {
   if (str === '') {
     return [{ base: '', sub: undefined, sup: undefined }];
   }
-  const lstr = str.split(',');
+  // A label is a comma separated list; the separating space belongs to the
+  // separator, not to the name, and spaces inside a name are kept.
+  const lstr = str.split(',').map((s) => s.trim());
   if (subSupScript === false) {
     return lstr.map((s) => ({ base: s, sub: undefined, sup: undefined }));
   }
@@ -12,7 +14,7 @@ Labelizer.strParse = function strParse(str, subSupScript) {
   const underscores = /_/g;
   // Base, subscript and superscript are made of Unicode letters, combining marks and
   // numbers, plus the characters used by HTML entities (&#x03BB;) and usual separators.
-  const rg = /([0-9-]+:)?([&#;\p{L}\p{M}\p{N}\-.]+)(_[&#;\p{L}\p{M}\p{N}\-._]+)?(\^.+)?/u;
+  const rg = /([0-9-]+:)?([&#;\p{L}\p{M}\p{N}\-. ]+)(_[&#;\p{L}\p{M}\p{N}\-._]+)?(\^.+)?/u;
 
   const res = lstr.map((s) => {
     let base;
