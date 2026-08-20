@@ -57,17 +57,17 @@ test("Labelizer.strParse('x_12') returns [{'base':'x', 'sub': '12', 'sup':undefi
   t.end();
 });
 
-test("Labelizer.strParse('x_13^{(0)}') returns [{'base':'x', 'sub': '13', 'sup': '{(0)}'}]", (t) => {
-  t.deepEqual(Labelizer.strParse('x_13^{(0)}'), [{ base: 'x', sub: '13', sup: '{(0)}' }]);
+test("Labelizer.strParse('x_13^{(0)}') returns [{'base':'x', 'sub': '13', 'sup': '(0)'}]", (t) => {
+  t.deepEqual(Labelizer.strParse('x_13^{(0)}'), [{ base: 'x', sub: '13', sup: '(0)' }]);
   t.end();
 });
 test(
-  "Labelizer.strParse('x_13^0, y_1^{*}') returns [{'base': 'x', 'sub': '13', 'sup': '{*}'}, " +
+  "Labelizer.strParse('x_13^{(0)}, y_1^{*}') returns [{'base': 'x', 'sub': '13', 'sup': '(0)'}, " +
     "{'base':'y', 'sub': '1', 'sup': '*'}]",
   (t) => {
     t.deepEqual(Labelizer.strParse('x_13^{(0)}, y_1^{*}'), [
-      { base: 'x', sub: '13', sup: '{(0)}' },
-      { base: 'y', sub: '1', sup: '{*}' },
+      { base: 'x', sub: '13', sup: '(0)' },
+      { base: 'y', sub: '1', sup: '*' },
     ]);
     t.end();
   }
@@ -183,6 +183,93 @@ test("Labelizer.strParse('f,c') returns one token per variable", (t) => {
     { base: 'f', sub: undefined, sup: undefined },
     { base: 'c', sub: undefined, sup: undefined },
   ]);
+  t.end();
+});
+
+// LaTeX braces around a subscript or a superscript group without being displayed
+test("Labelizer.strParse('x^{(0)}') returns [{'base':'x', 'sub':undefined, 'sup':'(0)'}]", (t) => {
+  t.deepEqual(Labelizer.strParse('x^{(0)}'), [{ base: 'x', sub: undefined, sup: '(0)' }]);
+  t.end();
+});
+test("Labelizer.strParse('x_{12}') returns [{'base':'x', 'sub':'12', 'sup':undefined}]", (t) => {
+  t.deepEqual(Labelizer.strParse('x_{12}'), [{ base: 'x', sub: '12', sup: undefined }]);
+  t.end();
+});
+test("Labelizer.strParse('x_{13}^{(0)}') returns [{'base':'x', 'sub':'13', 'sup':'(0)'}]", (t) => {
+  t.deepEqual(Labelizer.strParse('x_{13}^{(0)}'), [{ base: 'x', sub: '13', sup: '(0)' }]);
+  t.end();
+});
+test("Labelizer.strParse('x_{shared}^(0)') returns [{'base':'x', 'sub':'shared', 'sup':'(0)'}]", (t) => {
+  t.deepEqual(Labelizer.strParse('x_{shared}^(0)'), [{ base: 'x', sub: 'shared', sup: '(0)' }]);
+  t.end();
+});
+test("Labelizer.strParse('y_{aero total}') allows spaces inside a braced subscript", (t) => {
+  t.deepEqual(Labelizer.strParse('y_{aero total}'), [
+    { base: 'y', sub: 'aero total', sup: undefined },
+  ]);
+  t.end();
+});
+test("Labelizer.strParse('y_12_y_34^{*}') strips braces on the multiple underscores path", (t) => {
+  t.deepEqual(Labelizer.strParse('y_12_y_34^{*}'), [
+    { base: 'y_12_y_34', sub: undefined, sup: '*' },
+  ]);
+  t.end();
+});
+// Braces not introduced by _ or ^ stay literal
+test("Labelizer.strParse('{foo}') keeps the braces in the base", (t) => {
+  t.deepEqual(Labelizer.strParse('{foo}'), [{ base: '{foo}', sub: undefined, sup: undefined }]);
+  t.end();
+});
+test("Labelizer.strParse('\\foo{y}') keeps an unsupported command literal", (t) => {
+  t.deepEqual(Labelizer.strParse('\\foo{y}'), [
+    { base: '\\foo{y}', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+// LaTeX accents fold into the base as a combining mark, normalized to NFC:
+// a precomposed character when Unicode has one, a combining sequence otherwise.
+test("Labelizer.strParse('\\hat{y}') returns the precomposed 'y with circumflex' (U+0177)", (t) => {
+  t.deepEqual(Labelizer.strParse('\\hat{y}'), [{ base: '\u0177', sub: undefined, sup: undefined }]);
+  t.end();
+});
+test("Labelizer.strParse('\\hat{x}') returns 'x' plus a combining circumflex (U+0302)", (t) => {
+  t.deepEqual(Labelizer.strParse('\\hat{x}'), [
+    { base: 'x\u0302', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+test("Labelizer.strParse('\\bar{x}') returns 'x' plus a combining macron (U+0304)", (t) => {
+  t.deepEqual(Labelizer.strParse('\\bar{x}'), [
+    { base: 'x\u0304', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+test("Labelizer.strParse('\\tilde{z}') returns 'z' plus a combining tilde (U+0303)", (t) => {
+  t.deepEqual(Labelizer.strParse('\\tilde{z}'), [
+    { base: 'z\u0303', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+test("Labelizer.strParse('\\hat{Cd}') accents the first character of the base", (t) => {
+  t.deepEqual(Labelizer.strParse('\\hat{Cd}'), [
+    { base: '\u0108d', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+test("Labelizer.strParse('\\hat{y}_2^{(0)}') composes an accent with sub and sup", (t) => {
+  t.deepEqual(Labelizer.strParse('\\hat{y}_2^{(0)}'), [{ base: '\u0177', sub: '2', sup: '(0)' }]);
+  t.end();
+});
+test("Labelizer.strParse('\\hat{y}_{2}^{*}, \\bar{x}') parses a list of accented variables", (t) => {
+  t.deepEqual(Labelizer.strParse('\\hat{y}_{2}^{*}, \\bar{x}'), [
+    { base: '\u0177', sub: '2', sup: '*' },
+    { base: 'x\u0304', sub: undefined, sup: undefined },
+  ]);
+  t.end();
+});
+// Non regression on the brace-less forms
+test("Labelizer.strParse('x_shared^(0)') returns [{'base':'x', 'sub':'shared', 'sup':'(0)'}]", (t) => {
+  t.deepEqual(Labelizer.strParse('x_shared^(0)'), [{ base: 'x', sub: 'shared', sup: '(0)' }]);
   t.end();
 });
 
@@ -879,6 +966,41 @@ test('Labelizer.tooltipize keeps spaces inside a base name', (t) => {
     const tip = select('#tip');
     tip.call(Labelizer.tooltipize().subSupScript(true).text('Discipline 1, x_1'));
     t.equal(tip.html(), 'Discipline 1, x<sub>1</sub>');
+  });
+  t.end();
+});
+
+test('Labelizer.labelize renders an accented base composed with sub and sup', (t) => {
+  withDom('<svg id="root"></svg>', () => {
+    const g = select('#root').append('g').datum({ name: '\\hat{y}_2^{(0)}' });
+    g.call(Labelizer.labelize());
+    const tspans = g.selectAll('tspan').nodes();
+    t.deepEqual(
+      tspans.map((n) => n.innerHTML),
+      ['\u0177', '2', '(0)']
+    );
+    t.equal(tspans[1].getAttribute('class'), 'sub');
+    t.equal(tspans[2].getAttribute('class'), 'sup');
+  });
+  t.end();
+});
+
+test('Labelizer.tooltipize renders an accented base with sub and sup', (t) => {
+  withDom('<div id="tip"></div>', () => {
+    const tip = select('#tip');
+    tip.call(Labelizer.tooltipize().subSupScript(true).text('\\hat{y}_2^{(0)}, x_{13}'));
+    t.equal(tip.html(), '\u0177<sub>2</sub><sup>(0)</sup>, x<sub>13</sub>');
+  });
+  t.end();
+});
+
+test('Labelizer.labelize leaves markup untouched when subSupScript is off', (t) => {
+  withDom('<svg id="root"></svg>', () => {
+    const g = select('#root').append('g').datum({ name: '\\hat{y}_2' });
+    g.call(Labelizer.labelize().subSupScript(false));
+    const tspans = g.selectAll('tspan').nodes();
+    t.equal(tspans.length, 1);
+    t.equal(tspans[0].innerHTML, '\\hat{y}_2');
   });
   t.end();
 });
