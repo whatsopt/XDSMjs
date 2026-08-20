@@ -59,8 +59,12 @@ Labelizer.strParse = function strParse(str, subSupScript) {
   // numbers, plus the characters used by HTML entities (&#x03BB;) and usual separators.
   // Braces and backslashes are part of the base so that anything this subset does not
   // handle stays literal instead of being silently dropped.
+  // The optional groups are written `(x|)` rather than `(x)?` on purpose: a quantifier
+  // nested in an optional group raises the star height, which ReDoS linters flag. The
+  // empty alternative captures '' instead of undefined, which the falsy tests below
+  // handle the same way.
   const rg =
-    /([0-9-]+:)?([&#;\p{L}\p{M}\p{N}\-. {}\\]+)(_(?:\{[^}]*\}|[&#;\p{L}\p{M}\p{N}\-._]+))?(\^.+)?/u;
+    /([0-9-]+:|)([&#;\p{L}\p{M}\p{N}\-. {}\\]+)(_(?:\{[^}]*\}|[&#;\p{L}\p{M}\p{N}\-._]+)|)(\^.+|)/u;
 
   const res = lstr.map((raw) => {
     const s = accentize(raw);
