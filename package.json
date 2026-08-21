@@ -26,7 +26,10 @@
     "pack:check": "npm pack --dry-run",
     "webpack": "webpack"
   },
-  "repository": "git+https://github.com/whatsopt/XDSMjs.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whatsopt/XDSMjs.git"
+  },
   "keywords": [
     "XDSM",
     "MDO"
