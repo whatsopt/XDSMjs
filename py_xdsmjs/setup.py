@@ -12,7 +12,7 @@ CLASSIFIERS = """
 Development Status :: 5 - Production/Stable
 Intended Audience :: Science/Research
 Intended Audience :: Developers
-License-Expression: Apache-2.0
+License-Expression :: Apache-2.0
 Programming Language :: Python :: 3
 Topic :: Software Development
 Topic :: Scientific/Engineering
