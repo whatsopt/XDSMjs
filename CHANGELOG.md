@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 2.1.0 - 2026-08-21
+
+- Improve label parsing: handle Unicode letters, spaces in names, and manage a small LaTeX subset
+
 ## 2.0.0 - 2023-02-13
 
 ### Changed
