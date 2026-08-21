@@ -12,7 +12,6 @@ CLASSIFIERS = """
 Development Status :: 5 - Production/Stable
 Intended Audience :: Science/Research
 Intended Audience :: Developers
-License-Expression :: Apache-2.0
 Programming Language :: Python :: 3
 Topic :: Software Development
 Topic :: Scientific/Engineering
@@ -28,7 +27,7 @@ setup(
     long_description="Python module to distribute [XDSMjs](https://github.com/WhatsOpt/XDSMjs#xdsmjs) js/css resources",
     author="Rémi Lafage",
     author_email="remi.lafage@onera.fr",
-    license="Apache License, Version 2.0",
+    license="Apache-2.0",
     classifiers=[_f for _f in CLASSIFIERS.split("\n") if _f],
     packages=["xdsmjs"],
     package_data={"xdsmjs": ["dist/xdsmjs.js", "dist/xdsmjs.css", "dist/fontello.css"]},
