@@ -19,6 +19,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    environment: npm
 
     steps:
       - uses: actions/checkout@v6
@@ -53,3 +54,5 @@ jobs:
 
       - name: Publish to npm
         run: npm publish --access public
+
+      
