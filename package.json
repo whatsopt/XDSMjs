@@ -28,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/whatsopt/XDSMjs.git"
+    "url": "git+https://github.com/WhatsOpt/XDSMjs.git"
   },
   "keywords": [
     "XDSM",
@@ -42,9 +42,9 @@
     "node": ">=20.19.0"
   },
   "bugs": {
-    "url": "https://github.com/OneraHub/XDSMjs/issues"
+    "url": "https://github.com/WhatsOpt/XDSMjs/issues"
   },
-  "homepage": "https://github.com/OneraHub/XDSMjs#readme",
+  "homepage": "https://github.com/WhatsOpt/XDSMjs#readme",
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.3",
